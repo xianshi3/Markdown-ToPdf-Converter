@@ -16,9 +16,14 @@ namespace MarkdownToPdfConverter.ViewModels
     public class MainViewModel : ReactiveObject
     {
         private bool _isChinese = true; // 默认中文
+        private string _theme = "Gray"; // 默认灰主题
+        private string _background;
+        private string _foreground;
+        private string _borderBrush;
+        private string _textBoxForeground;
 
-        // 添加语言切换命令
         public ReactiveCommand<Unit, Unit> SwitchLanguageCommand { get; }
+        public ReactiveCommand<Unit, Unit> SwitchThemeCommand { get; }
 
         // 添加语言相关属性
         public string LanguageButtonText => _isChinese ? "English" : "中文";
@@ -30,6 +35,30 @@ namespace MarkdownToPdfConverter.ViewModels
         public string SelectedFileText => _isChinese ? "已选择文件:" : "Selected File:";
         public string EditContentText => _isChinese ? "编辑内容:" : "Edit Content:";
         public string WindowTitle => _isChinese ? "Markdown转PDF工具" : "Markdown to PDF Converter";
+
+        public string Background
+        {
+            get => _background;
+            set => this.RaiseAndSetIfChanged(ref _background, value);
+        }
+
+        public string Foreground
+        {
+            get => _foreground;
+            set => this.RaiseAndSetIfChanged(ref _foreground, value);
+        }
+
+        public string BorderBrush
+        {
+            get => _borderBrush;
+            set => this.RaiseAndSetIfChanged(ref _borderBrush, value);
+        }
+
+        public string TextBoxForeground
+        {
+            get => _textBoxForeground;
+            set => this.RaiseAndSetIfChanged(ref _textBoxForeground, value);
+        }
 
         private string _selectedFilePath;
         /// <summary>
@@ -118,6 +147,55 @@ namespace MarkdownToPdfConverter.ViewModels
                 this.RaisePropertyChanged(nameof(EditContentText));
                 this.RaisePropertyChanged(nameof(WindowTitle));
             });
+
+            // 添加主题切换命令
+            SwitchThemeCommand = ReactiveCommand.Create(SwitchTheme);
+
+            // 初始化主题为灰主题
+            ApplyTheme(_theme);
+        }
+
+        /// <summary>
+        /// 切换主题
+        /// </summary>
+        private void SwitchTheme()
+        {
+            _theme = _theme switch
+            {
+                "Gray" => "Dark",
+                "Dark" => "Light",
+                _ => "Gray"
+            };
+            ApplyTheme(_theme);
+        }
+
+        /// <summary>
+        /// 应用指定的主题
+        /// </summary>
+        /// <param name="theme">主题名称</param>
+        private void ApplyTheme(string theme)
+        {
+            switch (theme)
+            {
+                case "Dark":
+                    Background = "#1E1E1E";
+                    Foreground = "#D0D0D0";
+                    BorderBrush = "#444444";
+                    TextBoxForeground = "#FFFFFF";
+                    break;
+                case "Light":
+                    Background = "#FFFFFF";
+                    Foreground = "#000000"; // 白色背景下的前景色为黑色
+                    BorderBrush = "#CCCCCC";
+                    TextBoxForeground = "#000000";
+                    break;
+                default:
+                    Background = "#2E2E2E";
+                    Foreground = "#D0D0D0";
+                    BorderBrush = "#444444";
+                    TextBoxForeground = "#D0D0D0";
+                    break;
+            }
         }
 
         /// <summary>
