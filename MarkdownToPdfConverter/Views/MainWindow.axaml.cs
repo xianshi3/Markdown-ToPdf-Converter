@@ -15,6 +15,22 @@ namespace MarkdownToPdfConverter.ViewModels
     /// </summary>
     public class MainViewModel : ReactiveObject
     {
+        private bool _isChinese = true; // 默认中文
+
+        // 添加语言切换命令
+        public ReactiveCommand<Unit, Unit> SwitchLanguageCommand { get; }
+
+        // 添加语言相关属性
+        public string LanguageButtonText => _isChinese ? "English" : "中文";
+        public string UploadButtonText => _isChinese ? "上传 Markdown" : "Upload Markdown";
+        public string ConvertButtonText => _isChinese ? "转换 PDF" : "Convert PDF";
+        public string HelpButtonText => _isChinese ? "帮助" : "Help";
+        public string FileTabText => _isChinese ? "文件上传" : "File Upload";
+        public string EditTabText => _isChinese ? "编辑 Markdown" : "Edit Markdown";
+        public string SelectedFileText => _isChinese ? "已选择文件:" : "Selected File:";
+        public string EditContentText => _isChinese ? "编辑内容:" : "Edit Content:";
+        public string WindowTitle => _isChinese ? "Markdown转PDF工具" : "Markdown to PDF Converter";
+
         private string _selectedFilePath;
         /// <summary>
         /// 获取或设置用户选择的文件路径
@@ -86,6 +102,22 @@ namespace MarkdownToPdfConverter.ViewModels
             ConvertToPdfCommand = ReactiveCommand.CreateFromTask(ConvertToPdfAsync,
                 this.WhenAnyValue(x => x.SelectedFilePath, x => x.MarkdownText,
                     (filePath, markdown) => !string.IsNullOrEmpty(filePath) || !string.IsNullOrWhiteSpace(markdown)));
+
+            // 添加语言切换命令
+            SwitchLanguageCommand = ReactiveCommand.Create(() =>
+            {
+                _isChinese = !_isChinese;
+                // 通知所有语言相关属性更新
+                this.RaisePropertyChanged(nameof(LanguageButtonText));
+                this.RaisePropertyChanged(nameof(UploadButtonText));
+                this.RaisePropertyChanged(nameof(ConvertButtonText));
+                this.RaisePropertyChanged(nameof(HelpButtonText));
+                this.RaisePropertyChanged(nameof(FileTabText));
+                this.RaisePropertyChanged(nameof(EditTabText));
+                this.RaisePropertyChanged(nameof(SelectedFileText));
+                this.RaisePropertyChanged(nameof(EditContentText));
+                this.RaisePropertyChanged(nameof(WindowTitle));
+            });
         }
 
         /// <summary>
