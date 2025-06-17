@@ -4,6 +4,8 @@ using PdfSharpCore.Fonts;
 using System;
 using System.IO;
 using CommonMark;
+using HtmlAgilityPack;
+using System.Xml;
 
 namespace MarkdownToPdfConverter.Services
 {
@@ -38,7 +40,7 @@ namespace MarkdownToPdfConverter.Services
                 var section = document.AddSection();
 
                 // 解析HTML并将其添加到PDF
-                ParseMarkdownToPdf(htmlContent, section);
+                ParseHtmlToPdf(htmlContent, section);
 
                 // 渲染 PDF 文件
                 var renderer = new PdfDocumentRenderer(true);
@@ -55,61 +57,165 @@ namespace MarkdownToPdfConverter.Services
         }
 
         /// <summary>
-        /// 解析Markdown的HTML内容并将其转化为MigraDoc段落
+        /// 解析HTML内容并将其转化为MigraDoc段落
         /// </summary>
         /// <param name="htmlContent">要解析的HTML内容</param>
         /// <param name="section">要添加内容的PDF文档部分</param>
-        private void ParseMarkdownToPdf(string htmlContent, Section section)
+        private void ParseHtmlToPdf(string htmlContent, Section section)
         {
-            // 对于更复杂的Markdown渲染，后面考虑使用更复杂的HTML解析器或更高级的MigraDoc操作
-            // 目前处理简单的Markdown样式（例如标题、加粗、斜体）
-            var lines = htmlContent.Split(new[] { "\n", "\r\n" }, StringSplitOptions.None);
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(htmlContent);
 
-            foreach (var line in lines)
+            ProcessNodes(htmlDoc.DocumentNode, section);
+        }
+
+        /// <summary>
+        /// 递归处理HTML节点
+        /// </summary>
+        private void ProcessNodes(HtmlNode node, Section section, Paragraph currentParagraph = null)
+        {
+            foreach (var childNode in node.ChildNodes)
             {
-                // 识别并处理标题
-                if (line.StartsWith("<h1>"))
+                switch (childNode.NodeType)
                 {
-                    var paragraph = section.AddParagraph(line.Replace("<h1>", "").Replace("</h1>", ""));
-                    paragraph.Format.Font.Bold = true;
-                    paragraph.Format.Font.Size = 16;
+                    case HtmlNodeType.Element:
+                        ProcessHtmlElement(childNode, section, ref currentParagraph);
+                        break;
+
+                    case HtmlNodeType.Text:
+                        ProcessTextNode(childNode, section, ref currentParagraph);
+                        break;
                 }
-                else if (line.StartsWith("<h2>"))
+            }
+        }
+
+        /// <summary>
+        /// 处理HTML元素节点
+        /// </summary>
+        private void ProcessHtmlElement(HtmlNode node, Section section, ref Paragraph currentParagraph)
+        {
+            // 如果当前没有段落，创建一个新的
+            if (currentParagraph == null)
+            {
+                currentParagraph = section.AddParagraph();
+            }
+
+            switch (node.Name.ToLower())
+            {
+                case "h1":
+                case "h2":
+                case "h3":
+                case "h4":
+                case "h5":
+                case "h6":
+                    // 标题单独成段
+                    currentParagraph = section.AddParagraph();
+                    int level = int.Parse(node.Name.Substring(1));
+                    currentParagraph.Format.Font.Bold = true;
+                    currentParagraph.Format.Font.Size = 16 - (level * 2);
+                    ProcessNodes(node, section, currentParagraph);
+                    currentParagraph = null; // 标题后重置段落
+                    break;
+
+                case "p":
+                    // 段落
+                    currentParagraph = section.AddParagraph();
+                    ProcessNodes(node, section, currentParagraph);
+                    currentParagraph = null; // 段落结束后重置
+                    break;
+
+                case "strong":
+                case "b":
+                    // 加粗文本
+                    currentParagraph.Format.Font.Bold = true;
+                    ProcessNodes(node, section, currentParagraph);
+                    currentParagraph.Format.Font.Bold = false;
+                    break;
+
+                case "em":
+                case "i":
+                    // 斜体文本
+                    currentParagraph.Format.Font.Italic = true;
+                    ProcessNodes(node, section, currentParagraph);
+                    currentParagraph.Format.Font.Italic = false;
+                    break;
+
+                case "blockquote":
+                    // 引用
+                    currentParagraph = section.AddParagraph();
+                    currentParagraph.Format.LeftIndent = 10;
+                    currentParagraph.Format.Font.Italic = true;
+                    ProcessNodes(node, section, currentParagraph);
+                    currentParagraph = null;
+                    break;
+
+                case "ul":
+                case "ol":
+                    // 列表处理
+                    ProcessList(node, section);
+                    break;
+
+                case "li":
+                    // 列表项
+                    currentParagraph = section.AddParagraph();
+                    currentParagraph.Format.LeftIndent = 10;
+                    currentParagraph.AddText("• "); // 无序列表符号
+                    ProcessNodes(node, section, currentParagraph);
+                    currentParagraph = null;
+                    break;
+
+                case "br":
+                    // 换行
+                    currentParagraph.AddLineBreak();
+                    break;
+
+                default:
+                    // 默认处理
+                    ProcessNodes(node, section, currentParagraph);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 处理文本节点
+        /// </summary>
+        private void ProcessTextNode(HtmlNode node, Section section, ref Paragraph currentParagraph)
+        {
+            string text = node.InnerText.Trim();
+            if (!string.IsNullOrEmpty(text))
+            {
+                if (currentParagraph == null)
                 {
-                    var paragraph = section.AddParagraph(line.Replace("<h2>", "").Replace("</h2>", ""));
-                    paragraph.Format.Font.Bold = true;
-                    paragraph.Format.Font.Size = 14;
+                    currentParagraph = section.AddParagraph();
                 }
-                else if (line.StartsWith("<h3>"))
+                currentParagraph.AddText(text);
+            }
+        }
+
+        /// <summary>
+        /// 处理列表
+        /// </summary>
+        private void ProcessList(HtmlNode listNode, Section section)
+        {
+            bool isOrdered = listNode.Name.ToLower() == "ol";
+            int itemNumber = 1;
+
+            foreach (var liNode in listNode.SelectNodes("./li"))
+            {
+                var paragraph = section.AddParagraph();
+                paragraph.Format.LeftIndent = 10;
+
+                if (isOrdered)
                 {
-                    var paragraph = section.AddParagraph(line.Replace("<h3>", "").Replace("</h3>", ""));
-                    paragraph.Format.Font.Bold = true;
-                    paragraph.Format.Font.Size = 12;
-                }
-                // 处理加粗文本
-                else if (line.Contains("<strong>"))
-                {
-                    var paragraph = section.AddParagraph(line.Replace("<strong>", "").Replace("</strong>", ""));
-                    paragraph.Format.Font.Bold = true;
-                }
-                // 处理斜体文本
-                else if (line.Contains("<em>"))
-                {
-                    var paragraph = section.AddParagraph(line.Replace("<em>", "").Replace("</em>", ""));
-                    paragraph.Format.Font.Italic = true;
-                }
-                // 处理引用
-                else if (line.StartsWith("<blockquote>"))
-                {
-                    var paragraph = section.AddParagraph(line.Replace("<blockquote>", "").Replace("</blockquote>", ""));
-                    paragraph.Format.LeftIndent = 10;
-                    paragraph.Format.Font.Italic = true;
+                    paragraph.AddText($"{itemNumber}. ");
+                    itemNumber++;
                 }
                 else
                 {
-                    // 普通段落
-                    section.AddParagraph(line);
+                    paragraph.AddText("• ");
                 }
+
+                ProcessNodes(liNode, section, paragraph);
             }
         }
     }

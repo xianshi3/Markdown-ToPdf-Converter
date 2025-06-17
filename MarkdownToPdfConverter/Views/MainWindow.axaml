@@ -36,10 +36,10 @@
                     HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
 				<Button.Background>
 					<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-						<GradientStop Offset="0" Color="#673AB7"/>
+						<GradientStop Offset="0" Color="#6200EE"/>
 						<!-- 深紫色 -->
-						<GradientStop Offset="1" Color="#7E57C2"/>
-						<!-- 浅紫色 -->
+						<GradientStop Offset="1" Color="#3700B3"/>
+						<!-- 更深紫色 -->
 					</LinearGradientBrush>
 				</Button.Background>
 				<Button.Foreground>
@@ -50,7 +50,7 @@
 				</Button.BorderBrush>
 				<Button.Styles>
 					<Style Selector="Button">
-						<Setter Property="CornerRadius" Value="12"/>
+						<Setter Property="CornerRadius" Value="24"/>
 						<Setter Property="Effect">
 							<DropShadowEffect BlurRadius="10" OffsetX="4" OffsetY="4" Color="#40000000"/>
 						</Setter>
@@ -59,27 +59,21 @@
 					<Style Selector="Button:pointerover">
 						<Setter Property="Background">
 							<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-								<GradientStop Offset="0" Color="#7E57C2"/>
-								<!-- 浅紫色 -->
-								<GradientStop Offset="1" Color="#9575CD"/>
-								<!-- 更浅紫色 -->
+								<GradientStop Offset="0" Color="#7B00B4"/>
+								<!-- 较深紫色 -->
+								<GradientStop Offset="1" Color="#9C27B0"/>
+								<!-- 紫色 -->
 							</LinearGradientBrush>
-						</Setter>
-						<Setter Property="Effect">
-							<DropShadowEffect BlurRadius="15" OffsetX="6" OffsetY="6" Color="#60000000"/>
 						</Setter>
 					</Style>
 					<Style Selector="Button:pressed">
 						<Setter Property="Background">
 							<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-								<GradientStop Offset="0" Color="#512DA8"/>
-								<!-- 深紫色 -->
-								<GradientStop Offset="1" Color="#673AB7"/>
+								<GradientStop Offset="0" Color="#311B92"/>
+								<!-- 最深紫色 -->
+								<GradientStop Offset="1" Color="#512DA8"/>
 								<!-- 深紫色 -->
 							</LinearGradientBrush>
-						</Setter>
-						<Setter Property="Effect">
-							<DropShadowEffect BlurRadius="5" OffsetX="2" OffsetY="2" Color="#20000000"/>
 						</Setter>
 					</Style>
 				</Button.Styles>
@@ -89,10 +83,10 @@
                     HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
 				<Button.Background>
 					<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-						<GradientStop Offset="0" Color="#009688"/>
-						<!-- 深青色 -->
-						<GradientStop Offset="1" Color="#26A69A"/>
-						<!-- 浅青色 -->
+						<GradientStop Offset="0" Color="#03DAC5"/>
+						<!-- 青绿色 -->
+						<GradientStop Offset="1" Color="#1DE9B6"/>
+						<!-- 浅青绿色 -->
 					</LinearGradientBrush>
 				</Button.Background>
 				<Button.Foreground>
@@ -103,7 +97,7 @@
 				</Button.BorderBrush>
 				<Button.Styles>
 					<Style Selector="Button">
-						<Setter Property="CornerRadius" Value="12"/>
+						<Setter Property="CornerRadius" Value="24"/>
 						<Setter Property="Effect">
 							<DropShadowEffect BlurRadius="10" OffsetX="4" OffsetY="4" Color="#40000000"/>
 						</Setter>
@@ -118,9 +112,6 @@
 								<!-- 更浅青色 -->
 							</LinearGradientBrush>
 						</Setter>
-						<Setter Property="Effect">
-							<DropShadowEffect BlurRadius="15" OffsetX="6" OffsetY="6" Color="#60000000"/>
-						</Setter>
 					</Style>
 					<Style Selector="Button:pressed">
 						<Setter Property="Background">
@@ -131,9 +122,6 @@
 								<!-- 深青色 -->
 							</LinearGradientBrush>
 						</Setter>
-						<Setter Property="Effect">
-							<DropShadowEffect BlurRadius="5" OffsetX="2" OffsetY="2" Color="#20000000"/>
-						</Setter>
 					</Style>
 				</Button.Styles>
 			</Button>
@@ -142,11 +130,11 @@
 		<!-- 内容区域 -->
 		<TabControl Grid.Row="1" Grid.Column="0" Margin="20" Background="#2E2E2E" BorderBrush="#444444" BorderThickness="1">
 			<!-- 文件上传 Tab -->
-			<TabItem Header="文件上传" Background="#444444" Foreground="White">
+			<TabItem Header="文件上传" Background="#333333" Foreground="White">
 				<ScrollViewer VerticalScrollBarVisibility="Auto">
 					<StackPanel Margin="20" Spacing="10">
 						<TextBlock Text="已选择文件:" FontWeight="Bold" Foreground="White" FontSize="18"/>
-						<Border Background="#333333" CornerRadius="8" Padding="10">
+						<Border Background="#444444" CornerRadius="8" Padding="10">
 							<TextBlock Text="{Binding SelectedFilePath}" TextWrapping="Wrap" Foreground="LightGray" FontSize="16"/>
 						</Border>
 					</StackPanel>
@@ -154,11 +142,11 @@
 			</TabItem>
 
 			<!-- 编辑 Markdown Tab -->
-			<TabItem Header="编辑 Markdown" Background="#444444" Foreground="White">
+			<TabItem Header="编辑 Markdown" Background="#333333" Foreground="White">
 				<ScrollViewer VerticalScrollBarVisibility="Auto">
 					<StackPanel Margin="20" Spacing="10">
 						<TextBlock Text="编辑内容:" FontWeight="Bold" Foreground="White" FontSize="18"/>
-						<Border Background="#333333" CornerRadius="8" Padding="10">
+						<Border Background="#444444" CornerRadius="8" Padding="10">
 							<TextBox Text="{Binding MarkdownText}" AcceptsReturn="True"
                                      ScrollViewer.VerticalScrollBarVisibility="Auto" MinHeight="400"
                                      Background="Transparent" Foreground="White" BorderBrush="Transparent"
@@ -191,7 +179,7 @@
 
 		<!-- 状态信息 -->
 		<Border VerticalAlignment="Center"
-                Margin="18,5,18,20" Grid.Row="2" Grid.Column="0">
+                Margin="18,5,18,20" Grid.Row="2" Grid.Column="0" CornerRadius="8">
 			<Border.Background>
 				<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
 					<GradientStop Offset="0" Color="#2E2E2E"/>
@@ -207,27 +195,6 @@
 			<Border.Padding>
 				10
 			</Border.Padding>
-			<Border.CornerRadius>
-				8
-			</Border.CornerRadius>
-			<Border.Styles>
-				<Style Selector="Border">
-					<Setter Property="Effect">
-						<DropShadowEffect BlurRadius="5" OffsetX="2" OffsetY="2" Color="#40000000"/>
-					</Setter>
-				</Style>
-				<Style Selector="Border:pointerover">
-					<Setter Property="Background">
-						<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-							<GradientStop Offset="0" Color="#444444"/>
-							<GradientStop Offset="1" Color="#555555"/>
-						</LinearGradientBrush>
-					</Setter>
-					<Setter Property="Effect">
-						<DropShadowEffect BlurRadius="10" OffsetX="4" OffsetY="4" Color="#60000000"/>
-					</Setter>
-				</Style>
-			</Border.Styles>
 			<TextBlock Text="{Binding StatusMessage}" Foreground="White" FontSize="16"
                        FontFamily="Segoe UI" FontWeight="SemiBold"/>
 		</Border>
