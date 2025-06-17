@@ -3,7 +3,7 @@
 ## Project Overview
 MarkdownToPdfConverter is a cross-platform desktop application developed based on the Avalonia UI framework, capable of converting Markdown documents into PDF files. This project features an intuitive user interface and a rich set of functional characteristics.
 
-![QQ20250617-162158](https://github.com/user-attachments/assets/019e35b0-fc6c-4e2e-b4fd-0e69011f90ee)
+![QQ20250617-162552](https://github.com/user-attachments/assets/8fedc5a9-7257-4260-8928-142376278a58)
 
 ## Main Features
 
