@@ -26,10 +26,14 @@
 
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="*" />
+			<ColumnDefinition Width="Auto" />
+			<!-- 左中右布局 -->
 		</Grid.ColumnDefinitions>
 
 		<!-- 改进后的导航条 -->
 		<Border Grid.Row="0" Grid.Column="0"
+                Grid.ColumnSpan="3"
                 Background="#252525"
                 BorderBrush="{Binding BorderBrush}"
                 BorderThickness="0,0,0,1"
@@ -194,29 +198,41 @@
 		</Border>
 
 		<!-- 内容区域 -->
-		<TabControl Grid.Row="1" Grid.Column="0" Margin="20" Background="{Binding Background}" BorderBrush="{Binding BorderBrush}" BorderThickness="1">
+		<Grid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="20" Background="{Binding Background}">
 			<!-- 文件上传 Tab -->
-			<TabItem Header="{Binding FileTabText}" Background="#333333" Foreground="White">
-				<ScrollViewer VerticalScrollBarVisibility="Auto">
-					<StackPanel Margin="20" Spacing="10">
-						<TextBlock Text="{Binding SelectedFileText}" FontWeight="Bold" Foreground="{Binding Foreground}" FontSize="18"/>
-						<Border Background="{Binding BorderBrush}" CornerRadius="8" Padding="10">
-							<TextBlock Text="{Binding SelectedFilePath}" TextWrapping="Wrap" Foreground="{Binding Foreground}" FontSize="16"/>
-						</Border>
-					</StackPanel>
-				</ScrollViewer>
-			</TabItem>
+			<TabControl Grid.Row="1" Grid.Column="0" Margin="0" Background="{Binding Background}">
+				<TabItem Header="{Binding FileTabText}" Background="#333333" Foreground="White">
+					<ScrollViewer VerticalScrollBarVisibility="Auto">
+						<StackPanel Margin="20" Spacing="10">
+							<TextBlock Text="{Binding SelectedFileText}" FontWeight="Bold" Foreground="{Binding Foreground}" FontSize="18"/>
+							<Border Background="{Binding BorderBrush}" CornerRadius="8" Padding="10">
+								<TextBlock Text="{Binding SelectedFilePath}" TextWrapping="Wrap" Foreground="{Binding TextBoxForeground}" FontSize="16"/>
+							</Border>
+						</StackPanel>
+					</ScrollViewer>
+				</TabItem>
 
-			<!-- 编辑 Markdown Tab -->
-			<TabItem Header="{Binding EditTabText}" Background="#333333" Foreground="White">
-				<ScrollViewer VerticalScrollBarVisibility="Auto">
-					<StackPanel Margin="20" Spacing="10">
-						<TextBlock Text="{Binding EditContentText}" FontWeight="Bold" Foreground="{Binding Foreground}" FontSize="18"/>
-						<Border Background="{Binding BorderBrush}" CornerRadius="8" Padding="10">
+				<!-- 编辑 Markdown Tab -->
+				<TabItem Header="{Binding EditTabText}" Background="#333333" Foreground="White">
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="10"/>
+							<!-- 中间空隙 -->
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="Auto"/>
+						</Grid.ColumnDefinitions>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto"/>
+							<RowDefinition Height="*"/>
+						</Grid.RowDefinitions>
+
+						<!-- Markdown编辑器 -->
+						<Border Grid.Row="1" Grid.Column="0" Background="{Binding BorderBrush}" CornerRadius="8" Padding="10" Margin="0,0,5,0">
 							<TextBox Text="{Binding MarkdownText}" AcceptsReturn="True"
-                                     ScrollViewer.VerticalScrollBarVisibility="Auto" MinHeight="400"
-                                     Background="Transparent" Foreground="{Binding TextBoxForeground}" BorderBrush="Transparent"
-                                     Padding="10" FontSize="16">
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                     Background="{Binding TextBoxBackground}" Foreground="{Binding TextBoxForeground}" BorderBrush="{Binding BorderBrush}"
+                                     BorderThickness="1" Padding="10" FontSize="{Binding FontSize}">
 								<TextBox.Styles>
 									<Style Selector="TextBox">
 										<Setter Property="Effect">
@@ -241,13 +257,31 @@
 								</TextBox.Styles>
 							</TextBox>
 						</Border>
-					</StackPanel>
-				</ScrollViewer>
-			</TabItem>
-		</TabControl>
+
+						<!-- Markdown预览 -->
+						<Border Grid.Row="1" Grid.Column="2" Background="{Binding BorderBrush}" CornerRadius="8" Padding="10" Margin="5,0,0,0">
+							<ScrollViewer VerticalScrollBarVisibility="Auto">
+								<TextBlock Text="{Binding MarkdownText}" TextWrapping="Wrap" Foreground="{Binding TextBoxForeground}" FontSize="{Binding FontSize}"
+                                           FontWeight="Normal" Padding="10"/>
+							</ScrollViewer>
+						</Border>
+
+						<!-- 设置面板 -->
+						<Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="3" Background="#333333" Padding="10" Margin="10,0,0,0">
+							<StackPanel>
+								<TextBlock Text="设置" FontWeight="Bold" Foreground="{Binding Foreground}" FontSize="18" Margin="0,0,0,10"/>
+								<Slider Minimum="12" Maximum="24" Value="{Binding FontSize}" SmallChange="1" LargeChange="5" Margin="0,0,0,10"/>
+								<TextBlock Text="字体大小: {Binding FontSize}" Foreground="{Binding Foreground}" FontSize="16"/>
+							</StackPanel>
+						</Border>
+					</Grid>
+				</TabItem>
+			</TabControl>
+		</Grid>
 
 		<!-- 状态信息 -->
 		<Border Grid.Row="2" Grid.Column="0"
+                Grid.ColumnSpan="3"
                 VerticalAlignment="Center"
                 Margin="18,5,18,20"
                 CornerRadius="8"

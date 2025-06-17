@@ -10,9 +10,6 @@ using Avalonia.Platform.Storage;
 
 namespace MarkdownToPdfConverter.ViewModels
 {
-    /// <summary>
-    /// 主视图模型，负责处理用户界面逻辑和文件转换操作
-    /// </summary>
     public class MainViewModel : ReactiveObject
     {
         private bool _isChinese = true; // 默认中文
@@ -20,7 +17,9 @@ namespace MarkdownToPdfConverter.ViewModels
         private string _background;
         private string _foreground;
         private string _borderBrush;
+        private string _textBoxBackground;
         private string _textBoxForeground;
+        private double _fontSize = 16; // 默认字体大小
 
         public ReactiveCommand<Unit, Unit> SwitchLanguageCommand { get; }
         public ReactiveCommand<Unit, Unit> SwitchThemeCommand { get; }
@@ -35,6 +34,7 @@ namespace MarkdownToPdfConverter.ViewModels
         public string SelectedFileText => _isChinese ? "已选择文件:" : "Selected File:";
         public string EditContentText => _isChinese ? "编辑内容:" : "Edit Content:";
         public string WindowTitle => _isChinese ? "Markdown转PDF工具" : "Markdown to PDF Converter";
+        public string PreviewText => $"## {(_isChinese ? "预览" : "Preview")}";
 
         public string Background
         {
@@ -54,89 +54,73 @@ namespace MarkdownToPdfConverter.ViewModels
             set => this.RaiseAndSetIfChanged(ref _borderBrush, value);
         }
 
+        public string TextBoxBackground
+        {
+            get => _textBoxBackground;
+            set => this.RaiseAndSetIfChanged(ref _textBoxBackground, value);
+        }
+
         public string TextBoxForeground
         {
             get => _textBoxForeground;
             set => this.RaiseAndSetIfChanged(ref _textBoxForeground, value);
         }
 
+        public double FontSize
+        {
+            get => _fontSize;
+            set => this.RaiseAndSetIfChanged(ref _fontSize, value);
+        }
+
         private string _selectedFilePath;
-        /// <summary>
-        /// 获取或设置用户选择的文件路径
-        /// </summary>
         public string SelectedFilePath
         {
             get => _selectedFilePath;
             set
             {
                 this.RaiseAndSetIfChanged(ref _selectedFilePath, value);
-                // 手动触发 CanConvert 更新
                 this.RaisePropertyChanged(nameof(CanConvert));
             }
         }
 
         private string _markdownText;
-        /// <summary>
-        /// 获取或设置用户输入的 Markdown 文本
-        /// </summary>
         public string MarkdownText
         {
             get => _markdownText;
             set
             {
                 this.RaiseAndSetIfChanged(ref _markdownText, value);
-                // 手动触发 CanConvert 更新
                 this.RaisePropertyChanged(nameof(CanConvert));
             }
         }
 
         private string _statusMessage;
-        /// <summary>
-        /// 获取或设置状态消息，用于向用户显示操作结果或错误信息
-        /// </summary>
         public string StatusMessage
         {
             get => _statusMessage;
             set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
         }
 
-        /// <summary>
-        /// 获取上传文件的命令
-        /// </summary>
         public ReactiveCommand<Unit, Unit> UploadFileCommand { get; }
-
-        /// <summary>
-        /// 获取将 Markdown 转换为 PDF 的命令
-        /// </summary>
         public ReactiveCommand<Unit, Unit> ConvertToPdfCommand { get; }
 
-        /// <summary>
-        /// 判断是否可以进行 PDF 转换
-        /// </summary>
         public bool CanConvert => !string.IsNullOrEmpty(SelectedFilePath) || !string.IsNullOrWhiteSpace(MarkdownText);
 
         private readonly MarkdownToPdfService _converterService;
 
-        /// <summary>
-        /// 初始化 <see cref="MainViewModel"/> 类的新实例
-        /// </summary>
         public MainViewModel()
         {
             _converterService = new MarkdownToPdfService();
 
-            // 上传文件命令
             UploadFileCommand = ReactiveCommand.CreateFromTask(UploadFileAsync);
 
-            // 转换为 PDF 命令，当 SelectedFilePath 或 MarkdownText 不为空时启用
             ConvertToPdfCommand = ReactiveCommand.CreateFromTask(ConvertToPdfAsync,
                 this.WhenAnyValue(x => x.SelectedFilePath, x => x.MarkdownText,
                     (filePath, markdown) => !string.IsNullOrEmpty(filePath) || !string.IsNullOrWhiteSpace(markdown)));
 
-            // 添加语言切换命令
             SwitchLanguageCommand = ReactiveCommand.Create(() =>
             {
                 _isChinese = !_isChinese;
-                // 通知所有语言相关属性更新
                 this.RaisePropertyChanged(nameof(LanguageButtonText));
                 this.RaisePropertyChanged(nameof(UploadButtonText));
                 this.RaisePropertyChanged(nameof(ConvertButtonText));
@@ -146,18 +130,14 @@ namespace MarkdownToPdfConverter.ViewModels
                 this.RaisePropertyChanged(nameof(SelectedFileText));
                 this.RaisePropertyChanged(nameof(EditContentText));
                 this.RaisePropertyChanged(nameof(WindowTitle));
+                this.RaisePropertyChanged(nameof(PreviewText));
             });
 
-            // 添加主题切换命令
             SwitchThemeCommand = ReactiveCommand.Create(SwitchTheme);
 
-            // 初始化主题为灰主题
             ApplyTheme(_theme);
         }
 
-        /// <summary>
-        /// 切换主题
-        /// </summary>
         private void SwitchTheme()
         {
             _theme = _theme switch
@@ -169,10 +149,6 @@ namespace MarkdownToPdfConverter.ViewModels
             ApplyTheme(_theme);
         }
 
-        /// <summary>
-        /// 应用指定的主题
-        /// </summary>
-        /// <param name="theme">主题名称</param>
         private void ApplyTheme(string theme)
         {
             switch (theme)
@@ -181,27 +157,33 @@ namespace MarkdownToPdfConverter.ViewModels
                     Background = "#1E1E1E";
                     Foreground = "#D0D0D0";
                     BorderBrush = "#444444";
+                    TextBoxBackground = "#333333";
                     TextBoxForeground = "#FFFFFF";
                     break;
                 case "Light":
                     Background = "#FFFFFF";
-                    Foreground = "#000000"; // 白色背景下的前景色为黑色
+                    Foreground = "#D0D0D0";
                     BorderBrush = "#CCCCCC";
+                    TextBoxBackground = "#FFFFFF";
                     TextBoxForeground = "#000000";
                     break;
                 default:
                     Background = "#2E2E2E";
                     Foreground = "#D0D0D0";
                     BorderBrush = "#444444";
+                    TextBoxBackground = "#333333";
                     TextBoxForeground = "#D0D0D0";
                     break;
             }
+
+            // 确保所有相关属性都更新
+            this.RaisePropertyChanged(nameof(Background));
+            this.RaisePropertyChanged(nameof(Foreground));
+            this.RaisePropertyChanged(nameof(BorderBrush));
+            this.RaisePropertyChanged(nameof(TextBoxBackground));
+            this.RaisePropertyChanged(nameof(TextBoxForeground));
         }
 
-        /// <summary>
-        /// 上传文件并读取其内容
-        /// </summary>
-        /// <returns>表示异步操作的任务</returns>
         private async Task UploadFileAsync()
         {
             var window = (Application.Current.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime)?.MainWindow;
@@ -240,10 +222,6 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
-        /// <summary>
-        /// 将 Markdown 文本转换为 PDF 文件并保存
-        /// </summary>
-        /// <returns>表示异步操作的任务</returns>
         private async Task ConvertToPdfAsync()
         {
             try
