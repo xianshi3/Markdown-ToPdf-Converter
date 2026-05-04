@@ -1,0 +1,22 @@
+{
+  "app_title": "Markdown转PDF工具",
+  "upload": "上传 Markdown",
+  "convert": "转换 PDF",
+  "help": "帮助",
+  "file_tab": "文件上传",
+  "edit_tab": "编辑 Markdown",
+  "selected_file": "已选择文件:",
+  "edit_content": "编辑内容:",
+  "preview": "预览",
+  "settings": "设置",
+  "font_size": "字体大小:",
+  "ready": "就绪",
+  "file_loaded": "文件已加载",
+  "conversion_success": "转换成功！文件已保存到",
+  "conversion_failed": "转换失败:",
+  "no_markdown": "没有 Markdown 内容可转换",
+  "no_window": "无法获取主窗口",
+  "save_cancelled": "保存已取消",
+  "select_markdown": "选择 Markdown 文件",
+  "save_pdf": "保存 PDF 文件"
+}

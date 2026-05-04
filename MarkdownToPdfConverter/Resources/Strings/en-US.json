@@ -1,0 +1,22 @@
+{
+  "app_title": "Markdown to PDF Converter",
+  "upload": "Upload Markdown",
+  "convert": "Convert PDF",
+  "help": "Help",
+  "file_tab": "File Upload",
+  "edit_tab": "Edit Markdown",
+  "selected_file": "Selected File:",
+  "edit_content": "Edit Content:",
+  "preview": "Preview",
+  "settings": "Settings",
+  "font_size": "Font Size:",
+  "ready": "Ready",
+  "file_loaded": "File Loaded",
+  "conversion_success": "Conversion successful! File saved to",
+  "conversion_failed": "Conversion failed:",
+  "no_markdown": "No Markdown content to convert",
+  "no_window": "Unable to get main window",
+  "save_cancelled": "Save cancelled",
+  "select_markdown": "Select Markdown File",
+  "save_pdf": "Save PDF File"
+}
