@@ -19,12 +19,18 @@ namespace MarkdownToPdfConverter.ViewModels
         private readonly IThemeService _themeService;
         private readonly MarkdownToPdfService _converterService;
 
-        private string _theme = "Dark";
         private double _fontSize = 16;
         private string _selectedFilePath = string.Empty;
         private string _markdownText = string.Empty;
         private string _statusMessage = string.Empty;
         private bool _isConverting;
+
+        // 主题属性 - 使用 setter 让它们可以被 RaiseAndSetIfChanged
+        private IBrush _background = Brushes.Transparent;
+        private IBrush _foreground = Brushes.White;
+        private IBrush _borderBrush = Brushes.Gray;
+        private IBrush _textBoxBackground = Brushes.Black;
+        private IBrush _textBoxForeground = Brushes.White;
 
         public string WindowTitle => _localization.GetString("app_title");
         public string UploadButtonText => _localization.GetString("upload");
@@ -37,27 +43,32 @@ namespace MarkdownToPdfConverter.ViewModels
 
         public IBrush Background
         {
-            get => new SolidColorBrush(_themeService.GetResources(_theme).Background);
+            get => _background;
+            set => this.RaiseAndSetIfChanged(ref _background, value);
         }
 
         public IBrush Foreground
         {
-            get => new SolidColorBrush(_themeService.GetResources(_theme).Foreground);
+            get => _foreground;
+            set => this.RaiseAndSetIfChanged(ref _foreground, value);
         }
 
         public IBrush BorderBrush
         {
-            get => new SolidColorBrush(_themeService.GetResources(_theme).Border);
+            get => _borderBrush;
+            set => this.RaiseAndSetIfChanged(ref _borderBrush, value);
         }
 
         public IBrush TextBoxBackground
         {
-            get => new SolidColorBrush(_themeService.GetResources(_theme).TextBoxBackground);
+            get => _textBoxBackground;
+            set => this.RaiseAndSetIfChanged(ref _textBoxBackground, value);
         }
 
         public IBrush TextBoxForeground
         {
-            get => new SolidColorBrush(_themeService.GetResources(_theme).TextBoxForeground);
+            get => _textBoxForeground;
+            set => this.RaiseAndSetIfChanged(ref _textBoxForeground, value);
         }
 
         public string LanguageButtonText => _localization.CurrentLanguage == "zh-CN" ? "English" : "中文";
@@ -100,7 +111,8 @@ namespace MarkdownToPdfConverter.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isConverting, value);
         }
 
-        public bool CanConvert => !IsConverting && (!string.IsNullOrEmpty(SelectedFilePath) || !string.IsNullOrWhiteSpace(MarkdownText));
+        public bool CanConvert => !IsConverting && 
+            (!string.IsNullOrEmpty(SelectedFilePath) || !string.IsNullOrWhiteSpace(MarkdownText));
 
         public ReactiveCommand<Unit, Unit> UploadFileCommand { get; }
         public ReactiveCommand<Unit, Unit> ConvertToPdfCommand { get; }
@@ -113,6 +125,9 @@ namespace MarkdownToPdfConverter.ViewModels
             _themeService = new ThemeService();
             _converterService = new MarkdownToPdfService();
 
+            // 初始化主题
+            ApplyThemeResources();
+
             StatusMessage = _localization.GetString("ready");
 
             _localization.LanguageChanged += OnLanguageChanged;
@@ -122,7 +137,8 @@ namespace MarkdownToPdfConverter.ViewModels
 
             ConvertToPdfCommand = ReactiveCommand.CreateFromTask(ConvertToPdfAsync,
                 this.WhenAnyValue(x => x.IsConverting, x => x.SelectedFilePath, x => x.MarkdownText,
-                    (converting, filePath, markdown) => !converting && (!string.IsNullOrEmpty(filePath) || !string.IsNullOrWhiteSpace(markdown))));
+                    (converting, filePath, markdown) => 
+                        !converting && (!string.IsNullOrEmpty(filePath) || !string.IsNullOrWhiteSpace(markdown))));
 
             SwitchLanguageCommand = ReactiveCommand.Create(() =>
             {
@@ -132,14 +148,25 @@ namespace MarkdownToPdfConverter.ViewModels
 
             SwitchThemeCommand = ReactiveCommand.Create(() =>
             {
-                _theme = _theme switch
+                var newTheme = _themeService.CurrentTheme switch
                 {
                     "Dark" => "Light",
                     "Light" => "Gray",
+                    "Gray" => "Dark",
                     _ => "Dark"
                 };
-                _themeService.SetTheme(_theme);
+                _themeService.SetTheme(newTheme);
             });
+        }
+
+        private void ApplyThemeResources()
+        {
+            var resources = _themeService.CurrentResources;
+            Background = resources.Background;
+            Foreground = resources.Foreground;
+            BorderBrush = resources.BorderBrush;
+            TextBoxBackground = resources.TextBoxBackground;
+            TextBoxForeground = resources.TextBoxForeground;
         }
 
         private void OnLanguageChanged()
@@ -155,7 +182,8 @@ namespace MarkdownToPdfConverter.ViewModels
                 this.RaisePropertyChanged(nameof(SelectedFileText));
                 this.RaisePropertyChanged(nameof(EditContentText));
                 this.RaisePropertyChanged(nameof(LanguageButtonText));
-                this.RaisePropertyChanged(nameof(StatusMessage));
+                // StatusMessage might need to be re-translated
+                StatusMessage = _localization.GetString("ready");
             });
         }
 
@@ -163,11 +191,7 @@ namespace MarkdownToPdfConverter.ViewModels
         {
             Dispatcher.UIThread.Post(() =>
             {
-                this.RaisePropertyChanged(nameof(Background));
-                this.RaisePropertyChanged(nameof(Foreground));
-                this.RaisePropertyChanged(nameof(BorderBrush));
-                this.RaisePropertyChanged(nameof(TextBoxBackground));
-                this.RaisePropertyChanged(nameof(TextBoxForeground));
+                ApplyThemeResources();
             });
         }
 
