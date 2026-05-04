@@ -184,7 +184,8 @@ namespace MarkdownToPdfConverter.ViewModels
 
         private async Task UploadFileAsync()
         {
-            var window = (Application.Current.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+            var topLevel = Application.Current?.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
+            var window = topLevel?.MainWindow;
 
             if (window == null)
             {
@@ -232,7 +233,8 @@ namespace MarkdownToPdfConverter.ViewModels
                     return;
                 }
 
-                var window = (Application.Current.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+                var topLevel = Application.Current?.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
+                var window = topLevel?.MainWindow;
 
                 if (window == null)
                 {
