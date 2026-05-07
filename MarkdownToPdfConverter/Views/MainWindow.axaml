@@ -5,7 +5,9 @@
         Title="{Binding WindowTitle}"
         MinWidth="1000" MinHeight="700"
         Background="#0D1117"
-        FontFamily="Segoe UI, Microsoft YaHei">
+        FontFamily="Segoe UI, Microsoft YaHei"
+        DragDrop.AllowDrop="True"
+        KeyDown="OnKeyDown">
 
     <Window.DataContext>
         <vm:MainViewModel />
@@ -123,6 +125,10 @@
                                 <TextBlock Text="{Binding ConvertButtonText}"/>
                             </StackPanel>
                         </Button>
+
+                        <Border Background="#21262D" CornerRadius="8" Padding="12,8">
+                            <TextBlock Text="Drop .md file here" FontSize="11" Foreground="#8B949E" HorizontalAlignment="Center"/>
+                        </Border>
                     </StackPanel>
                     
                     <Border Height="1" Background="#21262D"/>
@@ -174,7 +180,7 @@
                             <StackPanel Orientation="Horizontal" Spacing="8" 
                                         HorizontalAlignment="Center">
                                 <TextBlock Text="🎨" FontSize="14"/>
-                                <TextBlock Text="Theme"/>
+                                <TextBlock Text="{Binding CurrentTheme, StringFormat='Theme: {0}'}"/>
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -189,10 +195,29 @@
                         <Slider Minimum="12" 
                                 Maximum="24" 
                                 Value="{Binding FontSize}"/>
-                        <TextBlock Text="{Binding FontSize, StringFormat='{}Size: {0}px'}" 
+                        <TextBlock Text="{Binding FontSize, StringFormat='Size: {0}px'}" 
                                    Foreground="#8B949E" 
                                    FontSize="12"
                                    HorizontalAlignment="Center"/>
+                        
+                        <Border Height="1" Background="#21262D" Margin="0,8,0,0"/>
+                        
+                        <StackPanel Spacing="4" Margin="0,8,0,0">
+                            <TextBlock Text="STATISTICS" 
+                                       FontSize="10" 
+                                       FontWeight="Bold"
+                                       Foreground="#8B949E"/>
+                            <Grid ColumnDefinitions="*,*">
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="Lines" FontSize="10" Foreground="#8B949E"/>
+                                    <TextBlock Text="{Binding LineCount}" FontSize="14" Foreground="#58A6FF"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Words" FontSize="10" Foreground="#8B949E"/>
+                                    <TextBlock Text="{Binding WordCount}" FontSize="14" Foreground="#58A6FF"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -275,81 +300,47 @@
                         </TabItem>
 
                         <TabItem Header="{Binding EditTabText}">
-                            <Grid ColumnDefinitions="*,8,*" Margin="0">
-                                <Border Grid.Column="0" 
-                                        Background="#0D1117" 
-                                        CornerRadius="10" 
-                                        Padding="4"
-                                        Margin="0,0,4,0">
-                                    <Grid RowDefinitions="Auto,*">
-                                        <Border Grid.Row="0" 
-                                                Background="#161B22"
-                                                CornerRadius="8,8,0,0"
-                                                Padding="12,8">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <Ellipse Width="10" Height="10" Fill="#FF5F56"/>
-                                                <Ellipse Width="10" Height="10" Fill="#FFBD2E"/>
-                                                <Ellipse Width="10" Height="10" Fill="#27C93F"/>
-                                                <TextBlock Text="EDITOR" 
-                                                           Foreground="#8B949E" 
-                                                           FontSize="10"
-                                                           FontWeight="Bold"
-                                                           Margin="12,0,0,0"/>
-                                            </StackPanel>
-                                        </Border>
-                                        
-                                        <TextBox Grid.Row="1"
-                                                 Text="{Binding MarkdownText}"
-                                                 AcceptsReturn="True"
-                                                 Watermark="Write your Markdown here..."
-                                                 Background="Transparent"
-                                                 Foreground="#E6EDF3"
-                                                 BorderThickness="0"
-                                                 FontSize="{Binding FontSize}"
-                                                 FontFamily="Cascadia Code, JetBrains Mono, Consolas, monospace"
-                                                 Padding="16"
-                                                 VerticalAlignment="Stretch"
-                                                 HorizontalAlignment="Stretch"/>
-                                    </Grid>
-                                </Border>
-
-                                <Border Grid.Column="2" 
-                                        Background="#0D1117" 
-                                        CornerRadius="10" 
-                                        Padding="4"
-                                        Margin="4,0,0,0">
-                                    <Grid RowDefinitions="Auto,*">
-                                        <Border Grid.Row="0" 
-                                                Background="#161B22"
-                                                CornerRadius="8,8,0,0"
-                                                Padding="12,8">
-                                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                                <Ellipse Width="10" Height="10" Fill="#FF5F56"/>
-                                                <Ellipse Width="10" Height="10" Fill="#FFBD2E"/>
-                                                <Ellipse Width="10" Height="10" Fill="#27C93F"/>
-                                                <TextBlock Text="PREVIEW" 
-                                                           Foreground="#8B949E" 
-                                                           FontSize="10"
-                                                           FontWeight="Bold"
-                                                           Margin="12,0,0,0"/>
-                                            </StackPanel>
-                                        </Border>
-                                        
-                                        <ScrollViewer Grid.Row="1">
-                                            <TextBlock Text="{Binding MarkdownText}"
-                                                       TextWrapping="Wrap"
-                                                       Foreground="#E6EDF3"
-                                                       FontSize="{Binding FontSize}"
-                                                       Padding="16"/>
-                                        </ScrollViewer>
-                                    </Grid>
-                                </Border>
-                            </Grid>
+                            <Border Grid.Column="0" 
+                                    Background="#0D1117" 
+                                    CornerRadius="10" 
+                                    Padding="4"
+                                    Margin="4">
+                                <Grid RowDefinitions="Auto,*">
+                                    <Border Grid.Row="0" 
+                                            Background="#161B22"
+                                            CornerRadius="8,8,0,0"
+                                            Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <Ellipse Width="10" Height="10" Fill="#FF5F56"/>
+                                            <Ellipse Width="10" Height="10" Fill="#FFBD2E"/>
+                                            <Ellipse Width="10" Height="10" Fill="#27C93F"/>
+                                            <TextBlock Text="EDITOR" 
+                                                       Foreground="#8B949E" 
+                                                       FontSize="10"
+                                                       FontWeight="Bold"
+                                                       Margin="12,0,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                    
+                                    <TextBox Grid.Row="1"
+                                             Text="{Binding MarkdownText}"
+                                             AcceptsReturn="True"
+                                             Watermark="Write your Markdown here..."
+                                             Background="Transparent"
+                                             Foreground="#E6EDF3"
+                                             BorderThickness="0"
+                                             FontSize="{Binding FontSize}"
+                                             FontFamily="Cascadia Code, JetBrains Mono, Consolas, monospace"
+                                             Padding="16"
+                                             VerticalAlignment="Stretch"
+                                             HorizontalAlignment="Stretch"/>
+                                </Grid>
+                            </Border>
                         </TabItem>
                     </TabControl>
                 </Border>
                 
-                <!-- 底部状态栏 - 已修复 -->
+                <!-- 底部状态栏 -->
                 <Border Grid.Row="1"
                         Margin="0,16,0,0" 
                         Padding="0"
@@ -376,8 +367,18 @@
                         
                         <StackPanel Grid.Column="2" 
                                     Orientation="Horizontal" 
-                                    Spacing="16"
+                                    Spacing="12"
                                     Height="44">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="Ln" Foreground="#8B949E" FontSize="11" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding LineCount}" Foreground="#58A6FF" FontSize="11" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <Border Width="1" Background="#30363D"/>
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="Words" Foreground="#8B949E" FontSize="11" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding WordCount}" Foreground="#58A6FF" FontSize="11" VerticalAlignment="Center"/>
+                            </StackPanel>
+                            <Border Width="1" Background="#30363D"/>
                             <TextBlock Text="UTF-8" Foreground="#8B949E" FontSize="11" VerticalAlignment="Center"/>
                             <TextBlock Text="Markdown" Foreground="#8B949E" FontSize="11" VerticalAlignment="Center"/>
                             <Border Background="#21262D" CornerRadius="4" Padding="6,3">

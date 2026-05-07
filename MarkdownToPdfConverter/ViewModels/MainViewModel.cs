@@ -10,6 +10,7 @@ using MarkdownToPdfConverter.Services;
 using System.IO;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
+using System.Collections.ObjectModel;
 
 namespace MarkdownToPdfConverter.ViewModels
 {
@@ -18,12 +19,17 @@ namespace MarkdownToPdfConverter.ViewModels
         private readonly ILocalizationService _localization;
         private readonly IThemeService _themeService;
         private readonly MarkdownToPdfService _converterService;
+        private readonly MarkdownPreviewService _previewService;
 
         private double _fontSize = 16;
         private string _selectedFilePath = string.Empty;
         private string _markdownText = string.Empty;
         private string _statusMessage = string.Empty;
         private bool _isConverting;
+        private ObservableCollection<PreviewBlock> _previewBlocks = new();
+        private int _lineCount = 1;
+        private int _wordCount = 0;
+        private string _currentTheme = "Dark";
 
         // 主题属性 - 使用 setter 让它们可以被 RaiseAndSetIfChanged
         private IBrush _background = Brushes.Transparent;
@@ -65,10 +71,34 @@ namespace MarkdownToPdfConverter.ViewModels
             set => this.RaiseAndSetIfChanged(ref _textBoxBackground, value);
         }
 
-        public IBrush TextBoxForeground
+public IBrush TextBoxForeground
         {
             get => _textBoxForeground;
             set => this.RaiseAndSetIfChanged(ref _textBoxForeground, value);
+        }
+
+        public ObservableCollection<PreviewBlock> PreviewBlocks
+        {
+            get => _previewBlocks;
+            set => this.RaiseAndSetIfChanged(ref _previewBlocks, value);
+        }
+
+        public int LineCount
+        {
+            get => _lineCount;
+            set => this.RaiseAndSetIfChanged(ref _lineCount, value);
+        }
+
+        public int WordCount
+        {
+            get => _wordCount;
+            set => this.RaiseAndSetIfChanged(ref _wordCount, value);
+        }
+
+        public string CurrentTheme
+        {
+            get => _currentTheme;
+            set => this.RaiseAndSetIfChanged(ref _currentTheme, value);
         }
 
         public string LanguageButtonText => _localization.CurrentLanguage == "zh-CN" ? "English" : "中文";
@@ -89,13 +119,14 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
-        public string MarkdownText
+public string MarkdownText
         {
             get => _markdownText;
             set
             {
                 this.RaiseAndSetIfChanged(ref _markdownText, value);
                 this.RaisePropertyChanged(nameof(CanConvert));
+                UpdatePreview();
             }
         }
 
@@ -119,13 +150,14 @@ namespace MarkdownToPdfConverter.ViewModels
         public ReactiveCommand<Unit, Unit> SwitchLanguageCommand { get; }
         public ReactiveCommand<Unit, Unit> SwitchThemeCommand { get; }
 
-        public MainViewModel()
+public MainViewModel()
         {
             _localization = new LocalizationService();
             _themeService = new ThemeService();
             _converterService = new MarkdownToPdfService();
+            _previewService = new MarkdownPreviewService();
 
-            // 初始化主题
+            CurrentTheme = _themeService.CurrentTheme;
             ApplyThemeResources();
 
             StatusMessage = _localization.GetString("ready");
@@ -187,12 +219,23 @@ namespace MarkdownToPdfConverter.ViewModels
             });
         }
 
-        private void OnThemeChanged()
+private void OnThemeChanged()
         {
             Dispatcher.UIThread.Post(() =>
             {
+                CurrentTheme = _themeService.CurrentTheme;
                 ApplyThemeResources();
             });
+        }
+
+        private void UpdatePreview()
+        {
+            var blocks = _previewService.ParseToBlocks(MarkdownText);
+            PreviewBlocks = new ObservableCollection<PreviewBlock>(blocks);
+            
+            LineCount = string.IsNullOrEmpty(MarkdownText) ? 1 : MarkdownText.Split('\n').Length;
+            WordCount = string.IsNullOrWhiteSpace(MarkdownText) ? 0 : 
+                MarkdownText.Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
         }
 
         private async Task UploadFileAsync()
