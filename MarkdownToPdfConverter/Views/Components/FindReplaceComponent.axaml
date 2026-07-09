@@ -4,9 +4,47 @@
              x:Class="MarkdownToPdfConverter.Views.Components.FindReplaceComponent"
              x:DataType="vm:MainViewModel"
              IsVisible="{Binding IsFindVisible}">
-    <Border Background="{DynamicResource ThemeSurfaceBackground}"
-            CornerRadius="10"
-            Padding="12">
+    <UserControl.Styles>
+        <Style Selector="UserControl">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="MaxHeight" Value="0"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.25" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="MaxHeight" Duration="0:0:0.25" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="UserControl[IsVisible=True]">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="MaxHeight" Value="200"/>
+        </Style>
+
+        <Style Selector="Border#FindReplaceBorder">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Button.close-btn">
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+
+        <Style Selector="Button.close-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Border Name="FindReplaceBorder">
         <Grid ColumnDefinitions="*,*,Auto,Auto">
             <TextBox Grid.Column="0"
                      Text="{Binding FindText}"
@@ -22,11 +60,9 @@
                     Padding="12,6"
                     Margin="0,0,8,0"/>
             <Button Grid.Column="3"
+                    Classes="close-btn"
                     Command="{Binding CloseFindCommand}"
-                    Content="✕"
-                    Padding="8,6"
-                    Background="Transparent"
-                    Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                    Content="✕"/>
         </Grid>
     </Border>
 </UserControl>

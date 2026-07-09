@@ -3,8 +3,52 @@
              xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
              x:Class="MarkdownToPdfConverter.Views.Components.StatusBarComponent"
              x:DataType="vm:MainViewModel">
-    <Border Background="{DynamicResource ThemeStatusBarBackground}"
-            CornerRadius="10">
+    <UserControl.Styles>
+        <Style Selector="Border#StatusBarBorder">
+            <Setter Property="Background" Value="{DynamicResource ThemeStatusBarBackground}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Ellipse#StatusDot">
+            <Setter Property="Width" Value="7"/>
+            <Setter Property="Height" Value="7"/>
+            <Setter Property="Fill" Value="{DynamicResource ThemeReadyDotColor}"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Fill" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Border.status-sep">
+            <Setter Property="Width" Value="1"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="Opacity" Value="0.5"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Border.version-badge">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="6,3"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+    </UserControl.Styles>
+
+    <Border Name="StatusBarBorder">
         <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0">
             <StackPanel Grid.Column="0"
                         Orientation="Horizontal"
@@ -12,7 +56,7 @@
                         VerticalAlignment="Center"
                         Height="36">
                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                    <Ellipse Width="7" Height="7" Fill="{DynamicResource ThemeReadyDotColor}"/>
+                    <Ellipse Name="StatusDot" />
                     <TextBlock Text="{DynamicResource str_ready}"
                                Foreground="{DynamicResource ThemeSecondaryForeground}"
                                FontSize="11"
@@ -32,15 +76,15 @@
                     <TextBlock Text="{DynamicResource str_status_ln}" Foreground="{DynamicResource ThemeSecondaryForeground}" FontSize="11" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding LineCount}" Foreground="{DynamicResource ThemeStatValueColor}" FontSize="11" VerticalAlignment="Center"/>
                 </StackPanel>
-                <Border Width="1" Background="{DynamicResource ThemeBorderBrush}"/>
+                <Border Classes="status-sep" />
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <TextBlock Text="{DynamicResource str_status_words}" Foreground="{DynamicResource ThemeSecondaryForeground}" FontSize="11" VerticalAlignment="Center"/>
                     <TextBlock Text="{Binding WordCount}" Foreground="{DynamicResource ThemeStatValueColor}" FontSize="11" VerticalAlignment="Center"/>
                 </StackPanel>
-                <Border Width="1" Background="{DynamicResource ThemeBorderBrush}"/>
+                <Border Classes="status-sep" />
                 <TextBlock Text="UTF-8" Foreground="{DynamicResource ThemeSecondaryForeground}" FontSize="11" VerticalAlignment="Center"/>
                 <TextBlock Text="Markdown" Foreground="{DynamicResource ThemeSecondaryForeground}" FontSize="11" VerticalAlignment="Center"/>
-                <Border Background="{DynamicResource ThemeButtonBackground}" CornerRadius="4" Padding="6,3">
+                <Border Classes="version-badge">
                     <TextBlock Text="v1.0"
                                Foreground="{DynamicResource ThemeSecondaryForeground}"
                                FontSize="10"

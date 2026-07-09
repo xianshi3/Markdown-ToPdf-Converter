@@ -26,6 +26,7 @@ namespace MarkdownToPdfConverter.ViewModels
         private int _wordCount = 0;
         private string _currentTheme = "Dark";
         private bool _hasUnsavedChanges = false;
+        private bool _isSidebarExpanded = true;
 
         private string _findText = string.Empty;
         private string _replaceText = string.Empty;
@@ -82,6 +83,18 @@ namespace MarkdownToPdfConverter.ViewModels
             get => _hasUnsavedChanges;
             set => this.RaiseAndSetIfChanged(ref _hasUnsavedChanges, value);
         }
+
+        public bool IsSidebarExpanded
+        {
+            get => _isSidebarExpanded;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _isSidebarExpanded, value);
+                this.RaisePropertyChanged(nameof(SidebarWidth));
+            }
+        }
+
+        public double SidebarWidth => IsSidebarExpanded ? 200 : 0;
 
         public string LanguageButtonText => _localization.CurrentLanguage == "zh-CN" ? "English" : "中文";
         public string LoadFileStatusText => _localization.GetString("file_loaded_status");
@@ -198,6 +211,7 @@ namespace MarkdownToPdfConverter.ViewModels
         public ReactiveCommand<Unit, Unit> FindCommand { get; }
         public ReactiveCommand<Unit, Unit> ReplaceCommand { get; }
         public ReactiveCommand<Unit, Unit> CloseFindCommand { get; }
+        public ReactiveCommand<Unit, Unit> ToggleSidebarCommand { get; }
 
         public MainViewModel()
         {
@@ -255,6 +269,7 @@ namespace MarkdownToPdfConverter.ViewModels
             FindCommand = ReactiveCommand.Create(() => { IsFindVisible = !IsFindVisible; });
             ReplaceCommand = ReactiveCommand.Create(Replace);
             CloseFindCommand = ReactiveCommand.Create(() => { IsFindVisible = false; });
+            ToggleSidebarCommand = ReactiveCommand.Create(() => { IsSidebarExpanded = !IsSidebarExpanded; });
         }
 
         private void NewFile()

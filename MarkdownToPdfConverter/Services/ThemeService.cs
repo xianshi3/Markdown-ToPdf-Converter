@@ -48,6 +48,9 @@ namespace MarkdownToPdfConverter.Services
                 StatValueColor = new SolidColorBrush(Color.Parse("#58A6FF")),
                 ScrollBarThumb = new SolidColorBrush(Color.Parse("#484F58")),
                 ScrollBarThumbHover = new SolidColorBrush(Color.Parse("#6E7681")),
+                TitleBarBackground = new SolidColorBrush(Color.Parse("#161B22")),
+                WindowButtonHoverBackground = new SolidColorBrush(Color.Parse("#2D3340")),
+                WindowButtonCloseHoverBackground = new SolidColorBrush(Color.Parse("#C42B1C")),
             },
             ["Light"] = new ThemeResources
             {
@@ -73,6 +76,9 @@ namespace MarkdownToPdfConverter.Services
                 StatValueColor = new SolidColorBrush(Color.Parse("#0969DA")),
                 ScrollBarThumb = new SolidColorBrush(Color.Parse("#C0C0C0")),
                 ScrollBarThumbHover = new SolidColorBrush(Color.Parse("#A0A0A0")),
+                TitleBarBackground = new SolidColorBrush(Color.Parse("#F0F0F0")),
+                WindowButtonHoverBackground = new SolidColorBrush(Color.Parse("#E0E0E0")),
+                WindowButtonCloseHoverBackground = new SolidColorBrush(Color.Parse("#E81123")),
             },
             ["Gray"] = new ThemeResources
             {
@@ -98,6 +104,9 @@ namespace MarkdownToPdfConverter.Services
                 StatValueColor = new SolidColorBrush(Color.Parse("#6C5CE7")),
                 ScrollBarThumb = new SolidColorBrush(Color.Parse("#555555")),
                 ScrollBarThumbHover = new SolidColorBrush(Color.Parse("#666666")),
+                TitleBarBackground = new SolidColorBrush(Color.Parse("#383838")),
+                WindowButtonHoverBackground = new SolidColorBrush(Color.Parse("#4A4A4A")),
+                WindowButtonCloseHoverBackground = new SolidColorBrush(Color.Parse("#C42B1C")),
             }
         };
 
@@ -142,6 +151,9 @@ namespace MarkdownToPdfConverter.Services
             app.Resources["ThemeStatValueColor"] = r.StatValueColor;
             app.Resources["ThemeScrollBarThumb"] = r.ScrollBarThumb;
             app.Resources["ThemeScrollBarThumbHover"] = r.ScrollBarThumbHover;
+            app.Resources["ThemeTitleBarBackground"] = r.TitleBarBackground;
+            app.Resources["ThemeWindowButtonHoverBackground"] = r.WindowButtonHoverBackground;
+            app.Resources["ThemeWindowButtonCloseHoverBackground"] = r.WindowButtonCloseHoverBackground;
         }
 
         public ThemeResources GetResources(string themeName) =>
@@ -172,5 +184,8 @@ namespace MarkdownToPdfConverter.Services
         public IBrush StatValueColor { get; set; } = Brushes.Blue;
         public IBrush ScrollBarThumb { get; set; } = Brushes.Gray;
         public IBrush ScrollBarThumbHover { get; set; } = Brushes.DarkGray;
+        public IBrush TitleBarBackground { get; set; } = Brushes.Black;
+        public IBrush WindowButtonHoverBackground { get; set; } = Brushes.DimGray;
+        public IBrush WindowButtonCloseHoverBackground { get; set; } = Brushes.Red;
     }
 }

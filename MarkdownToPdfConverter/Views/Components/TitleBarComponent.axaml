@@ -1,0 +1,151 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MarkdownToPdfConverter.Views.Components.TitleBarComponent"
+             Height="36">
+    <UserControl.Styles>
+        <Style Selector="UserControl">
+            <Setter Property="Background" Value="{DynamicResource ThemeTitleBarBackground}"/>
+        </Style>
+
+        <Style Selector="Grid#TitleBarRoot">
+            <Setter Property="Background" Value="{DynamicResource ThemeTitleBarBackground}"/>
+        </Style>
+
+        <Style Selector="TextBlock#TitleText">
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="12,0,0,0"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+
+        <Style Selector="Button.window-btn">
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Arrow"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="RenderTransform" Value="scale(1)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.1"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Button.window-btn /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Button.window-btn:pressed">
+            <Setter Property="RenderTransform" Value="scale(0.93)"/>
+        </Style>
+
+        <Style Selector="Button.window-btn /template/ ContentPresenter:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeWindowButtonHoverBackground}"/>
+        </Style>
+
+        <Style Selector="Button.window-close /template/ ContentPresenter:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeWindowButtonCloseHoverBackground}"/>
+        </Style>
+
+        <Style Selector="Button.window-btn:pointerover">
+            <Setter Property="Opacity" Value="1"/>
+        </Style>
+
+        <Style Selector="Button.window-close:pointerover Path">
+            <Setter Property="Stroke" Value="White"/>
+        </Style>
+
+        <Style Selector="Button.window-close:pointerover Rectangle">
+            <Setter Property="Fill" Value="White"/>
+        </Style>
+
+        <Style Selector="Path.window-icon">
+            <Setter Property="Stroke" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="StrokeThickness" Value="1.2"/>
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="Height" Value="12"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
+        </Style>
+
+        <Style Selector="Button.window-btn:pointerover Path.window-icon">
+            <Setter Property="Stroke" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+
+        <Style Selector="Button.window-btn:pointerover Rectangle">
+            <Setter Property="Fill" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+
+        <Style Selector="Separator">
+            <Setter Property="Background" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="Height" Value="1"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Name="TitleBarRoot">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Name="TitleText"
+                       Grid.Column="0"
+                       Text="{Binding WindowTitle}"
+                       VerticalAlignment="Center"
+                       Margin="14,0,0,0"
+                       FontSize="13"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource ThemeForeground}"
+                       TextTrimming="CharacterEllipsis" />
+
+            <StackPanel Grid.Column="2"
+                        Name="WindowButtons"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Top">
+                <Button Name="MinimizeButton"
+                        Classes="window-btn"
+                        ToolTip.Tip="Minimize">
+                    <Rectangle Width="12" Height="1.5"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               RadiusX="0.75" RadiusY="0.75"
+                               Fill="{DynamicResource ThemeSecondaryForeground}" />
+                </Button>
+
+                <Button Name="MaximizeRestoreButton"
+                        Classes="window-btn"
+                        ToolTip.Tip="Maximize">
+                    <Grid Width="12" Height="12">
+                        <Path Name="MaximizeIcon"
+                              Classes="window-icon"
+                              Width="12" Height="12"
+                              Data="M 0.5,0.5 H 11.5 V 11.5 H 0.5 Z" />
+                        <Path Name="RestoreIcon"
+                              Classes="window-icon"
+                              Width="12" Height="12"
+                              Data="M 2.5,3.5 H 9.5 V 10.5 H 2.5 Z M 0,0.5 H 7 V 7.5 H 0 Z"
+                              IsVisible="False" />
+                    </Grid>
+                </Button>
+
+                <Button Name="CloseButton"
+                        Classes="window-btn window-close"
+                        ToolTip.Tip="Close">
+                    <Path Classes="window-icon"
+                          Data="M 0.5,0.5 L 11.5,11.5 M 11.5,0.5 L 0.5,11.5" />
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

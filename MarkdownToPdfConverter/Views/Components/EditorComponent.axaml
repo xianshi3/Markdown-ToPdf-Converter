@@ -3,93 +3,292 @@
              xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
              x:Class="MarkdownToPdfConverter.Views.Components.EditorComponent"
              x:DataType="vm:MainViewModel">
-    <Border Background="{DynamicResource ThemeSurfaceBackground}"
-            CornerRadius="12"
-            Padding="4">
+    <UserControl.Styles>
+        <Style Selector="Border.editor-container">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <!-- File Tab Styles -->
+        <Style Selector="Border.drop-zone">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="40,32"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="MinWidth" Value="320"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.3"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.3"/>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Border.drop-zone:dragover">
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="Opacity" Value="0.95"/>
+        </Style>
+
+        <Style Selector="Path.upload-icon">
+            <Setter Property="Stroke" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="StrokeThickness" Value="1.5"/>
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
+        </Style>
+
+        <Style Selector="Border.drop-zone:dragover Path.upload-icon">
+            <Setter Property="Stroke" Value="{DynamicResource ThemeAccentBrush}"/>
+        </Style>
+
+        <Style Selector="TextBlock.upload-title">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="TextBlock.upload-hint">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.browse-btn">
+            <Setter Property="Padding" Value="20,8"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style Selector="Button.browse-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonHoverBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+        </Style>
+
+        <Style Selector="Border.file-info-card">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="MinWidth" Value="320"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Border.file-info-card:pointerover">
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+        </Style>
+
+        <!-- Editor Tab Styles -->
+        <Style Selector="Border.editor-wrapper">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Border.editor-header">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="CornerRadius" Value="8,8,0,0"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Ellipse.dot">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Border.editor-body">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
+        <Style Selector="TextBox.editor-textbox">
+            <Setter Property="AcceptsReturn" Value="True"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="{Binding FontSize}"/>
+            <Setter Property="FontFamily" Value="Cascadia Code, JetBrains Mono, Consolas, monospace"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+            <Setter Property="SelectionForegroundBrush" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+        </Style>
+
+        <Style Selector="TextBox.editor-textbox:focus">
+            <Setter Property="CaretBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Border Classes="editor-container">
         <TabControl Margin="0">
+            <!-- File Upload Tab -->
             <TabItem Header="{Binding FileTabText}">
                 <ScrollViewer Padding="24">
                     <StackPanel Spacing="16"
                                 VerticalAlignment="Center"
-                                HorizontalAlignment="Center"
-                                MinHeight="400">
+                                HorizontalAlignment="Center">
 
+                        <!-- Drop Zone -->
                         <Border x:Name="DropFileTab"
                                 DragDrop.AllowDrop="True"
-                                Background="{DynamicResource ThemeBackground}"
-                                CornerRadius="16"
-                                Padding="24"
-                                HorizontalAlignment="Center"
-                                BorderBrush="{DynamicResource ThemeBorderBrush}"
-                                BorderThickness="2">
-                            <StackPanel Spacing="12" HorizontalAlignment="Center">
-                                <TextBlock Text="📁" FontSize="48"
-                                           HorizontalAlignment="Center"/>
+                                Classes="drop-zone">
+                            <StackPanel Spacing="16" HorizontalAlignment="Center">
+                                <Border Width="80" Height="80"
+                                        CornerRadius="40"
+                                        Background="{DynamicResource ThemeSurfaceBackground}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        BorderThickness="0">
+                                    <Path Classes="upload-icon"
+                                          Data="M 24,40 V 56 M 16,48 L 24,40 L 32,48 M 16,62 H 32 M 14,24 H 34 C 34,24 40,24 40,30 V 40 C 40,46 34,46 34,46 H 26 M 14,24 H 10 C 10,24 4,24 4,30 V 62 C 4,68 10,68 10,68 H 34 C 34,68 40,68 40,62 V 56"
+                                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                          StrokeThickness="2" />
+                                </Border>
                                 <TextBlock Text="{Binding SelectedFileText}"
-                                           FontSize="16"
-                                           FontWeight="Bold"
-                                           Foreground="{DynamicResource ThemeForeground}"
-                                           HorizontalAlignment="Center"/>
+                                           Classes="upload-title" />
+                                <TextBlock Text="{DynamicResource str_drop_md_hint}"
+                                           Classes="upload-hint" />
+                                <Button Classes="browse-btn"
+                                        Command="{Binding OpenFileCommand}"
+                                        ToolTip.Tip="{DynamicResource str_tip_open}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Path Data="M 1,3 C 1,2 2,1 3,1 H 6 L 8,3 H 13 C 14,3 15,4 15,5 V 13 C 15,14 14,15 13,15 H 3 C 2,15 1,14 1,13 Z"
+                                              Stroke="{DynamicResource ThemeForeground}"
+                                              StrokeThickness="1.5"
+                                              Width="14" Height="14"
+                                              Stretch="Uniform"
+                                              VerticalAlignment="Center"/>
+                                        <TextBlock Text="{DynamicResource str_menu_open}" FontSize="12"/>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
                         </Border>
 
-                        <Border Background="{DynamicResource ThemeBackground}"
-                                CornerRadius="10"
-                                Padding="16,12"
-                                BorderBrush="{DynamicResource ThemeBorderBrush}"
-                                BorderThickness="1"
-                                MinWidth="400"
-                                MaxWidth="500">
-                            <StackPanel Spacing="4">
-                                <TextBlock Text="{DynamicResource str_editor_file_path}"
-                                           FontSize="10"
-                                           FontWeight="Bold"
-                                           Foreground="{DynamicResource ThemeSecondaryForeground}"/>
-                                <TextBlock Text="{Binding SelectedFilePath}"
-                                           TextWrapping="Wrap"
-                                           Foreground="{DynamicResource ThemeStatValueColor}"
-                                           FontSize="13"/>
-                            </StackPanel>
+                        <!-- File Info Card -->
+                        <Border Classes="file-info-card">
+                            <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                                <Border Width="36" Height="36"
+                                        CornerRadius="8"
+                                        Background="{DynamicResource ThemeStatValueColor}"
+                                        Opacity="0.15"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"/>
+                                <Path Data="M 2,1 H 10 L 14,5 V 13 C 14,13.5 13.5,14 13,14 H 2 C 1.5,14 1,13.5 1,13 V 2 C 1,1.5 1.5,1 2,1 Z M 10,1 V 5 H 14"
+                                      Stroke="{DynamicResource ThemeStatValueColor}"
+                                      StrokeThickness="1.5"
+                                      Width="16" Height="16"
+                                      Stretch="Uniform"
+                                      Margin="10,0,0,0"
+                                      VerticalAlignment="Center"/>
+
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                    <TextBlock Text="{DynamicResource str_editor_file_path}"
+                                               FontSize="10"
+                                               FontWeight="Bold"
+                                               Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                                    <TextBlock Text="{Binding SelectedFilePath}"
+                                               TextWrapping="Wrap"
+                                               Foreground="{DynamicResource ThemeStatValueColor}"
+                                               FontSize="12"
+                                               FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Grid>
                         </Border>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
 
+            <!-- Markdown Editor Tab -->
             <TabItem Header="{Binding EditTabText}">
-                <Border Background="{DynamicResource ThemeBackground}"
-                        CornerRadius="8"
-                        Padding="4"
-                        Margin="4">
+                <Border Classes="editor-wrapper">
                     <Grid RowDefinitions="Auto,*">
-                        <Border Grid.Row="0"
-                                Background="{DynamicResource ThemeSurfaceBackground}"
-                                CornerRadius="6,6,0,0"
-                                Padding="12,6">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <Ellipse Width="10" Height="10" Fill="#FF5F56"/>
-                                <Ellipse Width="10" Height="10" Fill="#FFBD2E"/>
-                                <Ellipse Width="10" Height="10" Fill="#27C93F"/>
-                                <TextBlock Text="{DynamicResource str_editor_title}"
+                        <!-- Header -->
+                        <Border Classes="editor-header">
+                            <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                    <Ellipse Classes="dot" Fill="#FF5F56"/>
+                                    <Ellipse Classes="dot" Fill="#FFBD2E"/>
+                                    <Ellipse Classes="dot" Fill="#27C93F"/>
+                                </StackPanel>
+
+                                <TextBlock Grid.Column="1"
+                                           Text="{DynamicResource str_editor_title}"
                                            Foreground="{DynamicResource ThemeSecondaryForeground}"
                                            FontSize="10"
                                            FontWeight="Bold"
-                                           Margin="12,0,0,0"/>
-                            </StackPanel>
+                                           Margin="12,0,0,0"
+                                           VerticalAlignment="Center"/>
+
+                                <StackPanel Grid.Column="3"
+                                            Orientation="Horizontal"
+                                            Spacing="12"
+                                            VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding LineCount, StringFormat='{}Ln {0}'}"
+                                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                                               FontSize="10"
+                                               VerticalAlignment="Center"/>
+                                    <Border Width="1" Height="12"
+                                            Background="{DynamicResource ThemeBorderBrush}"
+                                            Opacity="0.5"/>
+                                    <TextBlock Text="Markdown"
+                                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                                               FontSize="10"
+                                               VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
                         </Border>
 
-                        <TextBox Grid.Row="1"
-                                 Text="{Binding MarkdownText}"
-                                 AcceptsReturn="True"
-                                 Watermark="{DynamicResource str_editor_watermark}"
-                                 Background="Transparent"
-                                 Foreground="{DynamicResource ThemeForeground}"
-                                 BorderThickness="0"
-                                 FontSize="{Binding FontSize}"
-                                 FontFamily="Cascadia Code, JetBrains Mono, Consolas, monospace"
-                                 Padding="12"
-                                 VerticalAlignment="Stretch"
-                                 HorizontalAlignment="Stretch"
-                                 TextWrapping="Wrap"/>
+                        <!-- Editor Body -->
+                        <Border Grid.Row="1" Classes="editor-body">
+                            <TextBox Classes="editor-textbox"
+                                     Text="{Binding MarkdownText}"
+                                     Watermark="{DynamicResource str_editor_watermark}" />
+                        </Border>
                     </Grid>
                 </Border>
             </TabItem>
