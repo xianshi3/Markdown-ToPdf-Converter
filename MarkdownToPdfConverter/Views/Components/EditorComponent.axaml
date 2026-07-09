@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+             x:Class="MarkdownToPdfConverter.Views.Components.EditorComponent"
+             x:DataType="vm:MainViewModel">
+    <Border Background="{DynamicResource ThemeSurfaceBackground}"
+            CornerRadius="12"
+            Padding="4">
+        <TabControl Margin="0">
+            <TabItem Header="{Binding FileTabText}">
+                <ScrollViewer Padding="24">
+                    <StackPanel Spacing="16"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                MinHeight="400">
+
+                        <Border x:Name="DropFileTab"
+                                DragDrop.AllowDrop="True"
+                                Background="{DynamicResource ThemeBackground}"
+                                CornerRadius="16"
+                                Padding="24"
+                                HorizontalAlignment="Center"
+                                BorderBrush="{DynamicResource ThemeBorderBrush}"
+                                BorderThickness="2">
+                            <StackPanel Spacing="12" HorizontalAlignment="Center">
+                                <TextBlock Text="📁" FontSize="48"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding SelectedFileText}"
+                                           FontSize="16"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource ThemeForeground}"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="{DynamicResource ThemeBackground}"
+                                CornerRadius="10"
+                                Padding="16,12"
+                                BorderBrush="{DynamicResource ThemeBorderBrush}"
+                                BorderThickness="1"
+                                MinWidth="400"
+                                MaxWidth="500">
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="{DynamicResource str_editor_file_path}"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                                <TextBlock Text="{Binding SelectedFilePath}"
+                                           TextWrapping="Wrap"
+                                           Foreground="{DynamicResource ThemeStatValueColor}"
+                                           FontSize="13"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="{Binding EditTabText}">
+                <Border Background="{DynamicResource ThemeBackground}"
+                        CornerRadius="8"
+                        Padding="4"
+                        Margin="4">
+                    <Grid RowDefinitions="Auto,*">
+                        <Border Grid.Row="0"
+                                Background="{DynamicResource ThemeSurfaceBackground}"
+                                CornerRadius="6,6,0,0"
+                                Padding="12,6">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Ellipse Width="10" Height="10" Fill="#FF5F56"/>
+                                <Ellipse Width="10" Height="10" Fill="#FFBD2E"/>
+                                <Ellipse Width="10" Height="10" Fill="#27C93F"/>
+                                <TextBlock Text="{DynamicResource str_editor_title}"
+                                           Foreground="{DynamicResource ThemeSecondaryForeground}"
+                                           FontSize="10"
+                                           FontWeight="Bold"
+                                           Margin="12,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBox Grid.Row="1"
+                                 Text="{Binding MarkdownText}"
+                                 AcceptsReturn="True"
+                                 Watermark="{DynamicResource str_editor_watermark}"
+                                 Background="Transparent"
+                                 Foreground="{DynamicResource ThemeForeground}"
+                                 BorderThickness="0"
+                                 FontSize="{Binding FontSize}"
+                                 FontFamily="Cascadia Code, JetBrains Mono, Consolas, monospace"
+                                 Padding="12"
+                                 VerticalAlignment="Stretch"
+                                 HorizontalAlignment="Stretch"
+                                 TextWrapping="Wrap"/>
+                    </Grid>
+                </Border>
+            </TabItem>
+        </TabControl>
+    </Border>
+</UserControl>

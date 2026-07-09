@@ -1,0 +1,158 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+             x:Class="MarkdownToPdfConverter.Views.Components.SidebarComponent"
+             x:DataType="vm:MainViewModel">
+    <Border Background="{DynamicResource ThemeSurfaceBackground}"
+            CornerRadius="12"
+            Padding="12"
+            MinWidth="160"
+            MaxWidth="260">
+        <ScrollViewer>
+            <StackPanel Spacing="16">
+
+                <!-- Brand Section -->
+                <StackPanel Spacing="12">
+                    <Border Background="{DynamicResource ThemeSuccessAccent}"
+                            CornerRadius="10"
+                            Padding="12"
+                            HorizontalAlignment="Left">
+                        <TextBlock Text="MD"
+                                   FontSize="20"
+                                   FontWeight="Bold"
+                                   Foreground="White"/>
+                    </Border>
+                    <TextBlock Text="Markdown Converter"
+                               FontSize="14"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource ThemeForeground}"
+                               TextWrapping="Wrap"/>
+                    <TextBlock Text="{DynamicResource str_sidebar_brand_subtitle}"
+                               FontSize="11"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                </StackPanel>
+
+                <Border Height="1" Background="{DynamicResource ThemeBorderBrush}"/>
+
+                <!-- Export Options -->
+                <StackPanel Spacing="12">
+                    <TextBlock Text="{DynamicResource str_sidebar_export_options}"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{DynamicResource str_sidebar_page_size}" FontSize="11" Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                        <ComboBox ItemsSource="{Binding PageSizeOptions}"
+                                  SelectedItem="{Binding PageSize}"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{DynamicResource str_sidebar_font}" FontSize="11" Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                        <ComboBox ItemsSource="{Binding FontOptions}"
+                                  SelectedItem="{Binding ExportFont}"
+                                  HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="{DynamicResource str_sidebar_margin}" FontSize="11" Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                        <Slider Minimum="0" Maximum="50" Value="{Binding PageMargin}"/>
+                        <TextBlock Text="{Binding PageMargin, StringFormat='{}{0:0}mm'}"
+                                   Foreground="{DynamicResource ThemeStatValueColor}"
+                                   FontSize="11"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Border Height="1" Background="{DynamicResource ThemeBorderBrush}"/>
+
+                <!-- Editor Settings -->
+                <StackPanel Spacing="12">
+                    <TextBlock Text="{DynamicResource str_sidebar_editor}"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{DynamicResource str_sidebar_font_size}" FontSize="11" Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                        <Slider Minimum="12" Maximum="24" Value="{Binding FontSize}"/>
+                        <TextBlock Text="{Binding FontSize, StringFormat='Size: {0}px'}"
+                                   Foreground="{DynamicResource ThemeSecondaryForeground}"
+                                   FontSize="12"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <Border Height="1" Background="{DynamicResource ThemeBorderBrush}"/>
+
+                <!-- Statistics -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="{DynamicResource str_sidebar_statistics}"
+                               FontSize="10"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                    <Grid ColumnDefinitions="*,*">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{DynamicResource str_sidebar_lines}" FontSize="10" Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                            <TextBlock Text="{Binding LineCount}" FontSize="14" Foreground="{DynamicResource ThemeStatValueColor}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="{DynamicResource str_sidebar_words}" FontSize="10" Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                            <TextBlock Text="{Binding WordCount}" FontSize="14" Foreground="{DynamicResource ThemeStatValueColor}"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+
+                <Border Height="1" Background="{DynamicResource ThemeBorderBrush}"/>
+
+                <!-- Quick Actions -->
+                <StackPanel Spacing="8">
+                    <Button Command="{Binding SwitchLanguageCommand}"
+                            Padding="12,10"
+                            HorizontalAlignment="Stretch">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ThemeButtonForeground}"/>
+                                <Setter Property="CornerRadius" Value="8"/>
+                            </Style>
+                            <Style Selector="Button:pointerover">
+                                <Setter Property="Background" Value="{DynamicResource ThemeButtonHoverBackground}"/>
+                            </Style>
+                        </Button.Styles>
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <TextBlock Text="🌐" FontSize="14"/>
+                            <TextBlock Text="{Binding LanguageButtonText}"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding SwitchThemeCommand}"
+                            Padding="12,10"
+                            HorizontalAlignment="Stretch">
+                        <Button.Styles>
+                            <Style Selector="Button">
+                                <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ThemeButtonForeground}"/>
+                                <Setter Property="CornerRadius" Value="8"/>
+                            </Style>
+                            <Style Selector="Button:pointerover">
+                                <Setter Property="Background" Value="{DynamicResource ThemeButtonHoverBackground}"/>
+                            </Style>
+                        </Button.Styles>
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <TextBlock Text="🎨" FontSize="14"/>
+                            <TextBlock Text="{Binding CurrentTheme, StringFormat='Theme: {0}'}"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Border x:Name="DropSidebar"
+                            DragDrop.AllowDrop="True"
+                            Background="{DynamicResource ThemeButtonBackground}"
+                            CornerRadius="8" Padding="12,8">
+                        <TextBlock Text="{DynamicResource str_drop_md_hint}" FontSize="11" Foreground="{DynamicResource ThemeSecondaryForeground}" HorizontalAlignment="Center"/>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
+</UserControl>

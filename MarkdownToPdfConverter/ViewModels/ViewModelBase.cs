@@ -1,7 +1,8 @@
 ﻿using ReactiveUI;
 
-namespace MarkdownToPdfConverter.ViewModels;
-
-public class ViewModelBase : ReactiveObject
+namespace MarkdownToPdfConverter.ViewModels
 {
+    public class ViewModelBase : ReactiveObject
+    {
+    }
 }

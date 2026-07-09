@@ -2,9 +2,9 @@
 using MigraDocCore.Rendering;
 using PdfSharpCore.Fonts;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using Markdig;
 using HtmlAgilityPack;
@@ -14,7 +14,7 @@ namespace MarkdownToPdfConverter.Services
 {
     public class MarkdownToPdfService
     {
-        private Document _document;
+        private Document _document = null!;
         private Section? _section;
         private MarkdownPipeline _pipeline;
 
@@ -63,6 +63,19 @@ namespace MarkdownToPdfConverter.Services
             ("\\btypeof\\b", "Blue"), ("\\binstanceof\\b", "Blue"), ("\\bdelete\\b", "Blue"), ("\\bvoid\\b", "Blue"),
         };
 
+        private static readonly Dictionary<string, Regex> _syntaxRegexCache = new()
+        {
+            ["csharp"] = BuildSyntaxRegex(_csharpKeywords),
+            ["python"] = BuildSyntaxRegex(_pythonKeywords),
+            ["javascript"] = BuildSyntaxRegex(_jsKeywords),
+        };
+
+        private static Regex BuildSyntaxRegex((string pattern, string color)[] keywords)
+        {
+            var p = string.Join("|", keywords.Select(k => k.Item1));
+            return new Regex("(" + p + ")|((//|#).*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        }
+
         static MarkdownToPdfService()
         {
             GlobalFontSettings.FontResolver = new CustomFontResolver();
@@ -70,7 +83,6 @@ namespace MarkdownToPdfConverter.Services
 
         public MarkdownToPdfService()
         {
-            _document = new Document();
             _pipeline = new MarkdownPipelineBuilder()
                 .UseAdvancedExtensions()
                 .UsePipeTables()
@@ -89,6 +101,7 @@ namespace MarkdownToPdfConverter.Services
         {
             try
             {
+                _document = new Document();
                 SetupDocumentStyles(exportFont);
 
                 string html = Markdown.ToHtml(markdownContent, _pipeline);
@@ -122,10 +135,7 @@ namespace MarkdownToPdfConverter.Services
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
 
-                if (htmlDoc.DocumentNode.SelectSingleNode("//meta[@name='generator']") != null)
-                {
-                    htmlDoc.DocumentNode.SelectSingleNode("//meta[@name='generator']")?.Remove();
-                }
+                htmlDoc.DocumentNode.SelectSingleNode("//meta[@name='generator']")?.Remove();
 
                 htmlDoc.DocumentNode.Descendants()
                     .Where(n => n.NodeType == HtmlNodeType.Text && n.InnerText.Length == 0)
@@ -142,7 +152,7 @@ namespace MarkdownToPdfConverter.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"转换失败: {ex.Message}", ex);
+                throw new Exception($"PDF conversion failed: {ex.Message}", ex);
             }
         }
 
@@ -286,12 +296,12 @@ namespace MarkdownToPdfConverter.Services
             {
                 case "strong":
                 case "b":
-                    var bold = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
+                    var bold = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
                     bold.Font.Bold = true;
                     break;
                 case "em":
                 case "i":
-                    var italic = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
+                    var italic = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
                     italic.Font.Italic = true;
                     break;
                 case "code":
@@ -300,7 +310,7 @@ namespace MarkdownToPdfConverter.Services
                     code.Font.Size = 9;
                     break;
                 case "a":
-                    var link = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
+                    var link = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
                     link.Font.Underline = Underline.Single;
                     break;
                 case "br":
@@ -308,33 +318,33 @@ namespace MarkdownToPdfConverter.Services
                     break;
 case "del":
                 case "s":
-                    var strike = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
+                    var strike = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
                     strike.Font.Color = Colors.DarkGray;
                     break;
                 case "u":
-                    var underline = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
+                    var underline = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
                     underline.Font.Underline = Underline.Single;
                     break;
                 case "sup":
-                    var sup = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
+                    var sup = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
                     sup.Font.Size = 7;
                     sup.Font.Superscript = true;
                     break;
                 case "sub":
-                    var sub = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
+                    var sub = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
                     sub.Font.Size = 7;
                     sub.Font.Subscript = true;
                     break;
                 case "small":
-                    var small = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
+                    var small = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
                     small.Font.Size = 8;
                     break;
                 case "ins":
-                    var ins = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
+                    var ins = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
                     ins.Font.Underline = Underline.Single;
                     break;
                 case "q":
-                    var quote = para.AddFormattedText("\"" + HtmlEntity(node.InnerText.Trim()) + "\"");
+                    var quote = para.AddFormattedText("\"" + WebUtility.HtmlDecode(node.InnerText.Trim()) + "\"");
                     quote.Font.Italic = true;
                     break;
                 case "kbd":
@@ -359,7 +369,7 @@ case "del":
                 case "span":
                     if (node.Attributes["class"]?.Value.Contains("strikethrough") == true)
                     {
-                        var ss = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
+                        var ss = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
                         ss.Font.Underline = Underline.Single;
                     }
                     else
@@ -483,12 +493,14 @@ case "del":
                 return;
             }
 
-            var pattern = string.Join("|", keywords.Select(k => k.Item1));
-            pattern = "(" + pattern + ")|((//|#).*)";
-
             try
             {
-                var regex = new Regex(pattern, RegexOptions.IgnoreCase);
+                _syntaxRegexCache.TryGetValue(language, out var regex);
+                if (regex == null)
+                {
+                    para.AddText(line);
+                    return;
+                }
                 var lastEnd = 0;
 
                 foreach (Match match in regex.Matches(line))
@@ -629,7 +641,7 @@ case "del":
 
             for (int i = 0; i < cells.Count; i++)
             {
-                var cellText = HtmlEntity(cells[i].InnerText.Trim());
+                var cellText = WebUtility.HtmlDecode(cells[i].InnerText.Trim());
                 para.AddText(cellText);
                 if (i < cells.Count - 1)
                     para.AddText(" | ");
@@ -648,7 +660,7 @@ case "del":
 
             for (int i = 0; i < cells.Count; i++)
             {
-                var cellText = HtmlEntity(cells[i].InnerText.Trim());
+                var cellText = WebUtility.HtmlDecode(cells[i].InnerText.Trim());
                 para.AddText(cellText);
                 if (i < cells.Count - 1)
                     para.AddText(" | ");
@@ -668,7 +680,7 @@ case "del":
                 termPara.Format.Font.Bold = true;
                 termPara.Format.SpaceBefore = 5;
                 termPara.Format.SpaceAfter = 2;
-                termPara.AddText(HtmlEntity(terms[i].InnerText.Trim()));
+                termPara.AddText(WebUtility.HtmlDecode(terms[i].InnerText.Trim()));
 
                 if (definitions != null && i < definitions.Count)
                 {
@@ -882,14 +894,6 @@ case "del":
             }
         }
 
-        private string HtmlEntity(string text)
-        {
-            if (string.IsNullOrEmpty(text)) return text;
-            return text.Replace("&nbsp;", " ").Replace("&lt;", "<").Replace("&gt;", ">")
-                      .Replace("&amp;", "&").Replace("&quot;", "\"").Replace("&#39;", "'")
-                      .Replace("&copy;", "©").Replace("&reg;", "®").Replace("&trade;", "™")
-                      .Replace("&ndash;", "–").Replace("&mdash;", "—").Replace("&hellip;", "…");
-        }
     }
 
     public class CustomFontResolver : IFontResolver
@@ -917,15 +921,6 @@ case "del":
 
         public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
         {
-            if (familyName.Equals("SimSun", StringComparison.OrdinalIgnoreCase))
-                return new FontResolverInfo("SimSun");
-            if (familyName.Equals("Consolas", StringComparison.OrdinalIgnoreCase))
-                return new FontResolverInfo("Consolas");
-            if (familyName.Equals("Segoe UI", StringComparison.OrdinalIgnoreCase) ||
-                familyName.Equals("Arial", StringComparison.OrdinalIgnoreCase) ||
-                familyName.Equals("Times New Roman", StringComparison.OrdinalIgnoreCase) ||
-                familyName.Equals("Microsoft YaHei", StringComparison.OrdinalIgnoreCase))
-                return new FontResolverInfo("SimSun");
             return new FontResolverInfo("SimSun");
         }
     }

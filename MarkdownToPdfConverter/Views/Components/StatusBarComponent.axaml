@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+             x:Class="MarkdownToPdfConverter.Views.Components.StatusBarComponent"
+             x:DataType="vm:MainViewModel">
+    <Border Background="{DynamicResource ThemeStatusBarBackground}"
+            CornerRadius="10">
+        <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0">
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="12"
+                        VerticalAlignment="Center"
+                        Height="36">
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <Ellipse Width="7" Height="7" Fill="{DynamicResource ThemeReadyDotColor}"/>
+                    <TextBlock Text="{DynamicResource str_ready}"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                               FontSize="11"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Text="{Binding StatusMessage}"
+                           Foreground="{DynamicResource ThemeForeground}"
+                           FontSize="12"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2"
+                        Orientation="Horizontal"
+                        Spacing="12"
+                        Height="36">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="{DynamicResource str_status_ln}" Foreground="{DynamicResource ThemeSecondaryForeground}" FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding LineCount}" Foreground="{DynamicResource ThemeStatValueColor}" FontSize="11" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Border Width="1" Background="{DynamicResource ThemeBorderBrush}"/>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="{DynamicResource str_status_words}" Foreground="{DynamicResource ThemeSecondaryForeground}" FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding WordCount}" Foreground="{DynamicResource ThemeStatValueColor}" FontSize="11" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Border Width="1" Background="{DynamicResource ThemeBorderBrush}"/>
+                <TextBlock Text="UTF-8" Foreground="{DynamicResource ThemeSecondaryForeground}" FontSize="11" VerticalAlignment="Center"/>
+                <TextBlock Text="Markdown" Foreground="{DynamicResource ThemeSecondaryForeground}" FontSize="11" VerticalAlignment="Center"/>
+                <Border Background="{DynamicResource ThemeButtonBackground}" CornerRadius="4" Padding="6,3">
+                    <TextBlock Text="v1.0"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                               FontSize="10"
+                               VerticalAlignment="Center"/>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

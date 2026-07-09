@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+             x:Class="MarkdownToPdfConverter.Views.Components.MenuBarComponent"
+             x:DataType="vm:MainViewModel">
+    <Menu>
+        <MenuItem Header="{DynamicResource str_menu_file}">
+            <MenuItem Header="{DynamicResource str_menu_new}" Command="{Binding NewFileCommand}" InputGesture="Ctrl+N"/>
+            <MenuItem Header="{DynamicResource str_menu_open}" Command="{Binding OpenFileCommand}" InputGesture="Ctrl+O"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource str_menu_save}" Command="{Binding SaveFileCommand}" InputGesture="Ctrl+S"/>
+            <MenuItem Header="{DynamicResource str_menu_save_as}" Command="{Binding SaveAsCommand}" InputGesture="Ctrl+Shift+S"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource str_menu_export_pdf}" Command="{Binding ConvertToPdfCommand}"/>
+        </MenuItem>
+        <MenuItem Header="{DynamicResource str_menu_edit}">
+            <MenuItem Header="{DynamicResource str_menu_undo}" Command="{Binding UndoCommand}" InputGesture="Ctrl+Z"/>
+            <MenuItem Header="{DynamicResource str_menu_redo}" Command="{Binding RedoCommand}" InputGesture="Ctrl+Y"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource str_menu_find}" Command="{Binding FindCommand}" InputGesture="Ctrl+F"/>
+            <MenuItem Header="{DynamicResource str_menu_replace}" InputGesture="Ctrl+H"/>
+        </MenuItem>
+        <MenuItem Header="{DynamicResource str_menu_view}">
+            <MenuItem Header="{DynamicResource str_menu_toggle_theme}" Command="{Binding SwitchThemeCommand}"/>
+            <MenuItem Header="{DynamicResource str_menu_language}" Command="{Binding SwitchLanguageCommand}"/>
+        </MenuItem>
+        <MenuItem Header="{DynamicResource str_menu_help}">
+            <MenuItem Header="{DynamicResource str_menu_about}"/>
+        </MenuItem>
+    </Menu>
+</UserControl>

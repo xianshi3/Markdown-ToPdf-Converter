@@ -1,7 +1,3 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Media;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -15,7 +11,7 @@ using MarkdownToPdfConverter.Services;
 
 namespace MarkdownToPdfConverter.ViewModels
 {
-    public class MainViewModel : ReactiveObject
+    public class MainViewModel : ViewModelBase
     {
         private readonly ILocalizationService _localization;
         private readonly IThemeService _themeService;
@@ -42,12 +38,9 @@ namespace MarkdownToPdfConverter.ViewModels
         private readonly Stack<string> _undoStack = new();
         private readonly Stack<string> _redoStack = new();
         private string _lastSavedText = string.Empty;
-
-        private IBrush _background = Brushes.Transparent;
-        private IBrush _foreground = Brushes.White;
-        private IBrush _borderBrush = Brushes.Gray;
-        private IBrush _textBoxBackground = Brushes.Black;
-        private IBrush _textBoxForeground = Brushes.White;
+        private bool _isUndoingRedoing;
+        private readonly DispatcherTimer _statsTimer;
+        private bool _statsPending;
 
         public string WindowTitle
         {
@@ -62,43 +55,9 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
-        public string UploadButtonText => _localization.GetString("upload");
-        public string ConvertButtonText => _localization.GetString("convert");
-        public string HelpButtonText => _localization.GetString("help");
         public string FileTabText => _localization.GetString("file_tab");
         public string EditTabText => _localization.GetString("edit_tab");
         public string SelectedFileText => _localization.GetString("selected_file");
-        public string EditContentText => _localization.GetString("edit_content");
-
-        public IBrush Background
-        {
-            get => _background;
-            set => this.RaiseAndSetIfChanged(ref _background, value);
-        }
-
-        public IBrush Foreground
-        {
-            get => _foreground;
-            set => this.RaiseAndSetIfChanged(ref _foreground, value);
-        }
-
-        public IBrush BorderBrush
-        {
-            get => _borderBrush;
-            set => this.RaiseAndSetIfChanged(ref _borderBrush, value);
-        }
-
-        public IBrush TextBoxBackground
-        {
-            get => _textBoxBackground;
-            set => this.RaiseAndSetIfChanged(ref _textBoxBackground, value);
-        }
-
-        public IBrush TextBoxForeground
-        {
-            get => _textBoxForeground;
-            set => this.RaiseAndSetIfChanged(ref _textBoxForeground, value);
-        }
 
         public int LineCount
         {
@@ -153,15 +112,20 @@ namespace MarkdownToPdfConverter.ViewModels
             {
                 if (_markdownText != value)
                 {
-                    _undoStack.Push(_markdownText);
-                    _redoStack.Clear();
+                    if (!_isUndoingRedoing)
+                    {
+                        _undoStack.Push(_markdownText);
+                        _redoStack.Clear();
+                    }
                     this.RaiseAndSetIfChanged(ref _markdownText, value);
                     this.RaisePropertyChanged(nameof(CanConvert));
                     this.RaisePropertyChanged(nameof(WindowTitle));
                     this.RaisePropertyChanged(nameof(CanUndo));
                     this.RaisePropertyChanged(nameof(CanRedo));
                     HasUnsavedChanges = value != _lastSavedText;
-                    UpdateStatistics();
+                    _statsPending = true;
+                    _statsTimer.Stop();
+                    _statsTimer.Start();
                 }
             }
         }
@@ -226,7 +190,6 @@ namespace MarkdownToPdfConverter.ViewModels
         public ReactiveCommand<Unit, Unit> OpenFileCommand { get; }
         public ReactiveCommand<Unit, Unit> SaveFileCommand { get; }
         public ReactiveCommand<Unit, Unit> SaveAsCommand { get; }
-        public ReactiveCommand<Unit, Unit> UploadFileCommand { get; }
         public ReactiveCommand<Unit, Unit> ConvertToPdfCommand { get; }
         public ReactiveCommand<Unit, Unit> SwitchLanguageCommand { get; }
         public ReactiveCommand<Unit, Unit> SwitchThemeCommand { get; }
@@ -238,12 +201,22 @@ namespace MarkdownToPdfConverter.ViewModels
 
         public MainViewModel()
         {
-            _localization = new LocalizationService();
-            _themeService = new ThemeService();
+            _localization = LocalizationService.Instance;
+            _themeService = ThemeService.Instance;
             _converterService = new MarkdownToPdfService();
 
+            _statsTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+            _statsTimer.Tick += (_, _) =>
+            {
+                _statsTimer.Stop();
+                if (_statsPending)
+                {
+                    _statsPending = false;
+                    UpdateStatistics();
+                }
+            };
+
             CurrentTheme = _themeService.CurrentTheme;
-            ApplyThemeResources();
             StatusMessage = _localization.GetString("ready");
 
             _localization.LanguageChanged += OnLanguageChanged;
@@ -253,7 +226,6 @@ namespace MarkdownToPdfConverter.ViewModels
             OpenFileCommand = ReactiveCommand.CreateFromTask(OpenFileAsync);
             SaveFileCommand = ReactiveCommand.CreateFromTask(SaveFileAsync);
             SaveAsCommand = ReactiveCommand.CreateFromTask(SaveAsAsync);
-            UploadFileCommand = ReactiveCommand.CreateFromTask(UploadFileAsync);
 
             ConvertToPdfCommand = ReactiveCommand.CreateFromTask(ConvertToPdfAsync,
                 this.WhenAnyValue(x => x.IsConverting, x => x.SelectedFilePath, x => x.MarkdownText,
@@ -287,10 +259,6 @@ namespace MarkdownToPdfConverter.ViewModels
 
         private void NewFile()
         {
-            if (HasUnsavedChanges)
-            {
-                // In a real app, would show a confirmation dialog
-            }
             MarkdownText = string.Empty;
             SelectedFilePath = string.Empty;
             _lastSavedText = string.Empty;
@@ -301,14 +269,7 @@ namespace MarkdownToPdfConverter.ViewModels
 
         private async Task OpenFileAsync()
         {
-            var window = GetMainWindow();
-            if (window == null)
-            {
-                StatusMessage = _localization.GetString("no_window");
-                return;
-            }
-
-            var files = await window.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            var files = await WindowService.OpenFilePickerAsync(new FilePickerOpenOptions
             {
                 Title = _localization.GetString("select_markdown"),
                 FileTypeFilter = new[]
@@ -350,20 +311,13 @@ namespace MarkdownToPdfConverter.ViewModels
             }
             catch (Exception ex)
             {
-                StatusMessage = $"Save failed: {ex.Message}";
+                StatusMessage = $"{_localization.GetString("save_failed")}: {ex.Message}";
             }
         }
 
         private async Task SaveAsAsync()
         {
-            var window = GetMainWindow();
-            if (window == null)
-            {
-                StatusMessage = _localization.GetString("no_window");
-                return;
-            }
-
-            var file = await window.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            var file = await WindowService.SaveFilePickerAsync(new FilePickerSaveOptions
             {
                 Title = "Save Markdown File",
                 FileTypeChoices = new[]
@@ -399,10 +353,10 @@ namespace MarkdownToPdfConverter.ViewModels
         {
             if (_undoStack.Count > 0)
             {
+                _isUndoingRedoing = true;
                 _redoStack.Push(MarkdownText);
                 MarkdownText = _undoStack.Pop();
-                this.RaisePropertyChanged(nameof(CanUndo));
-                this.RaisePropertyChanged(nameof(CanRedo));
+                _isUndoingRedoing = false;
             }
         }
 
@@ -410,10 +364,10 @@ namespace MarkdownToPdfConverter.ViewModels
         {
             if (_redoStack.Count > 0)
             {
+                _isUndoingRedoing = true;
                 _undoStack.Push(MarkdownText);
                 MarkdownText = _redoStack.Pop();
-                this.RaisePropertyChanged(nameof(CanUndo));
-                this.RaisePropertyChanged(nameof(CanRedo));
+                _isUndoingRedoing = false;
             }
         }
 
@@ -430,29 +384,18 @@ namespace MarkdownToPdfConverter.ViewModels
                 MarkdownText.Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
         }
 
-        private void ApplyThemeResources()
-        {
-            var resources = _themeService.CurrentResources;
-            Background = resources.Background;
-            Foreground = resources.Foreground;
-            BorderBrush = resources.BorderBrush;
-            TextBoxBackground = resources.TextBoxBackground;
-            TextBoxForeground = resources.TextBoxForeground;
-        }
-
         private void OnLanguageChanged()
         {
             Dispatcher.UIThread.Post(() =>
             {
                 this.RaisePropertyChanged(nameof(WindowTitle));
-                this.RaisePropertyChanged(nameof(UploadButtonText));
-                this.RaisePropertyChanged(nameof(ConvertButtonText));
-                this.RaisePropertyChanged(nameof(HelpButtonText));
+                this.RaisePropertyChanged(nameof(LanguageButtonText));
+                this.RaisePropertyChanged(nameof(LoadFileStatusText));
+                this.RaisePropertyChanged(nameof(LoadFailedText));
                 this.RaisePropertyChanged(nameof(FileTabText));
                 this.RaisePropertyChanged(nameof(EditTabText));
                 this.RaisePropertyChanged(nameof(SelectedFileText));
-                this.RaisePropertyChanged(nameof(EditContentText));
-                this.RaisePropertyChanged(nameof(LanguageButtonText));
+                this.RaisePropertyChanged(nameof(DropMdHintText));
                 StatusMessage = _localization.GetString("ready");
             });
         }
@@ -462,13 +405,7 @@ namespace MarkdownToPdfConverter.ViewModels
             Dispatcher.UIThread.Post(() =>
             {
                 CurrentTheme = _themeService.CurrentTheme;
-                ApplyThemeResources();
             });
-        }
-
-        private async Task UploadFileAsync()
-        {
-            await OpenFileAsync();
         }
 
         private async Task ConvertToPdfAsync()
@@ -479,14 +416,7 @@ namespace MarkdownToPdfConverter.ViewModels
                 return;
             }
 
-            var window = GetMainWindow();
-            if (window == null)
-            {
-                StatusMessage = _localization.GetString("no_window");
-                return;
-            }
-
-            var file = await window.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            var file = await WindowService.SaveFilePickerAsync(new FilePickerSaveOptions
             {
                 Title = _localization.GetString("save_pdf"),
                 FileTypeChoices = new[] { new FilePickerFileType("PDF Files") { Patterns = new[] { "*.pdf" } } },
@@ -519,10 +449,5 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
-        private Window? GetMainWindow()
-        {
-            var topLevel = Application.Current?.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime;
-            return topLevel?.MainWindow;
-        }
     }
 }

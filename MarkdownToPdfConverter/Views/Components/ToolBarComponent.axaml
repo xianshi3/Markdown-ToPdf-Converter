@@ -1,0 +1,85 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+             x:Class="MarkdownToPdfConverter.Views.Components.ToolBarComponent"
+             x:DataType="vm:MainViewModel">
+    <Border Background="{DynamicResource ThemeSurfaceBackground}" Padding="8,6">
+        <StackPanel Orientation="Horizontal" Spacing="4">
+            <Button Command="{Binding NewFileCommand}" ToolTip.Tip="{DynamicResource str_tip_new}" Padding="8,6"
+                    Background="Transparent" Foreground="{DynamicResource ThemeSecondaryForeground}">
+                <Button.Styles>
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+                    </Style>
+                </Button.Styles>
+                <TextBlock Text="📄" FontSize="16"/>
+            </Button>
+            <Button Command="{Binding OpenFileCommand}" ToolTip.Tip="{DynamicResource str_tip_open}" Padding="8,6"
+                    Background="Transparent" Foreground="{DynamicResource ThemeSecondaryForeground}">
+                <Button.Styles>
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+                    </Style>
+                </Button.Styles>
+                <TextBlock Text="📂" FontSize="16"/>
+            </Button>
+            <Button Command="{Binding SaveFileCommand}" ToolTip.Tip="{DynamicResource str_tip_save}" Padding="8,6"
+                    Background="Transparent" Foreground="{DynamicResource ThemeSecondaryForeground}">
+                <Button.Styles>
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+                    </Style>
+                </Button.Styles>
+                <TextBlock Text="💾" FontSize="16"/>
+            </Button>
+
+            <Border Width="1" Background="{DynamicResource ThemeBorderBrush}" Margin="8,2"/>
+
+            <Button Command="{Binding UndoCommand}" ToolTip.Tip="{DynamicResource str_tip_undo}" Padding="8,6"
+                    Background="Transparent" Foreground="{DynamicResource ThemeSecondaryForeground}">
+                <Button.Styles>
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+                    </Style>
+                </Button.Styles>
+                <TextBlock Text="↩️" FontSize="16"/>
+            </Button>
+            <Button Command="{Binding RedoCommand}" ToolTip.Tip="{DynamicResource str_tip_redo}" Padding="8,6"
+                    Background="Transparent" Foreground="{DynamicResource ThemeSecondaryForeground}">
+                <Button.Styles>
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+                    </Style>
+                </Button.Styles>
+                <TextBlock Text="↪️" FontSize="16"/>
+            </Button>
+
+            <Border Width="1" Background="{DynamicResource ThemeBorderBrush}" Margin="8,2"/>
+
+            <Button Command="{Binding FindCommand}" ToolTip.Tip="{DynamicResource str_tip_find}" Padding="8,6"
+                    Background="Transparent" Foreground="{DynamicResource ThemeSecondaryForeground}">
+                <Button.Styles>
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+                    </Style>
+                </Button.Styles>
+                <TextBlock Text="🔍" FontSize="16"/>
+            </Button>
+
+            <Border Width="1" Background="{DynamicResource ThemeBorderBrush}" Margin="8,2"/>
+
+            <Button Command="{Binding ConvertToPdfCommand}" ToolTip.Tip="{DynamicResource str_tip_export_pdf}" Padding="8,6"
+                    Background="{DynamicResource ThemeSuccessAccent}" Foreground="White">
+                <Button.Styles>
+                    <Style Selector="Button:pointerover">
+                        <Setter Property="Background" Value="{DynamicResource ThemeSuccessAccentHover}"/>
+                    </Style>
+                </Button.Styles>
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <TextBlock Text="📑" FontSize="14"/>
+                    <TextBlock Text="PDF" FontSize="12"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Border>
+</UserControl>
