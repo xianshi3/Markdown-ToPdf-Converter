@@ -18,5 +18,11 @@
   "no_window": "Unable to get main window",
   "save_cancelled": "Save cancelled",
   "select_markdown": "Select Markdown File",
-  "save_pdf": "Save PDF File"
+  "save_pdf": "Save PDF File",
+  "converting": "Converting...",
+  "saved_to": "Saved to",
+  "save_failed": "Save failed",
+  "load_failed": "Error loading file",
+  "drop_md_hint": "Please drop a .md or .markdown file",
+  "file_loaded_status": "Loaded"
 }

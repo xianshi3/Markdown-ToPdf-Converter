@@ -63,11 +63,11 @@ namespace MarkdownToPdfConverter.Views
                                 {
                                     vm.SelectedFilePath = path;
                                     vm.MarkdownText = await File.ReadAllTextAsync(path);
-                                    vm.StatusMessage = $"Loaded: {Path.GetFileName(path)}";
+                                    vm.StatusMessage = $"{vm.LoadFileStatusText} {Path.GetFileName(path)}";
                                 }
                                 catch (Exception ex)
                                 {
-                                    vm.StatusMessage = $"Error loading file: {ex.Message}";
+                                    vm.StatusMessage = $"{vm.LoadFailedText} {ex.Message}";
                                 }
                             }
                         }
@@ -75,7 +75,7 @@ namespace MarkdownToPdfConverter.Views
                         {
                             if (DataContext is MainViewModel vm)
                             {
-                                vm.StatusMessage = "Please drop a .md or .markdown file";
+                                vm.StatusMessage = vm.DropMdHintText;
                             }
                         }
                     }
@@ -87,27 +87,48 @@ namespace MarkdownToPdfConverter.Views
         {
             if (DataContext is MainViewModel vm)
             {
-                if (e.KeyModifiers == KeyModifiers.Control)
+                var ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+                if (!ctrl) return;
+
+                var shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+
+                switch (e.Key)
                 {
-                    switch (e.Key)
-                    {
-                        case Key.O:
-                            vm.UploadFileCommand.Execute().Subscribe();
-                            e.Handled = true;
-                            break;
-                        case Key.S:
-                            vm.ConvertToPdfCommand.Execute().Subscribe();
-                            e.Handled = true;
-                            break;
-                        case Key.L:
-                            vm.SwitchLanguageCommand.Execute().Subscribe();
-                            e.Handled = true;
-                            break;
-                        case Key.T:
-                            vm.SwitchThemeCommand.Execute().Subscribe();
-                            e.Handled = true;
-                            break;
-                    }
+                    case Key.N:
+                        vm.NewFileCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.O:
+                        vm.OpenFileCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.S:
+                        if (shift)
+                            vm.SaveAsCommand.Execute().Subscribe();
+                        else
+                            vm.SaveFileCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.Z:
+                        vm.UndoCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.Y:
+                        vm.RedoCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.F:
+                        vm.FindCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.L:
+                        vm.SwitchLanguageCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.T:
+                        vm.SwitchThemeCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
                 }
             }
         }

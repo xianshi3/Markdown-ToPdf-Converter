@@ -18,5 +18,11 @@
   "no_window": "无法获取主窗口",
   "save_cancelled": "保存已取消",
   "select_markdown": "选择 Markdown 文件",
-  "save_pdf": "保存 PDF 文件"
+  "save_pdf": "保存 PDF 文件",
+  "converting": "正在转换...",
+  "saved_to": "已保存到",
+  "save_failed": "保存失败",
+  "load_failed": "加载文件失败",
+  "drop_md_hint": "请拖放 .md 或 .markdown 文件",
+  "file_loaded_status": "已加载"
 }

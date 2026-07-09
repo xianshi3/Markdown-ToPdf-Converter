@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Web;
 using Markdig;
 using Avalonia.Media;
 using ReactiveUI;
@@ -92,10 +91,15 @@ namespace MarkdownToPdfConverter.Services
                         listItems = null;
                         inList = false;
                     }
+                    blocks.Add(new PreviewBlock
+                    {
+                        Type = BlockType.Paragraph,
+                        Content = trimmed
+                    });
                     continue;
                 }
 
-                var listMatch = Regex.Match(trimmed, @"^(\* |\+ |- |\d+\. )\s*(.*)");
+                    var listMatch = Regex.Match(trimmed, @"^(\* |\+ |- |\d+\. )\s*(.*)");
                 if (listMatch.Success)
                 {
                     if (!inList)
@@ -103,7 +107,7 @@ namespace MarkdownToPdfConverter.Services
                         inList = true;
                         listItems = new List<string>();
                     }
-                    listItems.Add(listMatch.Groups[2].Value);
+                    listItems!.Add(listMatch.Groups[2].Value);
                     continue;
                 }
                 else if (inList && listItems != null && listItems.Count > 0)
@@ -193,22 +197,6 @@ namespace MarkdownToPdfConverter.Services
             return blocks;
         }
 
-        public string ParseInline(string text)
-        {
-            if (string.IsNullOrEmpty(text))
-                return text;
-
-            text = HttpUtility.HtmlEncode(text);
-            text = Regex.Replace(text, @"\*\*(.+?)\*\*", "**$1**");
-            text = Regex.Replace(text, @"\*(.+?)\*", "*$1*");
-            text = Regex.Replace(text, @"__(.+?)__", "__$1__");
-            text = Regex.Replace(text, @"_(.+?)_", "_$1_");
-            text = Regex.Replace(text, @"~~(.+?)~~", "~~$1~~");
-            text = Regex.Replace(text, @"`(.+?)`", "`$1`");
-            text = Regex.Replace(text, @"\[(.+?)\]\((.+?)\)", "[$1]($2)");
-
-            return text;
-        }
     }
 
     public enum BlockType

@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Markdig;
 using HtmlAgilityPack;
+using System.Net;
 
 namespace MarkdownToPdfConverter.Services
 {
@@ -62,6 +63,11 @@ namespace MarkdownToPdfConverter.Services
             ("\\btypeof\\b", "Blue"), ("\\binstanceof\\b", "Blue"), ("\\bdelete\\b", "Blue"), ("\\bvoid\\b", "Blue"),
         };
 
+        static MarkdownToPdfService()
+        {
+            GlobalFontSettings.FontResolver = new CustomFontResolver();
+        }
+
         public MarkdownToPdfService()
         {
             _document = new Document();
@@ -78,20 +84,40 @@ namespace MarkdownToPdfConverter.Services
                 .Build();
         }
 
-        public void ConvertMarkdownToPdf(string markdownContent, Stream outputStream)
+        public void ConvertMarkdownToPdf(string markdownContent, Stream outputStream,
+            string pageSize = "A4", double pageMargin = 20, string exportFont = "SimSun")
         {
             try
             {
-                GlobalFontSettings.FontResolver = new CustomFontResolver();
-                SetupDocumentStyles();
+                SetupDocumentStyles(exportFont);
 
                 string html = Markdown.ToHtml(markdownContent, _pipeline);
 
                 _section = _document.AddSection();
-                _section.PageSetup.TopMargin = "2cm";
-                _section.PageSetup.BottomMargin = "2cm";
-                _section.PageSetup.LeftMargin = "2.5cm";
-                _section.PageSetup.RightMargin = "2.5cm";
+                var margin = Unit.FromMillimeter(pageMargin);
+                _section.PageSetup.TopMargin = margin;
+                _section.PageSetup.BottomMargin = margin;
+                _section.PageSetup.LeftMargin = Unit.FromMillimeter(pageMargin + 5);
+                _section.PageSetup.RightMargin = Unit.FromMillimeter(pageMargin + 5);
+
+                switch (pageSize.ToLower())
+                {
+                    case "a3":
+                        _section.PageSetup.PageFormat = PageFormat.A3;
+                        break;
+                    case "a4":
+                        _section.PageSetup.PageFormat = PageFormat.A4;
+                        break;
+                    case "a5":
+                        _section.PageSetup.PageFormat = PageFormat.A5;
+                        break;
+                    case "letter":
+                        _section.PageSetup.PageFormat = PageFormat.Letter;
+                        break;
+                    case "legal":
+                        _section.PageSetup.PageFormat = PageFormat.Legal;
+                        break;
+                }
 
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
@@ -102,7 +128,7 @@ namespace MarkdownToPdfConverter.Services
                 }
 
                 htmlDoc.DocumentNode.Descendants()
-                    .Where(n => n.NodeType == HtmlNodeType.Text && string.IsNullOrWhiteSpace(n.InnerText))
+                    .Where(n => n.NodeType == HtmlNodeType.Text && n.InnerText.Length == 0)
                     .ToList()
                     .ForEach(n => n.Remove());
 
@@ -120,10 +146,10 @@ namespace MarkdownToPdfConverter.Services
             }
         }
 
-        private void SetupDocumentStyles()
+        private void SetupDocumentStyles(string fontName = "SimSun")
         {
             var normalStyle = _document.Styles["Normal"];
-            normalStyle.Font.Name = "SimSun";
+            normalStyle.Font.Name = fontName;
             normalStyle.Font.Size = 10;
             normalStyle.ParagraphFormat.SpaceAfter = 5;
 
@@ -241,7 +267,7 @@ namespace MarkdownToPdfConverter.Services
             {
                 if (child.NodeType == HtmlNodeType.Text)
                 {
-                    var text = child.InnerText.Trim();
+                    var text = WebUtility.HtmlDecode(child.InnerText);
                     if (!string.IsNullOrEmpty(text))
                         para.AddText(text);
                 }
@@ -280,10 +306,10 @@ namespace MarkdownToPdfConverter.Services
                 case "br":
                     para.AddLineBreak();
                     break;
-                case "del":
+case "del":
                 case "s":
                     var strike = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
-                    strike.Font.Underline = Underline.Single;
+                    strike.Font.Color = Colors.DarkGray;
                     break;
                 case "u":
                     var underline = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
@@ -291,9 +317,13 @@ namespace MarkdownToPdfConverter.Services
                     break;
                 case "sup":
                     var sup = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
+                    sup.Font.Size = 7;
+                    sup.Font.Superscript = true;
                     break;
                 case "sub":
                     var sub = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
+                    sub.Font.Size = 7;
+                    sub.Font.Subscript = true;
                     break;
                 case "small":
                     var small = para.AddFormattedText(HtmlEntity(node.InnerText.Trim()));
@@ -866,12 +896,23 @@ namespace MarkdownToPdfConverter.Services
     {
         public string DefaultFontName => "SimSun";
 
+        private static byte[]? _simSunCache;
+        private static readonly object _lock = new();
+
         public byte[] GetFont(string faceName)
         {
+            if (_simSunCache != null) return _simSunCache;
+
             var fontPath = Path.Combine(AppContext.BaseDirectory, "Resources", "Fonts", "SimSun.ttf");
             if (!File.Exists(fontPath))
-                throw new FileNotFoundException($"字体文件未找到: {fontPath}");
-            return File.ReadAllBytes(fontPath);
+                throw new FileNotFoundException($"Font file not found: {fontPath}");
+
+            lock (_lock)
+            {
+                _simSunCache ??= File.ReadAllBytes(fontPath);
+            }
+
+            return _simSunCache;
         }
 
         public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
@@ -880,7 +921,12 @@ namespace MarkdownToPdfConverter.Services
                 return new FontResolverInfo("SimSun");
             if (familyName.Equals("Consolas", StringComparison.OrdinalIgnoreCase))
                 return new FontResolverInfo("Consolas");
-            return null;
+            if (familyName.Equals("Segoe UI", StringComparison.OrdinalIgnoreCase) ||
+                familyName.Equals("Arial", StringComparison.OrdinalIgnoreCase) ||
+                familyName.Equals("Times New Roman", StringComparison.OrdinalIgnoreCase) ||
+                familyName.Equals("Microsoft YaHei", StringComparison.OrdinalIgnoreCase))
+                return new FontResolverInfo("SimSun");
+            return new FontResolverInfo("SimSun");
         }
     }
 }

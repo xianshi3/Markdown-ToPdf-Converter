@@ -74,7 +74,7 @@
 
 | Technology  | Minimum Version    |
 | ----------- | ------------------ |
-| .NET        | 6+                 |
+| .NET        | 8+                 |
 | Avalonia   | 11+                 |
 
 ---

@@ -1,16 +1,17 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media;
 using ReactiveUI;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Reactive;
 using System.Threading.Tasks;
-using MarkdownToPdfConverter.Services;
-using System.IO;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
-using System.Collections.ObjectModel;
+using MarkdownToPdfConverter.Services;
 
 namespace MarkdownToPdfConverter.ViewModels
 {
@@ -19,26 +20,48 @@ namespace MarkdownToPdfConverter.ViewModels
         private readonly ILocalizationService _localization;
         private readonly IThemeService _themeService;
         private readonly MarkdownToPdfService _converterService;
-        private readonly MarkdownPreviewService _previewService;
 
         private double _fontSize = 16;
         private string _selectedFilePath = string.Empty;
         private string _markdownText = string.Empty;
         private string _statusMessage = string.Empty;
         private bool _isConverting;
-        private ObservableCollection<PreviewBlock> _previewBlocks = new();
         private int _lineCount = 1;
         private int _wordCount = 0;
         private string _currentTheme = "Dark";
+        private bool _hasUnsavedChanges = false;
 
-        // 主题属性 - 使用 setter 让它们可以被 RaiseAndSetIfChanged
+        private string _findText = string.Empty;
+        private string _replaceText = string.Empty;
+        private bool _isFindVisible = false;
+
+        private string _pageSize = "A4";
+        private double _pageMargin = 20;
+        private string _exportFont = "Segoe UI";
+
+        private readonly Stack<string> _undoStack = new();
+        private readonly Stack<string> _redoStack = new();
+        private string _lastSavedText = string.Empty;
+
         private IBrush _background = Brushes.Transparent;
         private IBrush _foreground = Brushes.White;
         private IBrush _borderBrush = Brushes.Gray;
         private IBrush _textBoxBackground = Brushes.Black;
         private IBrush _textBoxForeground = Brushes.White;
 
-        public string WindowTitle => _localization.GetString("app_title");
+        public string WindowTitle
+        {
+            get
+            {
+                var title = _localization.GetString("app_title");
+                if (!string.IsNullOrEmpty(SelectedFilePath))
+                    title = $"{Path.GetFileName(SelectedFilePath)} - {title}";
+                if (HasUnsavedChanges)
+                    title = $"*{title}";
+                return title;
+            }
+        }
+
         public string UploadButtonText => _localization.GetString("upload");
         public string ConvertButtonText => _localization.GetString("convert");
         public string HelpButtonText => _localization.GetString("help");
@@ -71,16 +94,10 @@ namespace MarkdownToPdfConverter.ViewModels
             set => this.RaiseAndSetIfChanged(ref _textBoxBackground, value);
         }
 
-public IBrush TextBoxForeground
+        public IBrush TextBoxForeground
         {
             get => _textBoxForeground;
             set => this.RaiseAndSetIfChanged(ref _textBoxForeground, value);
-        }
-
-        public ObservableCollection<PreviewBlock> PreviewBlocks
-        {
-            get => _previewBlocks;
-            set => this.RaiseAndSetIfChanged(ref _previewBlocks, value);
         }
 
         public int LineCount
@@ -101,7 +118,16 @@ public IBrush TextBoxForeground
             set => this.RaiseAndSetIfChanged(ref _currentTheme, value);
         }
 
+        public bool HasUnsavedChanges
+        {
+            get => _hasUnsavedChanges;
+            set => this.RaiseAndSetIfChanged(ref _hasUnsavedChanges, value);
+        }
+
         public string LanguageButtonText => _localization.CurrentLanguage == "zh-CN" ? "English" : "中文";
+        public string LoadFileStatusText => _localization.GetString("file_loaded_status");
+        public string LoadFailedText => _localization.GetString("load_failed");
+        public string DropMdHintText => _localization.GetString("drop_md_hint");
 
         public double FontSize
         {
@@ -116,17 +142,27 @@ public IBrush TextBoxForeground
             {
                 this.RaiseAndSetIfChanged(ref _selectedFilePath, value);
                 this.RaisePropertyChanged(nameof(CanConvert));
+                this.RaisePropertyChanged(nameof(WindowTitle));
             }
         }
 
-public string MarkdownText
+        public string MarkdownText
         {
             get => _markdownText;
             set
             {
-                this.RaiseAndSetIfChanged(ref _markdownText, value);
-                this.RaisePropertyChanged(nameof(CanConvert));
-                UpdatePreview();
+                if (_markdownText != value)
+                {
+                    _undoStack.Push(_markdownText);
+                    _redoStack.Clear();
+                    this.RaiseAndSetIfChanged(ref _markdownText, value);
+                    this.RaisePropertyChanged(nameof(CanConvert));
+                    this.RaisePropertyChanged(nameof(WindowTitle));
+                    this.RaisePropertyChanged(nameof(CanUndo));
+                    this.RaisePropertyChanged(nameof(CanRedo));
+                    HasUnsavedChanges = value != _lastSavedText;
+                    UpdateStatistics();
+                }
             }
         }
 
@@ -142,34 +178,86 @@ public string MarkdownText
             set => this.RaiseAndSetIfChanged(ref _isConverting, value);
         }
 
-        public bool CanConvert => !IsConverting && 
-            (!string.IsNullOrEmpty(SelectedFilePath) || !string.IsNullOrWhiteSpace(MarkdownText));
+        public bool CanConvert => !IsConverting && !string.IsNullOrWhiteSpace(MarkdownText);
 
+        public bool CanUndo => _undoStack.Count > 0;
+        public bool CanRedo => _redoStack.Count > 0;
+
+        public string FindText
+        {
+            get => _findText;
+            set => this.RaiseAndSetIfChanged(ref _findText, value);
+        }
+
+        public string ReplaceText
+        {
+            get => _replaceText;
+            set => this.RaiseAndSetIfChanged(ref _replaceText, value);
+        }
+
+        public bool IsFindVisible
+        {
+            get => _isFindVisible;
+            set => this.RaiseAndSetIfChanged(ref _isFindVisible, value);
+        }
+
+        public string PageSize
+        {
+            get => _pageSize;
+            set => this.RaiseAndSetIfChanged(ref _pageSize, value);
+        }
+
+        public double PageMargin
+        {
+            get => _pageMargin;
+            set => this.RaiseAndSetIfChanged(ref _pageMargin, value);
+        }
+
+        public string ExportFont
+        {
+            get => _exportFont;
+            set => this.RaiseAndSetIfChanged(ref _exportFont, value);
+        }
+
+        public ObservableCollection<string> PageSizeOptions { get; } = new() { "A4", "Letter", "Legal", "A3", "A5" };
+        public ObservableCollection<string> FontOptions { get; } = new() { "Segoe UI", "Arial", "Times New Roman", "Consolas", "Microsoft YaHei" };
+
+        public ReactiveCommand<Unit, Unit> NewFileCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenFileCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveFileCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveAsCommand { get; }
         public ReactiveCommand<Unit, Unit> UploadFileCommand { get; }
         public ReactiveCommand<Unit, Unit> ConvertToPdfCommand { get; }
         public ReactiveCommand<Unit, Unit> SwitchLanguageCommand { get; }
         public ReactiveCommand<Unit, Unit> SwitchThemeCommand { get; }
+        public ReactiveCommand<Unit, Unit> UndoCommand { get; }
+        public ReactiveCommand<Unit, Unit> RedoCommand { get; }
+        public ReactiveCommand<Unit, Unit> FindCommand { get; }
+        public ReactiveCommand<Unit, Unit> ReplaceCommand { get; }
+        public ReactiveCommand<Unit, Unit> CloseFindCommand { get; }
 
-public MainViewModel()
+        public MainViewModel()
         {
             _localization = new LocalizationService();
             _themeService = new ThemeService();
             _converterService = new MarkdownToPdfService();
-            _previewService = new MarkdownPreviewService();
 
             CurrentTheme = _themeService.CurrentTheme;
             ApplyThemeResources();
-
             StatusMessage = _localization.GetString("ready");
 
             _localization.LanguageChanged += OnLanguageChanged;
             _themeService.ThemeChanged += OnThemeChanged;
 
+            NewFileCommand = ReactiveCommand.Create(NewFile);
+            OpenFileCommand = ReactiveCommand.CreateFromTask(OpenFileAsync);
+            SaveFileCommand = ReactiveCommand.CreateFromTask(SaveFileAsync);
+            SaveAsCommand = ReactiveCommand.CreateFromTask(SaveAsAsync);
             UploadFileCommand = ReactiveCommand.CreateFromTask(UploadFileAsync);
 
             ConvertToPdfCommand = ReactiveCommand.CreateFromTask(ConvertToPdfAsync,
                 this.WhenAnyValue(x => x.IsConverting, x => x.SelectedFilePath, x => x.MarkdownText,
-                    (converting, filePath, markdown) => 
+                    (converting, filePath, markdown) =>
                         !converting && (!string.IsNullOrEmpty(filePath) || !string.IsNullOrWhiteSpace(markdown))));
 
             SwitchLanguageCommand = ReactiveCommand.Create(() =>
@@ -189,56 +277,29 @@ public MainViewModel()
                 };
                 _themeService.SetTheme(newTheme);
             });
+
+            UndoCommand = ReactiveCommand.Create(Undo);
+            RedoCommand = ReactiveCommand.Create(Redo);
+            FindCommand = ReactiveCommand.Create(() => { IsFindVisible = !IsFindVisible; });
+            ReplaceCommand = ReactiveCommand.Create(Replace);
+            CloseFindCommand = ReactiveCommand.Create(() => { IsFindVisible = false; });
         }
 
-        private void ApplyThemeResources()
+        private void NewFile()
         {
-            var resources = _themeService.CurrentResources;
-            Background = resources.Background;
-            Foreground = resources.Foreground;
-            BorderBrush = resources.BorderBrush;
-            TextBoxBackground = resources.TextBoxBackground;
-            TextBoxForeground = resources.TextBoxForeground;
-        }
-
-        private void OnLanguageChanged()
-        {
-            Dispatcher.UIThread.Post(() =>
+            if (HasUnsavedChanges)
             {
-                this.RaisePropertyChanged(nameof(WindowTitle));
-                this.RaisePropertyChanged(nameof(UploadButtonText));
-                this.RaisePropertyChanged(nameof(ConvertButtonText));
-                this.RaisePropertyChanged(nameof(HelpButtonText));
-                this.RaisePropertyChanged(nameof(FileTabText));
-                this.RaisePropertyChanged(nameof(EditTabText));
-                this.RaisePropertyChanged(nameof(SelectedFileText));
-                this.RaisePropertyChanged(nameof(EditContentText));
-                this.RaisePropertyChanged(nameof(LanguageButtonText));
-                // StatusMessage might need to be re-translated
-                StatusMessage = _localization.GetString("ready");
-            });
+                // In a real app, would show a confirmation dialog
+            }
+            MarkdownText = string.Empty;
+            SelectedFilePath = string.Empty;
+            _lastSavedText = string.Empty;
+            HasUnsavedChanges = false;
+            StatusMessage = _localization.GetString("ready");
+            this.RaisePropertyChanged(nameof(WindowTitle));
         }
 
-private void OnThemeChanged()
-        {
-            Dispatcher.UIThread.Post(() =>
-            {
-                CurrentTheme = _themeService.CurrentTheme;
-                ApplyThemeResources();
-            });
-        }
-
-        private void UpdatePreview()
-        {
-            var blocks = _previewService.ParseToBlocks(MarkdownText);
-            PreviewBlocks = new ObservableCollection<PreviewBlock>(blocks);
-            
-            LineCount = string.IsNullOrEmpty(MarkdownText) ? 1 : MarkdownText.Split('\n').Length;
-            WordCount = string.IsNullOrWhiteSpace(MarkdownText) ? 0 : 
-                MarkdownText.Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
-        }
-
-        private async Task UploadFileAsync()
+        private async Task OpenFileAsync()
         {
             var window = GetMainWindow();
             if (window == null)
@@ -265,8 +326,149 @@ private void OnThemeChanged()
                 await using var stream = await file.OpenReadAsync();
                 using var reader = new StreamReader(stream);
                 MarkdownText = await reader.ReadToEndAsync();
+                _lastSavedText = MarkdownText;
+                HasUnsavedChanges = false;
                 StatusMessage = _localization.GetString("file_loaded");
             }
+        }
+
+        private async Task SaveFileAsync()
+        {
+            if (string.IsNullOrEmpty(SelectedFilePath))
+            {
+                await SaveAsAsync();
+                return;
+            }
+
+            try
+            {
+                await File.WriteAllTextAsync(SelectedFilePath, MarkdownText);
+                _lastSavedText = MarkdownText;
+                HasUnsavedChanges = false;
+                StatusMessage = $"{_localization.GetString("saved_to")} {SelectedFilePath}";
+                this.RaisePropertyChanged(nameof(WindowTitle));
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Save failed: {ex.Message}";
+            }
+        }
+
+        private async Task SaveAsAsync()
+        {
+            var window = GetMainWindow();
+            if (window == null)
+            {
+                StatusMessage = _localization.GetString("no_window");
+                return;
+            }
+
+            var file = await window.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                Title = "Save Markdown File",
+                FileTypeChoices = new[]
+                {
+                    new FilePickerFileType("Markdown Files") { Patterns = new[] { "*.md" } },
+                    new FilePickerFileType("All Files") { Patterns = new[] { "*" } }
+                },
+                DefaultExtension = "md",
+                SuggestedFileName = string.IsNullOrEmpty(SelectedFilePath) ? "untitled.md" : Path.GetFileName(SelectedFilePath)
+            });
+
+            if (file != null)
+            {
+                SelectedFilePath = file.Path.LocalPath;
+                try
+                {
+                    await using var stream = await file.OpenWriteAsync();
+                    using var writer = new StreamWriter(stream);
+                    await writer.WriteAsync(MarkdownText);
+                    _lastSavedText = MarkdownText;
+                    HasUnsavedChanges = false;
+                    StatusMessage = $"{_localization.GetString("saved_to")} {file.Path.LocalPath}";
+                    this.RaisePropertyChanged(nameof(WindowTitle));
+                }
+                catch (Exception ex)
+                {
+                    StatusMessage = $"{_localization.GetString("save_failed")}: {ex.Message}";
+                }
+            }
+        }
+
+        private void Undo()
+        {
+            if (_undoStack.Count > 0)
+            {
+                _redoStack.Push(MarkdownText);
+                MarkdownText = _undoStack.Pop();
+                this.RaisePropertyChanged(nameof(CanUndo));
+                this.RaisePropertyChanged(nameof(CanRedo));
+            }
+        }
+
+        private void Redo()
+        {
+            if (_redoStack.Count > 0)
+            {
+                _undoStack.Push(MarkdownText);
+                MarkdownText = _redoStack.Pop();
+                this.RaisePropertyChanged(nameof(CanUndo));
+                this.RaisePropertyChanged(nameof(CanRedo));
+            }
+        }
+
+        private void Replace()
+        {
+            if (string.IsNullOrEmpty(FindText)) return;
+            MarkdownText = MarkdownText.Replace(FindText, ReplaceText);
+        }
+
+        private void UpdateStatistics()
+        {
+            LineCount = string.IsNullOrEmpty(MarkdownText) ? 1 : MarkdownText.Split('\n').Length;
+            WordCount = string.IsNullOrWhiteSpace(MarkdownText) ? 0 :
+                MarkdownText.Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
+        }
+
+        private void ApplyThemeResources()
+        {
+            var resources = _themeService.CurrentResources;
+            Background = resources.Background;
+            Foreground = resources.Foreground;
+            BorderBrush = resources.BorderBrush;
+            TextBoxBackground = resources.TextBoxBackground;
+            TextBoxForeground = resources.TextBoxForeground;
+        }
+
+        private void OnLanguageChanged()
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                this.RaisePropertyChanged(nameof(WindowTitle));
+                this.RaisePropertyChanged(nameof(UploadButtonText));
+                this.RaisePropertyChanged(nameof(ConvertButtonText));
+                this.RaisePropertyChanged(nameof(HelpButtonText));
+                this.RaisePropertyChanged(nameof(FileTabText));
+                this.RaisePropertyChanged(nameof(EditTabText));
+                this.RaisePropertyChanged(nameof(SelectedFileText));
+                this.RaisePropertyChanged(nameof(EditContentText));
+                this.RaisePropertyChanged(nameof(LanguageButtonText));
+                StatusMessage = _localization.GetString("ready");
+            });
+        }
+
+        private void OnThemeChanged()
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                CurrentTheme = _themeService.CurrentTheme;
+                ApplyThemeResources();
+            });
+        }
+
+        private async Task UploadFileAsync()
+        {
+            await OpenFileAsync();
         }
 
         private async Task ConvertToPdfAsync()
@@ -300,10 +502,10 @@ private void OnThemeChanged()
             try
             {
                 IsConverting = true;
-                StatusMessage = "...";
+                StatusMessage = _localization.GetString("converting");
 
                 await using var stream = await file.OpenWriteAsync();
-                _converterService.ConvertMarkdownToPdf(MarkdownText, stream);
+                _converterService.ConvertMarkdownToPdf(MarkdownText, stream, PageSize, PageMargin, ExportFont);
 
                 StatusMessage = $"{_localization.GetString("conversion_success")} {file.Path.LocalPath}";
             }
