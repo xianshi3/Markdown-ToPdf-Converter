@@ -1,0 +1,235 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+             x:Class="MarkdownToPdfConverter.Views.Components.ToolBarComponent"
+             x:DataType="vm:MainViewModel">
+    <UserControl.Styles>
+        <Style Selector="Border#ToolbarBorder">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="Padding" Value="8,6"/>
+        </Style>
+
+        <Style Selector="Border.toolbar-sep">
+            <Setter Property="Width" Value="1"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="Margin" Value="6,4"/>
+            <Setter Property="Opacity" Value="0.6"/>
+        </Style>
+
+        <Style Selector="Button.toolbar-btn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+        </Style>
+        <Style Selector="Button.toolbar-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonHoverBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+
+        <Style Selector="Button.export-btn">
+            <Setter Property="Background" Value="{DynamicResource ThemeSuccessAccent}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+        <Style Selector="Button.export-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeSuccessAccentHover}"/>
+        </Style>
+
+        <Style Selector="Button.export-html-btn">
+            <Setter Property="Background" Value="{DynamicResource ThemeAccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+        <Style Selector="Button.export-html-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeAccentHoverBrush}"/>
+        </Style>
+
+        <Style Selector="Path.toolbar-icon">
+            <Setter Property="Stroke" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="StrokeThickness" Value="1.5"/>
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
+        </Style>
+        <Style Selector="Button.toolbar-btn:pointerover Path.toolbar-icon">
+            <Setter Property="Stroke" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+
+        <Style Selector="Button.export-btn Path.toolbar-icon">
+            <Setter Property="Stroke" Value="White"/>
+        </Style>
+        <Style Selector="Button.export-html-btn Path.toolbar-icon">
+            <Setter Property="Stroke" Value="White"/>
+        </Style>
+
+        <Style Selector="TextBlock.export-label">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="6,0,0,0"/>
+        </Style>
+
+        <Style Selector="Button.sidebar-toggle">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+        </Style>
+        <Style Selector="Button.sidebar-toggle:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+        <Style Selector="Button.sidebar-toggle Path.toggle-icon">
+            <Setter Property="Stroke" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="StrokeThickness" Value="1.5"/>
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="Width" Value="16"/>
+            <Setter Property="Height" Value="16"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
+        </Style>
+        <Style Selector="Button.sidebar-toggle:pointerover Path.toggle-icon">
+            <Setter Property="Stroke" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+
+        <Style Selector="Button.preview-btn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Width" Value="32"/>
+            <Setter Property="Height" Value="32"/>
+        </Style>
+        <Style Selector="Button.preview-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+
+        <Style Selector="Button.zoom-btn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="Padding" Value="4,6"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style Selector="Button.zoom-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+
+        <Style Selector="TextBlock.zoom-label">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="MinWidth" Value="28"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Border Name="ToolbarBorder">
+        <StackPanel Orientation="Horizontal" Spacing="2">
+            <Button Classes="toolbar-btn" Command="{Binding NewFileCommand}" ToolTip.Tip="{DynamicResource str_tip_new}">
+                <Path Classes="toolbar-icon" Data="M 2,1 H 10 L 14,5 V 13 C 14,13.5 13.5,14 13,14 H 2 C 1.5,14 1,13.5 1,13 V 2 C 1,1.5 1.5,1 2,1 Z M 10,1 V 5 H 14" />
+            </Button>
+            <Button Classes="toolbar-btn" Command="{Binding OpenFileCommand}" ToolTip.Tip="{DynamicResource str_tip_open}">
+                <Path Classes="toolbar-icon" Data="M 1,3 C 1,2 2,1 3,1 H 6 L 8,3 H 13 C 14,3 15,4 15,5 V 13 C 15,14 14,15 13,15 H 3 C 2,15 1,14 1,13 Z" />
+            </Button>
+            <Button Classes="toolbar-btn" Command="{Binding SaveFileCommand}" ToolTip.Tip="{DynamicResource str_tip_save}">
+                <Path Classes="toolbar-icon" Data="M 14,5 L 11,2 H 2 C 1.5,2 1,2.5 1,3 V 13 C 1,13.5 1.5,14 2,14 H 14 C 14.5,14 15,13.5 15,13 V 6 C 15,5.5 14.5,5 14,5 Z M 8,11 C 6.5,11 5,9.5 5,8 C 5,6.5 6.5,5 8,5 C 9.5,5 11,6.5 11,8 C 11,9.5 9.5,11 8,11 Z" />
+            </Button>
+
+            <Border Classes="toolbar-sep" />
+
+            <Button Classes="toolbar-btn" Command="{Binding UndoCommand}" ToolTip.Tip="{DynamicResource str_tip_undo}">
+                <Path Classes="toolbar-icon" Data="M 6,3 L 2,7 L 6,11 M 2,7 H 10 C 12,7 14,9 14,12 V 13" />
+            </Button>
+            <Button Classes="toolbar-btn" Command="{Binding RedoCommand}" ToolTip.Tip="{DynamicResource str_tip_redo}">
+                <Path Classes="toolbar-icon" Data="M 10,3 L 14,7 L 10,11 M 14,7 H 6 C 4,7 2,9 2,12 V 13" />
+            </Button>
+
+            <Border Classes="toolbar-sep" />
+
+            <Button Classes="toolbar-btn" Command="{Binding FindCommand}" ToolTip.Tip="{DynamicResource str_tip_find}">
+                <Path Classes="toolbar-icon" Data="M 10.5,10.5 L 14,14 M 6,11 C 3,11 1,9 1,6 C 1,3 3,1 6,1 C 9,1 11,3 11,6 C 11,9 9,11 6,11 Z" />
+            </Button>
+
+            <Border Classes="toolbar-sep" />
+
+            <Button Classes="export-btn" Command="{Binding ConvertToPdfCommand}" ToolTip.Tip="{DynamicResource str_tip_export_pdf}">
+                <StackPanel Orientation="Horizontal" Spacing="0">
+                    <Path Classes="toolbar-icon" Data="M 2,1 H 10 L 14,5 V 14 C 14,14.5 13.5,15 13,15 H 2 C 1.5,15 1,14.5 1,14 V 2 C 1,1.5 1.5,1 2,1 Z M 10,1 V 5 H 14 M 5,8 H 11 M 5,11 H 9" />
+                    <TextBlock Classes="export-label" Text="PDF"/>
+                </StackPanel>
+            </Button>
+
+            <Button Classes="export-html-btn" Command="{Binding ConvertToHtmlCommand}" ToolTip.Tip="{DynamicResource str_tip_export_html}">
+                <StackPanel Orientation="Horizontal" Spacing="0">
+                    <Path Classes="toolbar-icon" Data="M 2,1 H 10 L 14,5 V 14 C 14,14.5 13.5,15 13,15 H 2 C 1.5,15 1,14.5 1,14 V 2 C 1,1.5 1.5,1 2,1 Z M 10,1 V 5 H 14 M 5,8 H 11 M 5,11 H 9" />
+                    <TextBlock Classes="export-label" Text="HTML"/>
+                </StackPanel>
+            </Button>
+
+            <Border Width="1" Background="{DynamicResource ThemeBorderBrush}" Margin="6,4" Opacity="0.5"/>
+
+            <Button Classes="preview-btn"
+                    Command="{Binding TogglePreviewCommand}"
+                    ToolTip.Tip="{DynamicResource str_tip_preview}">
+                <Grid Width="16" Height="16">
+                    <Path Data="M 1,3 H 15 M 1,8 H 15 M 1,13 H 15"
+                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                          StrokeThickness="1.5"/>
+                </Grid>
+            </Button>
+
+            <StackPanel Orientation="Horizontal" Spacing="0" VerticalAlignment="Center" Margin="4,0">
+                <Button Classes="zoom-btn" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource str_tip_zoom_out}">
+                    <Grid Width="10" Height="10">
+                        <Path Data="M 1,5 L 9,5"
+                              Stroke="{DynamicResource ThemeSecondaryForeground}"
+                              StrokeThickness="2"/>
+                    </Grid>
+                </Button>
+                <TextBlock Classes="zoom-label" Text="{Binding ZoomLevel, StringFormat='{}{0:0}%'}"/>
+                <Button Classes="zoom-btn" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource str_tip_zoom_in}">
+                    <Grid Width="10" Height="10">
+                        <Path Data="M 1,5 L 9,5 M 5,1 L 5,9"
+                              Stroke="{DynamicResource ThemeSecondaryForeground}"
+                              StrokeThickness="2"/>
+                    </Grid>
+                </Button>
+            </StackPanel>
+
+            <Border Width="1" Background="{DynamicResource ThemeBorderBrush}" Margin="6,4" Opacity="0.5"/>
+
+            <Button Classes="sidebar-toggle"
+                    Command="{Binding ToggleSidebarCommand}"
+                    ToolTip.Tip="Toggle Sidebar">
+                <Grid Width="16" Height="16">
+                    <Path Name="SidebarCollapseIcon"
+                          Classes="toggle-icon"
+                          Width="16" Height="16"
+                          Data="M 2,2 H 14 V 14 H 2 Z M 9,5 L 6,8 L 9,11"
+                          IsVisible="{Binding IsSidebarExpanded}" />
+                    <Path Name="SidebarExpandIcon"
+                          Classes="toggle-icon"
+                          Width="16" Height="16"
+                          Data="M 2,2 H 14 V 14 H 2 Z M 6,5 L 9,8 L 6,11"
+                          IsVisible="{Binding !IsSidebarExpanded}" />
+                </Grid>
+            </Button>
+        </StackPanel>
+    </Border>
+</UserControl>

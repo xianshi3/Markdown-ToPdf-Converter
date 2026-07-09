@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+             x:Class="MarkdownToPdfConverter.Views.Components.MenuBarComponent"
+             x:DataType="vm:MainViewModel">
+    <Menu>
+        <MenuItem Header="{DynamicResource str_menu_file}">
+            <MenuItem Header="{DynamicResource str_menu_new}" Command="{Binding NewFileCommand}" InputGesture="Ctrl+N"/>
+            <MenuItem Header="{DynamicResource str_menu_open}" Command="{Binding OpenFileCommand}" InputGesture="Ctrl+O"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource str_menu_save}" Command="{Binding SaveFileCommand}" InputGesture="Ctrl+S"/>
+            <MenuItem Header="{DynamicResource str_menu_save_as}" Command="{Binding SaveAsCommand}" InputGesture="Ctrl+Shift+S"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource str_menu_export_pdf}" Command="{Binding ConvertToPdfCommand}"/>
+            <MenuItem Header="{DynamicResource str_menu_export_html}" Command="{Binding ConvertToHtmlCommand}"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource str_menu_recent}" ItemsSource="{Binding RecentFiles}"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource str_menu_about}" Command="{Binding ShowAboutCommand}"/>
+        </MenuItem>
+        <MenuItem Header="{DynamicResource str_menu_edit}">
+            <MenuItem Header="{DynamicResource str_menu_undo}" Command="{Binding UndoCommand}" InputGesture="Ctrl+Z"/>
+            <MenuItem Header="{DynamicResource str_menu_redo}" Command="{Binding RedoCommand}" InputGesture="Ctrl+Y"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource str_menu_find}" Command="{Binding FindCommand}" InputGesture="Ctrl+F"/>
+            <MenuItem Header="{DynamicResource str_menu_replace}" Command="{Binding ReplaceCommand}" InputGesture="Ctrl+H"/>
+        </MenuItem>
+        <MenuItem Header="{DynamicResource str_menu_view}">
+            <MenuItem Header="{DynamicResource str_menu_preview}" Command="{Binding TogglePreviewCommand}" InputGesture="Ctrl+P"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource str_menu_zoom_in}" Command="{Binding ZoomInCommand}"/>
+            <MenuItem Header="{DynamicResource str_menu_zoom_out}" Command="{Binding ZoomOutCommand}"/>
+            <MenuItem Header="{DynamicResource str_menu_zoom_reset}" Command="{Binding ZoomResetCommand}"/>
+            <Separator/>
+            <MenuItem Header="{DynamicResource str_menu_toggle_theme}" Command="{Binding SwitchThemeCommand}"/>
+            <MenuItem Header="{DynamicResource str_menu_language}" Command="{Binding SwitchLanguageCommand}"/>
+        </MenuItem>
+        <MenuItem Header="{DynamicResource str_menu_help}">
+            <MenuItem Header="{DynamicResource str_menu_about}" Command="{Binding ShowAboutCommand}"/>
+        </MenuItem>
+    </Menu>
+</UserControl>

@@ -8,6 +8,7 @@ namespace MarkdownToPdfConverter
     class Program
     {
         // 初始化 Avalonia 应用
+        [STAThread]
         public static void Main(string[] args) => BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
 

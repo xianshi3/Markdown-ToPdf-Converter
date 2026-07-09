@@ -1,0 +1,391 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+             xmlns:models="clr-namespace:MarkdownToPdfConverter.Models"
+             xmlns:cvt="clr-namespace:MarkdownToPdfConverter.Converters"
+             x:Class="MarkdownToPdfConverter.Views.Components.EditorComponent"
+             x:DataType="vm:MainViewModel">
+    <UserControl.Resources>
+        <cvt:NotBoolConverter x:Key="NotBoolConverter"/>
+        <cvt:BoolToFontStyleConverter x:Key="BoolToFontStyleConverter"/>
+        <cvt:BoolToFontFamilyConverter x:Key="BoolToFontFamilyConverter"/>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="Border.editor-container">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Border.drop-zone">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="40,32"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="MinWidth" Value="320"/>
+        </Style>
+        <Style Selector="Border.drop-zone:dragover">
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="Opacity" Value="0.95"/>
+        </Style>
+
+        <Style Selector="Path.upload-icon">
+            <Setter Property="Stroke" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="StrokeThickness" Value="1.5"/>
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="Width" Value="48"/>
+            <Setter Property="Height" Value="48"/>
+        </Style>
+
+        <Style Selector="TextBlock.upload-title">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="TextBlock.upload-hint">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.browse-btn">
+            <Setter Property="Padding" Value="20,8"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        <Style Selector="Button.browse-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonHoverBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+        </Style>
+
+        <Style Selector="Border.file-info-card">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="MinWidth" Value="320"/>
+        </Style>
+
+        <Style Selector="Border.editor-wrapper">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+        </Style>
+        <Style Selector="Border.editor-header">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="CornerRadius" Value="8,8,0,0"/>
+            <Setter Property="Padding" Value="12,8"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+        </Style>
+
+        <Style Selector="Ellipse.dot">
+            <Setter Property="Width" Value="10"/>
+            <Setter Property="Height" Value="10"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Border.editor-body">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
+        <Style Selector="TextBox.editor-textbox">
+            <Setter Property="AcceptsReturn" Value="True"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="{Binding FontSize}"/>
+            <Setter Property="FontFamily" Value="Cascadia Code, JetBrains Mono, Consolas, monospace"/>
+            <Setter Property="Padding" Value="16,12"/>
+            <Setter Property="VerticalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="SelectionBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+            <Setter Property="SelectionForegroundBrush" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="CaretBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+        </Style>
+        <Style Selector="TextBox.editor-textbox:focus-within">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+        </Style>
+        <Style Selector="TextBox.editor-textbox:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+        </Style>
+        <Style Selector="TextBox.editor-textbox /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+        </Style>
+        <Style Selector="TextBox.editor-textbox /template/ Border#PART_RevealBorder">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+
+        <Style Selector="Border.preview-container">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="Margin" Value="4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+        </Style>
+
+        <Style Selector="TextBlock.preview-heading">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="LetterSpacing" Value="1.5"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+
+        <Style Selector="Border.format-toolbar">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="BorderThickness" Value="0,0,0,1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+        </Style>
+
+        <Style Selector="Button.format-btn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="Padding" Value="6,2"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.12"/>
+                    <BrushTransition Property="Foreground" Duration="0:0:0.12"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.format-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonHoverBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+        <Style Selector="Button.format-btn:pressed">
+            <Setter Property="RenderTransform" Value="scale(0.93)"/>
+        </Style>
+
+        <Style Selector="Border.format-sep">
+            <Setter Property="Width" Value="1"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="Margin" Value="4,2"/>
+            <Setter Property="Opacity" Value="0.5"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Border Classes="editor-container">
+        <TabControl Margin="0">
+            <TabItem Header="{Binding FileTabText}">
+                <ScrollViewer Padding="24">
+                    <StackPanel Spacing="16" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Border x:Name="DropFileTab" DragDrop.AllowDrop="True" Classes="drop-zone">
+                            <StackPanel Spacing="16" HorizontalAlignment="Center">
+                                <Border Width="80" Height="80"
+                                        CornerRadius="40"
+                                        Background="{DynamicResource ThemeSurfaceBackground}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        BorderThickness="0">
+                                    <Path Classes="upload-icon"
+                                          Data="M 24,40 V 56 M 16,48 L 24,40 L 32,48 M 16,62 H 32 M 14,24 H 34 C 34,24 40,24 40,30 V 40 C 40,46 34,46 34,46 H 26 M 14,24 H 10 C 10,24 4,24 4,30 V 62 C 4,68 10,68 10,68 H 34 C 34,68 40,68 40,62 V 56"
+                                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                          StrokeThickness="2"/>
+                                </Border>
+                                <TextBlock Text="{Binding SelectedFileText}" Classes="upload-title"/>
+                                <TextBlock Text="{DynamicResource str_drop_md_hint}" Classes="upload-hint"/>
+                                <Button Classes="browse-btn" Command="{Binding OpenFileCommand}" ToolTip.Tip="{DynamicResource str_tip_open}">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Path Data="M 1,3 C 1,2 2,1 3,1 H 6 L 8,3 H 13 C 14,3 15,4 15,5 V 13 C 15,14 14,15 13,15 H 3 C 2,15 1,14 1,13 Z"
+                                              Stroke="{DynamicResource ThemeForeground}"
+                                              StrokeThickness="1.5"
+                                              Width="14" Height="14"
+                                              Stretch="Uniform"
+                                              VerticalAlignment="Center"/>
+                                        <TextBlock Text="{DynamicResource str_menu_open}" FontSize="12"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Classes="file-info-card">
+                            <Grid ColumnDefinitions="Auto,*,Auto" VerticalAlignment="Center">
+                                <Border Width="36" Height="36"
+                                        CornerRadius="8"
+                                        Background="{DynamicResource ThemeStatValueColor}"
+                                        Opacity="0.15"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"/>
+                                <Path Data="M 2,1 H 10 L 14,5 V 13 C 14,13.5 13.5,14 13,14 H 2 C 1.5,14 1,13.5 1,13 V 2 C 1,1.5 1.5,1 2,1 Z M 10,1 V 5 H 14"
+                                      Stroke="{DynamicResource ThemeStatValueColor}"
+                                      StrokeThickness="1.5"
+                                      Width="16" Height="16"
+                                      Stretch="Uniform"
+                                      Margin="10,0,0,0"
+                                      VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                                    <TextBlock Text="{DynamicResource str_editor_file_path}"
+                                               FontSize="10" FontWeight="Bold"
+                                               Foreground="{DynamicResource ThemeSecondaryForeground}"/>
+                                    <TextBlock Text="{Binding SelectedFilePath}"
+                                               TextWrapping="Wrap"
+                                               Foreground="{DynamicResource ThemeStatValueColor}"
+                                               FontSize="12" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="{Binding EditTabText}">
+                <Border Classes="editor-wrapper">
+                    <Grid RowDefinitions="Auto,Auto,*">
+                        <Border Classes="editor-header">
+                            <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+                                <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                    <Ellipse Classes="dot" Fill="#FF5F56"/>
+                                    <Ellipse Classes="dot" Fill="#FFBD2E"/>
+                                    <Ellipse Classes="dot" Fill="#27C93F"/>
+                                </StackPanel>
+                                <TextBlock Grid.Column="1"
+                                           Text="{DynamicResource str_editor_title}"
+                                           Foreground="{DynamicResource ThemeSecondaryForeground}"
+                                           FontSize="10" FontWeight="Bold"
+                                           Margin="12,0,0,0"
+                                           VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding LineCount, StringFormat='{}Ln {0}'}"
+                                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                                               FontSize="10" VerticalAlignment="Center"/>
+                                    <Border Width="1" Height="12"
+                                            Background="{DynamicResource ThemeBorderBrush}" Opacity="0.5"/>
+                                    <TextBlock Text="Markdown"
+                                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                                               FontSize="10" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Row="1" Classes="format-toolbar">
+                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                <Button Classes="format-btn" Command="{Binding InsertBoldCommand}" ToolTip.Tip="{DynamicResource str_tip_bold}">
+                                    <TextBlock Text="B" FontWeight="Bold"/>
+                                </Button>
+                                <Button Classes="format-btn" Command="{Binding InsertItalicCommand}" ToolTip.Tip="{DynamicResource str_tip_italic}">
+                                    <TextBlock Text="I" FontStyle="Italic"/>
+                                </Button>
+                                <Button Classes="format-btn" Command="{Binding InsertHeadingCommand}" ToolTip.Tip="{DynamicResource str_tip_heading}">
+                                    <TextBlock Text="H"/>
+                                </Button>
+                                <Border Classes="format-sep"/>
+                                <Button Classes="format-btn" Command="{Binding InsertLinkCommand}" ToolTip.Tip="{DynamicResource str_tip_link}">
+                                    <Path Data="M 4,4 L 4,12 M 10,4 L 10,12 M 4,4 C 4,2 10,2 10,4 M 4,12 C 4,14 10,14 10,12"
+                                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                          StrokeThickness="1.5"
+                                          Stretch="Uniform"
+                                          Width="12" Height="12"/>
+                                </Button>
+                                <Button Classes="format-btn" Command="{Binding InsertImageCommand}" ToolTip.Tip="{DynamicResource str_tip_image}">
+                                    <Path Data="M 2,3 L 14,3 L 14,13 L 2,13 Z M 2,10 L 5,6 L 9,10 L 11,7 L 14,11"
+                                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                          StrokeThickness="1.5"
+                                          Stretch="Uniform"
+                                          Width="12" Height="12"/>
+                                </Button>
+                                <Button Classes="format-btn" Command="{Binding InsertCodeCommand}" ToolTip.Tip="{DynamicResource str_tip_code}">
+                                    <Path Data="M 5,4 L 2,8 L 5,12 M 11,4 L 14,8 L 11,12"
+                                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                          StrokeThickness="1.5"
+                                          Stretch="Uniform"
+                                          Width="12" Height="12"/>
+                                </Button>
+                                <Border Classes="format-sep"/>
+                                <Button Classes="format-btn" Command="{Binding InsertListCommand}" ToolTip.Tip="{DynamicResource str_tip_list}">
+                                    <Path Data="M 2,4 H 5 M 7,4 H 14 M 2,8 H 5 M 7,8 H 14 M 2,12 H 5 M 7,12 H 14"
+                                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                          StrokeThickness="1.5"
+                                          Stretch="Uniform"
+                                          Width="12" Height="12"/>
+                                </Button>
+                                <Button Classes="format-btn" Command="{Binding InsertQuoteCommand}" ToolTip.Tip="{DynamicResource str_tip_quote}">
+                                    <Path Data="M 3,4 V 12 M 6,6 H 14 M 6,9 H 11"
+                                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                          StrokeThickness="1.5"
+                                          Stretch="Uniform"
+                                          Width="12" Height="12"/>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Row="2" Classes="editor-body">
+                            <TextBox Classes="editor-textbox"
+                                     Text="{Binding MarkdownText}"
+                                     Watermark="{DynamicResource str_editor_watermark}"/>
+                        </Border>
+                    </Grid>
+                </Border>
+            </TabItem>
+
+            <TabItem Header="{Binding PreviewTabText}">
+                <Border Classes="preview-container">
+                    <Grid RowDefinitions="Auto,*">
+                        <TextBlock Text="{DynamicResource str_preview_heading}" Classes="preview-heading"/>
+                        <ScrollViewer Grid.Row="1">
+                            <ItemsControl ItemsSource="{Binding PreviewBlocks}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Spacing="0"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="models:PreviewBlock">
+                                        <StackPanel>
+                                            <Border Height="1"
+                                                    Background="{DynamicResource ThemeBorderBrush}"
+                                                    IsVisible="{Binding IsHorizontalRule}"
+                                                    Opacity="0.5"
+                                                    Margin="0,8"/>
+                                            <Border IsVisible="{Binding IsHorizontalRule, Converter={StaticResource NotBoolConverter}}"
+                                                    Margin="0,0,0,4">
+                                                <TextBlock Text="{Binding Text}"
+                                                           FontSize="{Binding DisplayFontSize}"
+                                                           FontWeight="{Binding DisplayFontWeight}"
+                                                           FontStyle="{Binding IsItalic, Converter={StaticResource BoolToFontStyleConverter}}"
+                                                           FontFamily="{Binding IsMonospace, Converter={StaticResource BoolToFontFamilyConverter}}"
+                                                           Foreground="{DynamicResource ThemeForeground}"
+                                                           TextWrapping="Wrap"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </TabItem>
+        </TabControl>
+    </Border>
+</UserControl>

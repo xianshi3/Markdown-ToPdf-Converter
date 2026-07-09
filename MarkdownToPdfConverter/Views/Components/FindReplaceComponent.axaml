@@ -1,0 +1,133 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+             x:Class="MarkdownToPdfConverter.Views.Components.FindReplaceComponent"
+             x:DataType="vm:MainViewModel"
+             IsVisible="{Binding IsFindVisible}">
+    <UserControl.Styles>
+        <Style Selector="UserControl">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="MaxHeight" Value="0"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.25" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="MaxHeight" Duration="0:0:0.25" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="UserControl[IsVisible=True]">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="MaxHeight" Value="200"/>
+        </Style>
+
+        <Style Selector="Border#FindReplaceBorder">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="12"/>
+        </Style>
+
+        <Style Selector="Button.small-btn">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeButtonForeground}"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+        <Style Selector="Button.small-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonHoverBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+
+        <Style Selector="ToggleButton.case-btn">
+            <Setter Property="Padding" Value="6,4"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeButtonForeground}"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style Selector="ToggleButton.case-btn:checked">
+            <Setter Property="Background" Value="{DynamicResource ThemeAccentBrush}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+        </Style>
+
+        <Style Selector="Button.close-btn">
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="CornerRadius" Value="6"/>
+        </Style>
+        <Style Selector="Button.close-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+
+        <Style Selector="TextBlock.match-status">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="8,0,0,0"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Border Name="FindReplaceBorder">
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto"
+              VerticalAlignment="Center">
+            <TextBox Grid.Column="0"
+                     Text="{Binding FindText}"
+                     Watermark="{DynamicResource str_find_placeholder}"
+                     Margin="0,0,4,0"/>
+            <TextBox Grid.Column="1"
+                     Text="{Binding ReplaceText}"
+                     Watermark="{DynamicResource str_replace_placeholder}"
+                     Margin="4,0,8,0"
+                     Width="120"/>
+            <ToggleButton Grid.Column="2"
+                          Classes="case-btn"
+                          IsChecked="{Binding MatchCase}"
+                          ToolTip.Tip="{DynamicResource str_find_match_case}"
+                          Margin="0,0,4,0">
+                <TextBlock Text="Aa"/>
+            </ToggleButton>
+            <Button Grid.Column="3" Classes="small-btn"
+                    Command="{Binding FindPrevCommand}"
+                    ToolTip.Tip="{DynamicResource str_find_prev}"
+                    Margin="0,0,4,0">
+                <Path Data="M 8,3 L 3,8 L 8,13"
+                      Stroke="{DynamicResource ThemeButtonForeground}"
+                      StrokeThickness="1.5"
+                      Stretch="Uniform"
+                      Width="10" Height="10"/>
+            </Button>
+            <Button Grid.Column="4" Classes="small-btn"
+                    Command="{Binding FindNextCommand}"
+                    ToolTip.Tip="{DynamicResource str_find_next}"
+                    Margin="0,0,8,0">
+                <Path Data="M 3,3 L 8,8 L 3,13"
+                      Stroke="{DynamicResource ThemeButtonForeground}"
+                      StrokeThickness="1.5"
+                      Stretch="Uniform"
+                      Width="10" Height="10"/>
+            </Button>
+            <Button Grid.Column="5"
+                    Command="{Binding ReplaceCommand}"
+                    Content="{DynamicResource str_find_replace}"
+                    Padding="12,6"
+                    Margin="0,0,8,0"/>
+            <Button Grid.Column="6"
+                    Classes="close-btn"
+                    Command="{Binding CloseFindCommand}">
+                <Path Data="M 4,4 L 10,10 M 10,4 L 4,10"
+                      Stroke="{DynamicResource ThemeSecondaryForeground}"
+                      StrokeThickness="1.5"
+                      Stretch="Uniform"
+                      Width="12" Height="12"/>
+            </Button>
+        </Grid>
+    </Border>
+</UserControl>

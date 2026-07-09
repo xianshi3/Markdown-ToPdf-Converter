@@ -1,395 +1,207 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+        xmlns:components="clr-namespace:MarkdownToPdfConverter.Views.Components"
         x:Class="MarkdownToPdfConverter.Views.MainWindow"
         Title="{Binding WindowTitle}"
-        MinWidth="1000" MinHeight="700"
-        Background="#0D1117"
+        Width="1280" Height="800"
+        MinWidth="800" MinHeight="600"
+        SystemDecorations="None"
+        Background="{DynamicResource ThemeBackground}"
         FontFamily="Segoe UI, Microsoft YaHei"
-        DragDrop.AllowDrop="True"
-        KeyDown="OnKeyDown">
+        KeyDown="OnKeyDown"
+        WindowStartupLocation="CenterScreen">
 
     <Window.DataContext>
         <vm:MainViewModel />
     </Window.DataContext>
 
     <Window.Styles>
+        <!-- ===== Global Transitions (smooth theme switching & interactions) ===== -->
         <Style Selector="Button">
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="RenderTransform" Value="scale(1)"/>
             <Setter Property="Transitions">
                 <Transitions>
                     <DoubleTransition Property="Opacity" Duration="0:0:0.15"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" Easing="CubicEaseOut"/>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
                 </Transitions>
             </Setter>
         </Style>
-        <Style Selector="Button:pointerover">
-            <Setter Property="Opacity" Value="0.85"/>
+        <Style Selector="Button:pressed">
+            <Setter Property="RenderTransform" Value="scale(0.95)"/>
         </Style>
-        
+
+
+        <Style Selector="Border">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.3"/>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.dropzone">
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.25" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.dropzone:pointerover">
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+        </Style>
+        <Style Selector="Border.dragover">
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+            <Setter Property="Opacity" Value="0.9"/>
+        </Style>
+
         <Style Selector="TabItem">
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Padding" Value="16,10"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTabItemForeground}"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Foreground" Duration="0:0:0.2"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+                    <ThicknessTransition Property="BorderThickness" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
         </Style>
-        
+        <Style Selector="TabItem:selected">
+            <Setter Property="Foreground" Value="{DynamicResource ThemeTabItemSelectedForeground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeTabSelectedBorder}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+        </Style>
+        <Style Selector="TabItem:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+        <Style Selector="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
         <Style Selector="ScrollViewer">
             <Setter Property="Background" Value="Transparent"/>
         </Style>
+        <Style Selector="ScrollBar">
+            <Setter Property="Width" Value="6"/>
+            <Setter Property="MinWidth" Value="6"/>
+            <Setter Property="Opacity" Value="0.4"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.25"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="ScrollBar:pointerover">
+            <Setter Property="Opacity" Value="0.9"/>
+        </Style>
+        <Style Selector="ScrollBar /template/ Thumb">
+            <Setter Property="Background" Value="{DynamicResource ThemeScrollBarThumb}"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="ScrollBar:pointerover /template/ Thumb">
+            <Setter Property="Background" Value="{DynamicResource ThemeScrollBarThumbHover}"/>
+        </Style>
+
+        <Style Selector="MenuItem">
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Foreground" Duration="0:0:0.15"/>
+                    <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="TextBox">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="ComboBox">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Menu">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+
+        <Style Selector="Slider">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="ListBox">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Ellipse">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Fill" Duration="0:0:0.3"/>
+                </Transitions>
+            </Setter>
+        </Style>
     </Window.Styles>
 
-    <Grid RowDefinitions="Auto,*">
-        <Grid Grid.Row="1" Margin="32,24" ColumnDefinitions="Auto,*">
-            
-            <!-- 左侧边栏 -->
-            <Border Grid.Column="0" 
-                    Width="240"
-                    Background="#161B22"
-                    CornerRadius="16"
-                    Padding="20"
-                    Margin="0,0,24,0">
-                <StackPanel Spacing="24">
-                    
-                    <StackPanel Spacing="12">
-                        <Border Background="#238636" 
-                                CornerRadius="10" 
-                                Padding="12"
-                                HorizontalAlignment="Left">
-                            <TextBlock Text="MD" 
-                                       FontSize="20" 
-                                       FontWeight="Bold"
-                                       Foreground="White"/>
-                        </Border>
-                        <TextBlock Text="Markdown Converter" 
-                                   FontSize="14" 
-                                   FontWeight="Bold"
-                                   Foreground="#E6EDF3"
-                                   TextWrapping="Wrap"/>
-                        <TextBlock Text="Professional PDF conversion tool" 
-                                   FontSize="11" 
-                                   Foreground="#8B949E"/>
-                    </StackPanel>
+    <Grid x:Name="RootGrid" RowDefinitions="36,Auto,Auto,*" DragDrop.AllowDrop="True">
+        <components:TitleBarComponent Grid.Row="0" />
+        <components:MenuBarComponent Grid.Row="1" />
+        <components:ToolBarComponent Grid.Row="2" />
 
-                    <Border Height="1" Background="#21262D"/>
-                    
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="ACTIONS" 
-                                   FontSize="10" 
-                                   FontWeight="Bold"
-                                   Foreground="#8B949E"
-                                   Margin="0,0,0,4"/>
-                        
-                        <Button Command="{Binding UploadFileCommand}"
-                                Padding="12,10"
-                                HorizontalAlignment="Stretch">
-                            <Button.Styles>
-                                <Style Selector="Button">
-                                    <Setter Property="Background" Value="#238636"/>
-                                    <Setter Property="Foreground" Value="White"/>
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="CornerRadius" Value="8"/>
-                                </Style>
-                                <Style Selector="Button:pointerover">
-                                    <Setter Property="Background" Value="#2EA043"/>
-                                </Style>
-                            </Button.Styles>
-                            <StackPanel Orientation="Horizontal" Spacing="8" 
-                                        HorizontalAlignment="Center">
-                                <TextBlock Text="📄" FontSize="14"/>
-                                <TextBlock Text="{Binding UploadButtonText}"/>
-                            </StackPanel>
-                        </Button>
-                        
-                        <Button Command="{Binding ConvertToPdfCommand}"
-                                IsEnabled="{Binding CanConvert}"
-                                Padding="12,10"
-                                HorizontalAlignment="Stretch">
-                            <Button.Styles>
-                                <Style Selector="Button">
-                                    <Setter Property="Background" Value="#1F6FEB"/>
-                                    <Setter Property="Foreground" Value="White"/>
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="CornerRadius" Value="8"/>
-                                </Style>
-                                <Style Selector="Button:pointerover">
-                                    <Setter Property="Background" Value="#388BFD"/>
-                                </Style>
-                                <Style Selector="Button:disabled">
-                                    <Setter Property="Opacity" Value="0.4"/>
-                                </Style>
-                            </Button.Styles>
-                            <StackPanel Orientation="Horizontal" Spacing="8" 
-                                        HorizontalAlignment="Center">
-                                <TextBlock Text="📥" FontSize="14"/>
-                                <TextBlock Text="{Binding ConvertButtonText}"/>
-                            </StackPanel>
-                        </Button>
+        <Grid Grid.Row="3" Margin="12,12" RowDefinitions="Auto,*">
+            <components:FindReplaceComponent Grid.Row="0" Margin="0,0,0,12" />
 
-                        <Border Background="#21262D" CornerRadius="8" Padding="12,8">
-                            <TextBlock Text="Drop .md file here" FontSize="11" Foreground="#8B949E" HorizontalAlignment="Center"/>
-                        </Border>
-                    </StackPanel>
-                    
-                    <Border Height="1" Background="#21262D"/>
-                    
-                    <StackPanel Spacing="8">
-                        <TextBlock Text="SETTINGS" 
-                                   FontSize="10" 
-                                   FontWeight="Bold"
-                                   Foreground="#8B949E"
-                                   Margin="0,0,0,4"/>
-                        
-                        <Button Command="{Binding SwitchLanguageCommand}"
-                                Padding="12,10"
-                                HorizontalAlignment="Stretch">
-                            <Button.Styles>
-                                <Style Selector="Button">
-                                    <Setter Property="Background" Value="#21262D"/>
-                                    <Setter Property="Foreground" Value="#C9D1D9"/>
-                                    <Setter Property="BorderBrush" Value="#30363D"/>
-                                    <Setter Property="BorderThickness" Value="1"/>
-                                    <Setter Property="CornerRadius" Value="8"/>
-                                </Style>
-                                <Style Selector="Button:pointerover">
-                                    <Setter Property="Background" Value="#30363D"/>
-                                </Style>
-                            </Button.Styles>
-                            <StackPanel Orientation="Horizontal" Spacing="8" 
-                                        HorizontalAlignment="Center">
-                                <TextBlock Text="🌐" FontSize="14"/>
-                                <TextBlock Text="{Binding LanguageButtonText}"/>
-                            </StackPanel>
-                        </Button>
-                        
-                        <Button Command="{Binding SwitchThemeCommand}"
-                                Padding="12,10"
-                                HorizontalAlignment="Stretch">
-                            <Button.Styles>
-                                <Style Selector="Button">
-                                    <Setter Property="Background" Value="#21262D"/>
-                                    <Setter Property="Foreground" Value="#C9D1D9"/>
-                                    <Setter Property="BorderBrush" Value="#30363D"/>
-                                    <Setter Property="BorderThickness" Value="1"/>
-                                    <Setter Property="CornerRadius" Value="8"/>
-                                </Style>
-                                <Style Selector="Button:pointerover">
-                                    <Setter Property="Background" Value="#30363D"/>
-                                </Style>
-                            </Button.Styles>
-                            <StackPanel Orientation="Horizontal" Spacing="8" 
-                                        HorizontalAlignment="Center">
-                                <TextBlock Text="🎨" FontSize="14"/>
-                                <TextBlock Text="{Binding CurrentTheme, StringFormat='Theme: {0}'}"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                    
-                    <Border Height="1" Background="#21262D"/>
-                    
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="FONT SIZE" 
-                                   FontSize="10" 
-                                   FontWeight="Bold"
-                                   Foreground="#8B949E"/>
-                        <Slider Minimum="12" 
-                                Maximum="24" 
-                                Value="{Binding FontSize}"/>
-                        <TextBlock Text="{Binding FontSize, StringFormat='Size: {0}px'}" 
-                                   Foreground="#8B949E" 
-                                   FontSize="12"
-                                   HorizontalAlignment="Center"/>
-                        
-                        <Border Height="1" Background="#21262D" Margin="0,8,0,0"/>
-                        
-                        <StackPanel Spacing="4" Margin="0,8,0,0">
-                            <TextBlock Text="STATISTICS" 
-                                       FontSize="10" 
-                                       FontWeight="Bold"
-                                       Foreground="#8B949E"/>
-                            <Grid ColumnDefinitions="*,*">
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock Text="Lines" FontSize="10" Foreground="#8B949E"/>
-                                    <TextBlock Text="{Binding LineCount}" FontSize="14" Foreground="#58A6FF"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1">
-                                    <TextBlock Text="Words" FontSize="10" Foreground="#8B949E"/>
-                                    <TextBlock Text="{Binding WordCount}" FontSize="14" Foreground="#58A6FF"/>
-                                </StackPanel>
-                            </Grid>
-                        </StackPanel>
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-
-            <!-- 右侧主内容区 -->
-            <Grid Grid.Column="1" RowDefinitions="*,Auto">
-                
-                <Border Grid.Row="0"
-                        Background="#161B22"
-                        CornerRadius="16"
-                        Padding="4">
-                    <TabControl Margin="0">
-                        <TabControl.Styles>
-                            <Style Selector="TabControl">
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                            </Style>
-                            <Style Selector="TabItem">
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="Foreground" Value="#8B949E"/>
-                                <Setter Property="Padding" Value="16,10"/>
-                                <Setter Property="Margin" Value="0,0,4,0"/>
-                                <Setter Property="FontSize" Value="13"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                            </Style>
-                            <Style Selector="TabItem:selected">
-                                <Setter Property="Foreground" Value="#E6EDF3"/>
-                                <Setter Property="BorderBrush" Value="#F78166"/>
-                                <Setter Property="BorderThickness" Value="0,0,0,2"/>
-                            </Style>
-                            <Style Selector="TabItem:pointerover">
-                                <Setter Property="Foreground" Value="#C9D1D9"/>
-                            </Style>
-                        </TabControl.Styles>
-
-                        <TabItem Header="{Binding FileTabText}">
-                            <ScrollViewer Padding="24">
-                                <StackPanel Spacing="16" 
-                                            VerticalAlignment="Center" 
-                                            HorizontalAlignment="Center"
-                                            MinHeight="400">
-                                    
-                                    <Border Background="#0D1117" 
-                                            CornerRadius="16" 
-                                            Padding="24"
-                                            HorizontalAlignment="Center"
-                                            BorderBrush="#30363D"
-                                            BorderThickness="1">
-                                        <StackPanel Spacing="12" HorizontalAlignment="Center">
-                                            <TextBlock Text="📁" FontSize="48"
-                                                       HorizontalAlignment="Center"/>
-                                            <TextBlock Text="{Binding SelectedFileText}" 
-                                                       FontSize="16" 
-                                                       FontWeight="Bold"
-                                                       Foreground="#E6EDF3"
-                                                       HorizontalAlignment="Center"/>
-                                        </StackPanel>
-                                    </Border>
-
-                                    <Border Background="#0D1117" 
-                                            CornerRadius="10" 
-                                            Padding="16,12"
-                                            BorderBrush="#30363D"
-                                            BorderThickness="1"
-                                            MinWidth="400"
-                                            MaxWidth="500">
-                                        <StackPanel Spacing="4">
-                                            <TextBlock Text="FILE PATH" 
-                                                       FontSize="10" 
-                                                       FontWeight="Bold"
-                                                       Foreground="#8B949E"/>
-                                            <TextBlock Text="{Binding SelectedFilePath}" 
-                                                       TextWrapping="Wrap"
-                                                       Foreground="#58A6FF" 
-                                                       FontSize="13"/>
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-                            </ScrollViewer>
-                        </TabItem>
-
-                        <TabItem Header="{Binding EditTabText}">
-                            <Border Grid.Column="0" 
-                                    Background="#0D1117" 
-                                    CornerRadius="10" 
-                                    Padding="4"
-                                    Margin="4">
-                                <Grid RowDefinitions="Auto,*">
-                                    <Border Grid.Row="0" 
-                                            Background="#161B22"
-                                            CornerRadius="8,8,0,0"
-                                            Padding="12,8">
-                                        <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <Ellipse Width="10" Height="10" Fill="#FF5F56"/>
-                                            <Ellipse Width="10" Height="10" Fill="#FFBD2E"/>
-                                            <Ellipse Width="10" Height="10" Fill="#27C93F"/>
-                                            <TextBlock Text="EDITOR" 
-                                                       Foreground="#8B949E" 
-                                                       FontSize="10"
-                                                       FontWeight="Bold"
-                                                       Margin="12,0,0,0"/>
-                                        </StackPanel>
-                                    </Border>
-                                    
-                                    <TextBox Grid.Row="1"
-                                             Text="{Binding MarkdownText}"
-                                             AcceptsReturn="True"
-                                             Watermark="Write your Markdown here..."
-                                             Background="Transparent"
-                                             Foreground="#E6EDF3"
-                                             BorderThickness="0"
-                                             FontSize="{Binding FontSize}"
-                                             FontFamily="Cascadia Code, JetBrains Mono, Consolas, monospace"
-                                             Padding="16"
-                                             VerticalAlignment="Stretch"
-                                             HorizontalAlignment="Stretch"/>
-                                </Grid>
-                            </Border>
-                        </TabItem>
-                    </TabControl>
-                </Border>
-                
-                <!-- 底部状态栏 -->
-                <Border Grid.Row="1"
-                        Margin="0,16,0,0" 
-                        Padding="0"
-                        Background="#161B22"
-                        CornerRadius="10">
-                    <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0">
-                        <StackPanel Grid.Column="0" 
-                                    Orientation="Horizontal" 
-                                    Spacing="12"
-                                    VerticalAlignment="Center"
-                                    Height="44">
-                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                <Ellipse Width="7" Height="7" Fill="#3FB950"/>
-                                <TextBlock Text="Ready" 
-                                           Foreground="#8B949E" 
-                                           FontSize="11"
-                                           VerticalAlignment="Center"/>
-                            </StackPanel>
-                            <TextBlock Text="{Binding StatusMessage}" 
-                                       Foreground="#C9D1D9" 
-                                       FontSize="12"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
-                        
-                        <StackPanel Grid.Column="2" 
-                                    Orientation="Horizontal" 
-                                    Spacing="12"
-                                    Height="44">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <TextBlock Text="Ln" Foreground="#8B949E" FontSize="11" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding LineCount}" Foreground="#58A6FF" FontSize="11" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            <Border Width="1" Background="#30363D"/>
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <TextBlock Text="Words" Foreground="#8B949E" FontSize="11" VerticalAlignment="Center"/>
-                                <TextBlock Text="{Binding WordCount}" Foreground="#58A6FF" FontSize="11" VerticalAlignment="Center"/>
-                            </StackPanel>
-                            <Border Width="1" Background="#30363D"/>
-                            <TextBlock Text="UTF-8" Foreground="#8B949E" FontSize="11" VerticalAlignment="Center"/>
-                            <TextBlock Text="Markdown" Foreground="#8B949E" FontSize="11" VerticalAlignment="Center"/>
-                            <Border Background="#21262D" CornerRadius="4" Padding="6,3">
-                                <TextBlock Text="v1.0" 
-                                           Foreground="#8B949E" 
-                                           FontSize="10"
-                                           VerticalAlignment="Center"/>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
-                </Border>
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,*">
+                <components:SidebarComponent Grid.Column="0"
+                                             IsVisible="{Binding IsSidebarExpanded}"
+                                             Margin="0,0,10,0" />
+                <Grid Grid.Column="1" RowDefinitions="*,Auto">
+                    <components:EditorComponent Grid.Row="0" />
+                    <components:StatusBarComponent Grid.Row="1" Margin="0,12,0,0" />
+                </Grid>
             </Grid>
         </Grid>
     </Grid>

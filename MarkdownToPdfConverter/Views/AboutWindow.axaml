@@ -1,0 +1,58 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MarkdownToPdfConverter.Views.AboutWindow"
+        Title="About Markdown to PDF Converter"
+        Width="420" Height="260"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="{DynamicResource ThemeBackground}">
+    <Window.Styles>
+        <Style Selector="Border.about-card">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="24"/>
+            <Setter Property="Margin" Value="16"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="TextBlock.app-name">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+        </Style>
+        <Style Selector="TextBlock.app-version">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="Margin" Value="0,4,0,0"/>
+        </Style>
+        <Style Selector="TextBlock.app-desc">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,12,0,0"/>
+        </Style>
+        <Style Selector="Button.about-close">
+            <Setter Property="Padding" Value="24,8"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,16,0,0"/>
+        </Style>
+        <Style Selector="Button.about-close:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonHoverBackground}"/>
+        </Style>
+    </Window.Styles>
+
+    <Border Classes="about-card" VerticalAlignment="Center">
+        <StackPanel Spacing="0" HorizontalAlignment="Center">
+            <TextBlock Classes="app-name" Text="Markdown to PDF Converter" HorizontalAlignment="Center"/>
+            <TextBlock Classes="app-version" Text="{DynamicResource str_about_version}" HorizontalAlignment="Center"/>
+            <TextBlock Classes="app-desc" Text="{DynamicResource str_about_desc}" HorizontalAlignment="Center"/>
+            <Button Classes="about-close" Click="OnCloseClick" Content="{DynamicResource str_about_close}"/>
+        </StackPanel>
+    </Border>
+</Window>

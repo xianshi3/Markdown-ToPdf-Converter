@@ -1,5 +1,4 @@
 using Avalonia;
-using Avalonia.Markup.Parsers;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -13,11 +12,14 @@ namespace MarkdownToPdfConverter.Services
         string CurrentLanguage { get; }
         string GetString(string key);
         void SetLanguage(string languageCode);
+        void ApplyToApplication();
         event Action? LanguageChanged;
     }
 
     public class LocalizationService : ILocalizationService
     {
+        public static LocalizationService Instance { get; } = new();
+
         private Dictionary<string, string> _strings = new();
         private string _currentLanguage = "en-US";
 
@@ -27,11 +29,7 @@ namespace MarkdownToPdfConverter.Services
         public LocalizationService()
         {
             var culture = CultureInfo.CurrentUICulture.Name;
-            if (culture.StartsWith("zh"))
-                _currentLanguage = "zh-CN";
-            else
-                _currentLanguage = "en-US";
-
+            _currentLanguage = culture.StartsWith("zh") ? "zh-CN" : "en-US";
             LoadStrings(_currentLanguage);
         }
 
@@ -46,8 +44,18 @@ namespace MarkdownToPdfConverter.Services
             {
                 _currentLanguage = languageCode;
                 LoadStrings(languageCode);
+                ApplyToApplication();
                 LanguageChanged?.Invoke();
             }
+        }
+
+        public void ApplyToApplication()
+        {
+            var app = Application.Current;
+            if (app == null) return;
+
+            foreach (var kvp in _strings)
+                app.Resources[$"str_{kvp.Key}"] = kvp.Value;
         }
 
         private void LoadStrings(string languageCode)

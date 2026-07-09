@@ -1,69 +1,73 @@
+using Avalonia;
 using Avalonia.Data.Converters;
 using Avalonia.Media;
 using System;
 using System.Globalization;
-using MarkdownToPdfConverter.Services;
 
 namespace MarkdownToPdfConverter.Converters
 {
-    public class BlockTypeToFontSizeConverter : IValueConverter
+    public static class BoolConverters
     {
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public static readonly IValueConverter Not = new NotBoolConverter();
+        public static readonly IValueConverter BoolToOpacity = new BoolToOpacityConverter();
+    }
+
+    public class NotBoolConverter : IValueConverter
+    {
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value is PreviewBlock block)
-            {
-                return block.FontSize;
-            }
-            return 14.0;
+            if (value is bool b) return !b;
+            return false;
         }
 
-        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value is bool b) return !b;
+            return false;
+        }
+    }
+
+    public class BoolToOpacityConverter : IValueConverter
+    {
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value is bool b) return b ? 1.0 : 0.0;
+            return 0.0;
+        }
+
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value is double d) return d > 0.5;
+            return false;
+        }
+    }
+
+    public class BoolToFontStyleConverter : IValueConverter
+    {
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        {
+            if (value is bool b && b) return FontStyle.Italic;
+            return FontStyle.Normal;
+        }
+
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }
     }
 
-    public class BlockTypeToForegroundConverter : IValueConverter
+    public class BoolToFontFamilyConverter : IValueConverter
     {
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value is PreviewBlock block)
-            {
-                var colorStr = block.ForegroundColor;
-                return new SolidColorBrush(ParseColor(colorStr));
-            }
-            return new SolidColorBrush(Colors.White);
+            if (value is bool b && b) return new FontFamily("Consolas");
+            return FontFamily.Default;
         }
 
-        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-
-        private static uint ParseColor(string hex)
-        {
-            if (hex.StartsWith("#") && hex.Length == 7)
-            {
-                return uint.Parse(hex.Substring(1), System.Globalization.NumberStyles.HexNumber);
-            }
-            return 0xFFE6EDF3;
-        }
-    }
-
-    public class BlockTypeToFontWeightConverter : IValueConverter
-    {
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-        {
-            if (value is PreviewBlock block)
-            {
-                return block.FontWeight == "Bold" ? FontWeight.Bold : FontWeight.Normal;
-            }
-            return FontWeight.Normal;
-        }
-
-        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }
     }
+
 }

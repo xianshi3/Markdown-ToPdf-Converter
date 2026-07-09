@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using MarkdownToPdfConverter.Services;
 using MarkdownToPdfConverter.Views;
 
 namespace MarkdownToPdfConverter
@@ -12,12 +13,16 @@ namespace MarkdownToPdfConverter
             AvaloniaXamlLoader.Load(this);
         }
 
-        // 配置主窗口
         public override void OnFrameworkInitializationCompleted()
         {
+            ThemeService.Instance.ApplyToApplication();
+            LocalizationService.Instance.ApplyToApplication();
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow();
+                var mainWindow = new MainWindow();
+                desktop.MainWindow = mainWindow;
+                WindowService.MainWindow = mainWindow;
             }
 
             base.OnFrameworkInitializationCompleted();

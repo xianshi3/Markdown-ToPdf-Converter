@@ -1,0 +1,106 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+             x:Class="MarkdownToPdfConverter.Views.Components.StatusBarComponent"
+             x:DataType="vm:MainViewModel">
+    <UserControl.Styles>
+        <Style Selector="Border#StatusBarBorder">
+            <Setter Property="Background" Value="{DynamicResource ThemeStatusBarBackground}"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Ellipse#StatusDot">
+            <Setter Property="Width" Value="7"/>
+            <Setter Property="Height" Value="7"/>
+            <Setter Property="Fill" Value="{DynamicResource ThemeReadyDotColor}"/>
+        </Style>
+
+        <Style Selector="Border.status-sep">
+            <Setter Property="Width" Value="1"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="Opacity" Value="0.5"/>
+        </Style>
+
+        <Style Selector="Border.version-badge">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="CornerRadius" Value="4"/>
+            <Setter Property="Padding" Value="6,3"/>
+        </Style>
+
+        <Style Selector="Border.status-group">
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Border Name="StatusBarBorder">
+        <Grid ColumnDefinitions="Auto,*,Auto" Margin="16,0">
+            <StackPanel Grid.Column="0"
+                        Orientation="Horizontal"
+                        Spacing="12"
+                        VerticalAlignment="Center"
+                        Height="36">
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <Ellipse Name="StatusDot" />
+                    <TextBlock Text="{DynamicResource str_ready}"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                               FontSize="11"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                <TextBlock Text="{Binding StatusMessage}"
+                           Foreground="{DynamicResource ThemeForeground}"
+                           FontSize="12"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2"
+                        Orientation="Horizontal"
+                        Spacing="12"
+                        Height="36">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="{DynamicResource str_status_ln}"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                               FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding LineCount}"
+                               Foreground="{DynamicResource ThemeStatValueColor}"
+                               FontSize="11" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Border Classes="status-sep" />
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="{DynamicResource str_status_words}"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                               FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding WordCount}"
+                               Foreground="{DynamicResource ThemeStatValueColor}"
+                               FontSize="11" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Border Classes="status-sep" />
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="{DynamicResource str_status_chars}"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                               FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding CharCount}"
+                               Foreground="{DynamicResource ThemeStatValueColor}"
+                               FontSize="11" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Border Classes="status-sep" />
+                <TextBlock Text="UTF-8"
+                           Foreground="{DynamicResource ThemeSecondaryForeground}"
+                           FontSize="11" VerticalAlignment="Center"/>
+                <TextBlock Text="Markdown"
+                           Foreground="{DynamicResource ThemeSecondaryForeground}"
+                           FontSize="11" VerticalAlignment="Center"/>
+                <Border Classes="version-badge">
+                    <TextBlock Text="v1.2"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                               FontSize="10"
+                               VerticalAlignment="Center"/>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

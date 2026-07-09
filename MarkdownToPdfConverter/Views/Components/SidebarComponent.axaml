@@ -1,0 +1,281 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+             x:Class="MarkdownToPdfConverter.Views.Components.SidebarComponent"
+             x:DataType="vm:MainViewModel">
+    <UserControl.Styles>
+        <Style Selector="Border.sidebar-bg">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="14"/>
+            <Setter Property="MinWidth" Value="180"/>
+            <Setter Property="MaxWidth" Value="260"/>
+        </Style>
+
+        <Style Selector="Border.brand-badge">
+            <Setter Property="Background" Value="{DynamicResource ThemeSuccessAccent}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Width" Value="44"/>
+            <Setter Property="Height" Value="44"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+
+        <Style Selector="TextBlock.section-title">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="LetterSpacing" Value="1.5"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
+        </Style>
+
+        <Style Selector="Border.sidebar-divider">
+            <Setter Property="Height" Value="1"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="Opacity" Value="0.4"/>
+            <Setter Property="Margin" Value="0,4"/>
+        </Style>
+
+        <Style Selector="Border.section-card">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+        </Style>
+
+        <Style Selector="Border.drop-zone">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+        </Style>
+
+        <Style Selector="Border.drop-zone:dragover">
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+        </Style>
+
+        <Style Selector="Button.sidebar-action">
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeButtonForeground}"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+        </Style>
+
+        <Style Selector="Button.sidebar-action:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonHoverBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+        </Style>
+
+        <Style Selector="TextBlock.stat-value">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeStatValueColor}"/>
+        </Style>
+
+        <Style Selector="TextBlock.stat-label">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+        </Style>
+
+        <Style Selector="TextBlock.brand-name">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        <Style Selector="TextBlock.brand-sub">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+        </Style>
+
+        <Style Selector="Path.icon-md">
+            <Setter Property="Stroke" Value="White"/>
+            <Setter Property="StrokeThickness" Value="2"/>
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="Width" Value="22"/>
+            <Setter Property="Height" Value="22"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
+        </Style>
+
+        <Style Selector="Button.recent-file-btn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="Padding" Value="8,6"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="FontSize" Value="11"/>
+        </Style>
+        <Style Selector="Button.recent-file-btn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeButtonHoverBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeStatValueColor}"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Border Classes="sidebar-bg">
+        <ScrollViewer>
+            <StackPanel Spacing="14">
+
+                <!-- Brand Section -->
+                <Border Classes="brand-badge">
+                    <Path Classes="icon-md"
+                          Data="M 3,5 L 11,5 M 3,8 L 9,8 M 3,11 L 7,11 M 3,14 H 11 M 3,17 H 9" />
+                </Border>
+                <StackPanel Spacing="2" Margin="0,0,0,2">
+                    <TextBlock Classes="brand-name" Text="Markdown Converter" />
+                    <TextBlock Classes="brand-sub" Text="{DynamicResource str_sidebar_brand_subtitle}" />
+                </StackPanel>
+
+                <Border Classes="sidebar-divider" />
+
+                <!-- Export Options -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{DynamicResource str_sidebar_export_options}" Classes="section-title"/>
+                    <Border Classes="section-card">
+                        <StackPanel Spacing="10">
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="stat-label" Text="{DynamicResource str_sidebar_page_size}"/>
+                                <ComboBox ItemsSource="{Binding PageSizeOptions}"
+                                          SelectedItem="{Binding PageSize}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="stat-label" Text="{DynamicResource str_sidebar_font}"/>
+                                <ComboBox ItemsSource="{Binding FontOptions}"
+                                          SelectedItem="{Binding ExportFont}"
+                                          HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Spacing="4">
+                                <TextBlock Classes="stat-label" Text="{DynamicResource str_sidebar_margin}"/>
+                                <Slider Minimum="0" Maximum="50" Value="{Binding PageMargin}"/>
+                                <TextBlock Text="{Binding PageMargin, StringFormat='{}{0:0}mm'}"
+                                           Classes="stat-value"
+                                           FontSize="12"
+                                           HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Editor Settings -->
+                <StackPanel Spacing="8">
+                    <TextBlock Text="{DynamicResource str_sidebar_editor}" Classes="section-title"/>
+                    <Border Classes="section-card">
+                        <StackPanel Spacing="4">
+                            <TextBlock Classes="stat-label" Text="{DynamicResource str_sidebar_font_size}"/>
+                            <Slider Minimum="12" Maximum="24" Value="{Binding FontSize}"/>
+                            <TextBlock Text="{Binding FontSize}"
+                                       Foreground="{DynamicResource ThemeSecondaryForeground}"
+                                       FontSize="12" FontWeight="SemiBold"
+                                       HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <Border Classes="sidebar-divider" />
+
+                <!-- Statistics -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{DynamicResource str_sidebar_statistics}" Classes="section-title"/>
+                    <Grid ColumnDefinitions="*,*">
+                        <Border Classes="section-card" Margin="0,0,4,0">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Classes="stat-value" Text="{Binding LineCount}" HorizontalAlignment="Center"/>
+                                <TextBlock Classes="stat-label" Text="{DynamicResource str_sidebar_lines}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="1" Classes="section-card" Margin="4,0,0,0">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Classes="stat-value" Text="{Binding WordCount}" HorizontalAlignment="Center"/>
+                                <TextBlock Classes="stat-label" Text="{DynamicResource str_sidebar_words}" HorizontalAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Border Classes="section-card">
+                        <StackPanel HorizontalAlignment="Center" Spacing="2">
+                            <TextBlock Classes="stat-value" Text="{Binding CharCount}" HorizontalAlignment="Center"/>
+                            <TextBlock Classes="stat-label" Text="{DynamicResource str_sidebar_chars}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <Border Classes="sidebar-divider" />
+
+                <!-- Recent Files -->
+                <!-- Recent Files -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="{DynamicResource str_sidebar_recent}" Classes="section-title"/>
+                    <ItemsControl ItemsSource="{Binding RecentFiles}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="x:String">
+                                <Button Classes="recent-file-btn">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Path Data="M 2,1 L 8,1 L 12,5 L 12,15 C 12,16 11,17 10,17 L 4,17 C 3,17 2,16 2,15 Z M 8,1 L 8,5 L 12,5"
+                                              Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                              StrokeThickness="1.5"
+                                              Stretch="Uniform"
+                                              Width="12" Height="14"/>
+                                        <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+                <Border Classes="sidebar-divider" />
+
+                <!-- Quick Actions -->
+                <StackPanel Spacing="6">
+                    <Button Classes="sidebar-action" Command="{Binding SwitchLanguageCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <TextBlock Text="Aa" FontSize="11" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding LanguageButtonText}" FontSize="12"
+                                       Foreground="{DynamicResource ThemeButtonForeground}"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="sidebar-action" Command="{Binding SwitchThemeCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <Path Data="M 8,2 C 5,2 3,5 3,8 C 3,11 5,14 8,14 C 10,14 12,12 13,10 C 8,10 5,7 8,2"
+                                  Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                  StrokeThickness="1.5"
+                                  Stretch="Uniform"
+                                  Width="14" Height="14"/>
+                            <TextBlock Text="{Binding CurrentTheme}" FontSize="12"
+                                       Foreground="{DynamicResource ThemeButtonForeground}"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- Drop Zone -->
+                <Border x:Name="DropSidebar"
+                        DragDrop.AllowDrop="True"
+                        Classes="drop-zone">
+                    <StackPanel Spacing="4" HorizontalAlignment="Center">
+                        <Path Data="M 1,3 C 1,2 2,1 3,1 H 6 L 8,3 H 13 C 14,3 15,4 15,5 V 12 C 15,13 14,14 13,14 H 3 C 2,14 1,13 1,12 Z"
+                              Stroke="{DynamicResource ThemeSecondaryForeground}"
+                              StrokeThickness="1.5"
+                              Stretch="Uniform"
+                              Width="18" Height="18"
+                              HorizontalAlignment="Center"/>
+                        <TextBlock Text="{DynamicResource str_drop_md_hint}"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource ThemeSecondaryForeground}"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Border>
+</UserControl>

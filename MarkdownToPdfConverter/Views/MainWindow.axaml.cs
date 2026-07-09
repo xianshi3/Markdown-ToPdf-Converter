@@ -1,16 +1,8 @@
-﻿using Avalonia;
+﻿using System;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Interactivity;
 using ReactiveUI;
-using System;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
 using MarkdownToPdfConverter.Services;
-using System.IO;
-using Avalonia.Platform.Storage;
 using MarkdownToPdfConverter.ViewModels;
 
 namespace MarkdownToPdfConverter.Views
@@ -20,94 +12,97 @@ namespace MarkdownToPdfConverter.Views
         public MainWindow()
         {
             InitializeComponent();
-#if DEBUG
-            this.AttachDevTools();
-#endif
 
-            AddHandler(DragDrop.DropEvent, OnDrop);
-            AddHandler(DragDrop.DragOverEvent, OnDragOver);
+            RootGrid.AddHandler(DragDrop.DragOverEvent, OnRootDragOver);
+            RootGrid.AddHandler(DragDrop.DropEvent, OnRootDrop);
         }
 
-        private void OnDragOver(object? sender, DragEventArgs e)
+        private void OnRootDragOver(object? sender, DragEventArgs e)
         {
-            if (e.Data.Contains(DataFormats.Files))
-            {
-                e.DragEffects = DragDropEffects.Copy;
-            }
-            else
-            {
-                e.DragEffects = DragDropEffects.None;
-            }
-            e.Handled = true;
+            e.DragEffects = DragDropEffects.Copy;
         }
 
-        private async void OnDrop(object? sender, DragEventArgs e)
+        private async void OnRootDrop(object? sender, DragEventArgs e)
         {
-            if (e.Data.Contains(DataFormats.Files))
-            {
-                var files = e.Data.GetFiles();
-                if (files != null)
-                {
-                    var fileArray = files.ToArray();
-                    if (fileArray.Length > 0)
-                    {
-                        var file = fileArray[0];
-                        var path = file.Path.LocalPath;
-
-                        if (path.EndsWith(".md", StringComparison.OrdinalIgnoreCase) || 
-                            path.EndsWith(".markdown", StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (DataContext is MainViewModel vm)
-                            {
-                                try
-                                {
-                                    vm.SelectedFilePath = path;
-                                    vm.MarkdownText = await File.ReadAllTextAsync(path);
-                                    vm.StatusMessage = $"Loaded: {Path.GetFileName(path)}";
-                                }
-                                catch (Exception ex)
-                                {
-                                    vm.StatusMessage = $"Error loading file: {ex.Message}";
-                                }
-                            }
-                        }
-                        else
-                        {
-                            if (DataContext is MainViewModel vm)
-                            {
-                                vm.StatusMessage = "Please drop a .md or .markdown file";
-                            }
-                        }
-                    }
-                }
-            }
+            if (DataContext is MainViewModel vm)
+                await FileDropHelper.HandleFileDrop(e, vm);
         }
 
         private void OnKeyDown(object? sender, KeyEventArgs e)
         {
             if (DataContext is MainViewModel vm)
             {
-                if (e.KeyModifiers == KeyModifiers.Control)
+                var ctrl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+                if (!ctrl) return;
+
+                var shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+
+                switch (e.Key)
                 {
-                    switch (e.Key)
-                    {
-                        case Key.O:
-                            vm.UploadFileCommand.Execute().Subscribe();
-                            e.Handled = true;
-                            break;
-                        case Key.S:
-                            vm.ConvertToPdfCommand.Execute().Subscribe();
-                            e.Handled = true;
-                            break;
-                        case Key.L:
-                            vm.SwitchLanguageCommand.Execute().Subscribe();
-                            e.Handled = true;
-                            break;
-                        case Key.T:
-                            vm.SwitchThemeCommand.Execute().Subscribe();
-                            e.Handled = true;
-                            break;
-                    }
+                    case Key.N:
+                        vm.NewFileCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.O:
+                        vm.OpenFileCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.S:
+                        if (shift)
+                            vm.SaveAsCommand.Execute().Subscribe();
+                        else
+                            vm.SaveFileCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.Z:
+                        vm.UndoCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.Y:
+                        vm.RedoCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.F:
+                        vm.FindCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.H:
+                        vm.ReplaceCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.L:
+                        vm.SwitchLanguageCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.T:
+                        vm.SwitchThemeCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.B:
+                        vm.InsertBoldCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.I:
+                        vm.InsertItalicCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.P:
+                        vm.TogglePreviewCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.OemPlus:
+                        if (shift)
+                            vm.ZoomInCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.OemMinus:
+                        vm.ZoomOutCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.D0:
+                        vm.ZoomResetCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
                 }
             }
         }
