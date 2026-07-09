@@ -196,11 +196,19 @@
 
             <StackPanel Orientation="Horizontal" Spacing="0" VerticalAlignment="Center" Margin="4,0">
                 <Button Classes="zoom-btn" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource str_tip_zoom_out}">
-                    <TextBlock Text="−"/>
+                    <Grid Width="10" Height="10">
+                        <Path Data="M 1,5 L 9,5"
+                              Stroke="{DynamicResource ThemeSecondaryForeground}"
+                              StrokeThickness="2"/>
+                    </Grid>
                 </Button>
                 <TextBlock Classes="zoom-label" Text="{Binding ZoomLevel, StringFormat='{}{0:0}%'}"/>
                 <Button Classes="zoom-btn" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource str_tip_zoom_in}">
-                    <TextBlock Text="+"/>
+                    <Grid Width="10" Height="10">
+                        <Path Data="M 1,5 L 9,5 M 5,1 L 5,9"
+                              Stroke="{DynamicResource ThemeSecondaryForeground}"
+                              StrokeThickness="2"/>
+                    </Grid>
                 </Button>
             </StackPanel>
 

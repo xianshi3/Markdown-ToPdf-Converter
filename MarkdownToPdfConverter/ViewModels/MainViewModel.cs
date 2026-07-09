@@ -181,10 +181,7 @@ namespace MarkdownToPdfConverter.ViewModels
                     _statsPending = true;
                     _statsTimer.Stop();
                     _statsTimer.Start();
-                    if (IsPreviewVisible)
-                    {
-                        UpdatePreview();
-                    }
+                    UpdatePreview();
                 }
             }
         }
@@ -642,7 +639,6 @@ namespace MarkdownToPdfConverter.ViewModels
 
         private void UpdatePreview()
         {
-            if (!IsPreviewVisible) return;
             var blocks = _previewService.Parse(MarkdownText);
             PreviewBlocks = new ObservableCollection<PreviewBlock>(blocks);
         }

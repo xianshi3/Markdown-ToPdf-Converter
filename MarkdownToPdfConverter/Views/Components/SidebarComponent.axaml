@@ -219,7 +219,11 @@
                             <DataTemplate DataType="x:String">
                                 <Button Classes="recent-file-btn">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <TextBlock Text="📄" FontSize="11"/>
+                                        <Path Data="M 2,1 L 8,1 L 12,5 L 12,15 C 12,16 11,17 10,17 L 4,17 C 3,17 2,16 2,15 Z M 8,1 L 8,5 L 12,5"
+                                              Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                              StrokeThickness="1.5"
+                                              Stretch="Uniform"
+                                              Width="12" Height="14"/>
                                         <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
                                 </Button>
@@ -234,7 +238,7 @@
                 <StackPanel Spacing="6">
                     <Button Classes="sidebar-action" Command="{Binding SwitchLanguageCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                            <TextBlock Text="🌐" FontSize="13"/>
+                            <TextBlock Text="Aa" FontSize="11" FontWeight="Bold"/>
                             <TextBlock Text="{Binding LanguageButtonText}" FontSize="12"
                                        Foreground="{DynamicResource ThemeButtonForeground}"/>
                         </StackPanel>
@@ -242,7 +246,11 @@
 
                     <Button Classes="sidebar-action" Command="{Binding SwitchThemeCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-                            <TextBlock Text="🎨" FontSize="13"/>
+                            <Path Data="M 8,2 C 5,2 3,5 3,8 C 3,11 5,14 8,14 C 10,14 12,12 13,10 C 8,10 5,7 8,2"
+                                  Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                  StrokeThickness="1.5"
+                                  Stretch="Uniform"
+                                  Width="14" Height="14"/>
                             <TextBlock Text="{Binding CurrentTheme}" FontSize="12"
                                        Foreground="{DynamicResource ThemeButtonForeground}"/>
                         </StackPanel>
@@ -254,7 +262,12 @@
                         DragDrop.AllowDrop="True"
                         Classes="drop-zone">
                     <StackPanel Spacing="4" HorizontalAlignment="Center">
-                        <TextBlock Text="📁" FontSize="18" HorizontalAlignment="Center"/>
+                        <Path Data="M 1,3 C 1,2 2,1 3,1 H 6 L 8,3 H 13 C 14,3 15,4 15,5 V 12 C 15,13 14,14 13,14 H 3 C 2,14 1,13 1,12 Z"
+                              Stroke="{DynamicResource ThemeSecondaryForeground}"
+                              StrokeThickness="1.5"
+                              Stretch="Uniform"
+                              Width="18" Height="18"
+                              HorizontalAlignment="Center"/>
                         <TextBlock Text="{DynamicResource str_drop_md_hint}"
                                    FontSize="11"
                                    Foreground="{DynamicResource ThemeSecondaryForeground}"

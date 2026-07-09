@@ -106,13 +106,13 @@
         </Style>
 
         <Style Selector="Border.editor-body">
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
             <Setter Property="Padding" Value="0"/>
         </Style>
 
         <Style Selector="TextBox.editor-textbox">
             <Setter Property="AcceptsReturn" Value="True"/>
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
             <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontSize" Value="{Binding FontSize}"/>
@@ -124,6 +124,20 @@
             <Setter Property="SelectionBrush" Value="{DynamicResource ThemeAccentBrush}"/>
             <Setter Property="SelectionForegroundBrush" Value="{DynamicResource ThemeForeground}"/>
             <Setter Property="CaretBrush" Value="{DynamicResource ThemeAccentBrush}"/>
+        </Style>
+        <Style Selector="TextBox.editor-textbox:focus-within">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+        </Style>
+        <Style Selector="TextBox.editor-textbox:pointerover">
+            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
+        </Style>
+        <Style Selector="TextBox.editor-textbox /template/ Border#PART_BorderElement">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+        </Style>
+        <Style Selector="TextBox.editor-textbox /template/ Border#PART_RevealBorder">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="IsVisible" Value="False"/>
         </Style>
 
         <Style Selector="Border.preview-container">
@@ -288,20 +302,40 @@
                                 </Button>
                                 <Border Classes="format-sep"/>
                                 <Button Classes="format-btn" Command="{Binding InsertLinkCommand}" ToolTip.Tip="{DynamicResource str_tip_link}">
-                                    <TextBlock Text="🔗" FontSize="12"/>
+                                    <Path Data="M 4,4 L 4,12 M 10,4 L 10,12 M 4,4 C 4,2 10,2 10,4 M 4,12 C 4,14 10,14 10,12"
+                                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                          StrokeThickness="1.5"
+                                          Stretch="Uniform"
+                                          Width="12" Height="12"/>
                                 </Button>
                                 <Button Classes="format-btn" Command="{Binding InsertImageCommand}" ToolTip.Tip="{DynamicResource str_tip_image}">
-                                    <TextBlock Text="🖼" FontSize="12"/>
+                                    <Path Data="M 2,3 L 14,3 L 14,13 L 2,13 Z M 2,10 L 5,6 L 9,10 L 11,7 L 14,11"
+                                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                          StrokeThickness="1.5"
+                                          Stretch="Uniform"
+                                          Width="12" Height="12"/>
                                 </Button>
                                 <Button Classes="format-btn" Command="{Binding InsertCodeCommand}" ToolTip.Tip="{DynamicResource str_tip_code}">
-                                    <TextBlock Text="&lt;/&gt;" FontFamily="Consolas" FontSize="11"/>
+                                    <Path Data="M 5,4 L 2,8 L 5,12 M 11,4 L 14,8 L 11,12"
+                                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                          StrokeThickness="1.5"
+                                          Stretch="Uniform"
+                                          Width="12" Height="12"/>
                                 </Button>
                                 <Border Classes="format-sep"/>
                                 <Button Classes="format-btn" Command="{Binding InsertListCommand}" ToolTip.Tip="{DynamicResource str_tip_list}">
-                                    <TextBlock Text="•" FontSize="16"/>
+                                    <Path Data="M 2,4 H 5 M 7,4 H 14 M 2,8 H 5 M 7,8 H 14 M 2,12 H 5 M 7,12 H 14"
+                                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                          StrokeThickness="1.5"
+                                          Stretch="Uniform"
+                                          Width="12" Height="12"/>
                                 </Button>
                                 <Button Classes="format-btn" Command="{Binding InsertQuoteCommand}" ToolTip.Tip="{DynamicResource str_tip_quote}">
-                                    <TextBlock Text="❝" FontSize="12"/>
+                                    <Path Data="M 3,4 V 12 M 6,6 H 14 M 6,9 H 11"
+                                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                                          StrokeThickness="1.5"
+                                          Stretch="Uniform"
+                                          Width="12" Height="12"/>
                                 </Button>
                             </StackPanel>
                         </Border>

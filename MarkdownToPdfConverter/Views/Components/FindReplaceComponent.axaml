@@ -98,13 +98,21 @@
                     Command="{Binding FindPrevCommand}"
                     ToolTip.Tip="{DynamicResource str_find_prev}"
                     Margin="0,0,4,0">
-                <TextBlock Text="◀" FontSize="10"/>
+                <Path Data="M 8,3 L 3,8 L 8,13"
+                      Stroke="{DynamicResource ThemeButtonForeground}"
+                      StrokeThickness="1.5"
+                      Stretch="Uniform"
+                      Width="10" Height="10"/>
             </Button>
             <Button Grid.Column="4" Classes="small-btn"
                     Command="{Binding FindNextCommand}"
                     ToolTip.Tip="{DynamicResource str_find_next}"
                     Margin="0,0,8,0">
-                <TextBlock Text="▶" FontSize="10"/>
+                <Path Data="M 3,3 L 8,8 L 3,13"
+                      Stroke="{DynamicResource ThemeButtonForeground}"
+                      StrokeThickness="1.5"
+                      Stretch="Uniform"
+                      Width="10" Height="10"/>
             </Button>
             <Button Grid.Column="5"
                     Command="{Binding ReplaceCommand}"
@@ -113,8 +121,13 @@
                     Margin="0,0,8,0"/>
             <Button Grid.Column="6"
                     Classes="close-btn"
-                    Command="{Binding CloseFindCommand}"
-                    Content="✕"/>
+                    Command="{Binding CloseFindCommand}">
+                <Path Data="M 4,4 L 10,10 M 10,4 L 4,10"
+                      Stroke="{DynamicResource ThemeSecondaryForeground}"
+                      StrokeThickness="1.5"
+                      Stretch="Uniform"
+                      Width="12" Height="12"/>
+            </Button>
         </Grid>
     </Border>
 </UserControl>
