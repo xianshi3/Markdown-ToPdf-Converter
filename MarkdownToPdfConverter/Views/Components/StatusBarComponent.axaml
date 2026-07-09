@@ -18,33 +18,22 @@
             <Setter Property="Width" Value="7"/>
             <Setter Property="Height" Value="7"/>
             <Setter Property="Fill" Value="{DynamicResource ThemeReadyDotColor}"/>
-            <Setter Property="Transitions">
-                <Transitions>
-                    <BrushTransition Property="Fill" Duration="0:0:0.35"/>
-                </Transitions>
-            </Setter>
         </Style>
 
         <Style Selector="Border.status-sep">
             <Setter Property="Width" Value="1"/>
             <Setter Property="Background" Value="{DynamicResource ThemeBorderBrush}"/>
             <Setter Property="Opacity" Value="0.5"/>
-            <Setter Property="Transitions">
-                <Transitions>
-                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
-                </Transitions>
-            </Setter>
         </Style>
 
         <Style Selector="Border.version-badge">
             <Setter Property="Background" Value="{DynamicResource ThemeButtonBackground}"/>
             <Setter Property="CornerRadius" Value="4"/>
             <Setter Property="Padding" Value="6,3"/>
-            <Setter Property="Transitions">
-                <Transitions>
-                    <BrushTransition Property="Background" Duration="0:0:0.35"/>
-                </Transitions>
-            </Setter>
+        </Style>
+
+        <Style Selector="Border.status-group">
+            <Setter Property="Padding" Value="0"/>
         </Style>
     </UserControl.Styles>
 
@@ -73,19 +62,40 @@
                         Spacing="12"
                         Height="36">
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                    <TextBlock Text="{DynamicResource str_status_ln}" Foreground="{DynamicResource ThemeSecondaryForeground}" FontSize="11" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding LineCount}" Foreground="{DynamicResource ThemeStatValueColor}" FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="{DynamicResource str_status_ln}"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                               FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding LineCount}"
+                               Foreground="{DynamicResource ThemeStatValueColor}"
+                               FontSize="11" VerticalAlignment="Center"/>
                 </StackPanel>
                 <Border Classes="status-sep" />
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                    <TextBlock Text="{DynamicResource str_status_words}" Foreground="{DynamicResource ThemeSecondaryForeground}" FontSize="11" VerticalAlignment="Center"/>
-                    <TextBlock Text="{Binding WordCount}" Foreground="{DynamicResource ThemeStatValueColor}" FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="{DynamicResource str_status_words}"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                               FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding WordCount}"
+                               Foreground="{DynamicResource ThemeStatValueColor}"
+                               FontSize="11" VerticalAlignment="Center"/>
                 </StackPanel>
                 <Border Classes="status-sep" />
-                <TextBlock Text="UTF-8" Foreground="{DynamicResource ThemeSecondaryForeground}" FontSize="11" VerticalAlignment="Center"/>
-                <TextBlock Text="Markdown" Foreground="{DynamicResource ThemeSecondaryForeground}" FontSize="11" VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="{DynamicResource str_status_chars}"
+                               Foreground="{DynamicResource ThemeSecondaryForeground}"
+                               FontSize="11" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding CharCount}"
+                               Foreground="{DynamicResource ThemeStatValueColor}"
+                               FontSize="11" VerticalAlignment="Center"/>
+                </StackPanel>
+                <Border Classes="status-sep" />
+                <TextBlock Text="UTF-8"
+                           Foreground="{DynamicResource ThemeSecondaryForeground}"
+                           FontSize="11" VerticalAlignment="Center"/>
+                <TextBlock Text="Markdown"
+                           Foreground="{DynamicResource ThemeSecondaryForeground}"
+                           FontSize="11" VerticalAlignment="Center"/>
                 <Border Classes="version-badge">
-                    <TextBlock Text="v1.0"
+                    <TextBlock Text="v1.2"
                                Foreground="{DynamicResource ThemeSecondaryForeground}"
                                FontSize="10"
                                VerticalAlignment="Center"/>

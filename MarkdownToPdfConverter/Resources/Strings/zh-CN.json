@@ -5,6 +5,7 @@
   "help": "帮助",
   "file_tab": "文件上传",
   "edit_tab": "编辑 Markdown",
+  "preview_tab": "预览",
   "selected_file": "已选择文件:",
   "edit_content": "编辑内容:",
   "preview": "预览",
@@ -19,6 +20,7 @@
   "save_cancelled": "保存已取消",
   "select_markdown": "选择 Markdown 文件",
   "save_pdf": "保存 PDF 文件",
+  "save_html": "保存 HTML 文件",
   "converting": "正在转换...",
   "saved_to": "已保存到",
   "save_failed": "保存失败",
@@ -32,6 +34,7 @@
   "menu_save": "保存",
   "menu_save_as": "另存为...",
   "menu_export_pdf": "导出 PDF",
+  "menu_export_html": "导出 HTML",
   "menu_edit": "编辑",
   "menu_undo": "撤销",
   "menu_redo": "重做",
@@ -40,8 +43,13 @@
   "menu_view": "视图",
   "menu_toggle_theme": "切换主题",
   "menu_language": "语言",
+  "menu_preview": "预览",
+  "menu_zoom_in": "放大",
+  "menu_zoom_out": "缩小",
+  "menu_zoom_reset": "重置缩放",
   "menu_help": "帮助",
   "menu_about": "关于",
+  "menu_recent": "最近文件",
 
   "tip_new": "新建 (Ctrl+N)",
   "tip_open": "打开 (Ctrl+O)",
@@ -50,6 +58,18 @@
   "tip_redo": "重做 (Ctrl+Y)",
   "tip_find": "查找 (Ctrl+F)",
   "tip_export_pdf": "导出 PDF",
+  "tip_export_html": "导出 HTML",
+  "tip_preview": "预览 (Ctrl+P)",
+  "tip_bold": "加粗 (Ctrl+B)",
+  "tip_italic": "斜体 (Ctrl+I)",
+  "tip_heading": "标题",
+  "tip_link": "插入链接",
+  "tip_image": "插入图片",
+  "tip_code": "行内代码",
+  "tip_list": "无序列表",
+  "tip_quote": "块引用",
+  "tip_zoom_in": "放大",
+  "tip_zoom_out": "缩小",
 
   "sidebar_brand_subtitle": "专业的 PDF 转换工具",
   "sidebar_export_options": "导出选项",
@@ -61,6 +81,8 @@
   "sidebar_statistics": "统计",
   "sidebar_lines": "行数",
   "sidebar_words": "词数",
+  "sidebar_chars": "字符数",
+  "sidebar_recent": "最近文件",
 
   "editor_file_path": "文件路径",
   "editor_watermark": "在此编写 Markdown...",
@@ -68,8 +90,22 @@
 
   "status_ln": "行",
   "status_words": "词数",
+  "status_chars": "字符",
 
   "find_placeholder": "查找...",
   "replace_placeholder": "替换为...",
-  "find_replace": "替换"
+  "find_replace": "替换",
+  "find_next": "下一个",
+  "find_prev": "上一个",
+  "find_match_case": "Aa",
+  "find_no_matches": "无匹配",
+
+  "about_version": "v1.2.0",
+  "about_desc": "基于 Avalonia UI 和 .NET 构建的跨平台 Markdown 转 PDF 工具。\n支持语法高亮、自定义主题和多格式导出。",
+  "about_close": "关闭",
+
+  "preview_placeholder": "预览将在此处显示...",
+  "preview_heading": "预览",
+
+  "confirm_new": "创建新文件？未保存的更改将丢失。"
 }

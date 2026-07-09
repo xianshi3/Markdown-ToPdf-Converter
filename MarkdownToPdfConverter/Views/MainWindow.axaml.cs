@@ -78,6 +78,31 @@ namespace MarkdownToPdfConverter.Views
                         vm.SwitchThemeCommand.Execute().Subscribe();
                         e.Handled = true;
                         break;
+                    case Key.B:
+                        vm.InsertBoldCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.I:
+                        vm.InsertItalicCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.P:
+                        vm.TogglePreviewCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.OemPlus:
+                        if (shift)
+                            vm.ZoomInCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.OemMinus:
+                        vm.ZoomOutCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
+                    case Key.D0:
+                        vm.ZoomResetCommand.Execute().Subscribe();
+                        e.Handled = true;
+                        break;
                 }
             }
         }
