@@ -5,7 +5,6 @@
   "help": "帮助",
   "file_tab": "文件上传",
   "edit_tab": "编辑 Markdown",
-  "preview_tab": "预览",
   "selected_file": "已选择文件:",
   "edit_content": "编辑内容:",
   "preview": "预览",
@@ -100,6 +99,8 @@
   "find_match_case": "Aa",
   "find_no_matches": "无匹配",
 
+  "copy": "复制",
+  "close": "关闭",
   "about_version": "v1.2.0",
   "about_desc": "基于 Avalonia UI 和 .NET 构建的跨平台 Markdown 转 PDF 工具。\n支持语法高亮、自定义主题和多格式导出。",
   "about_close": "关闭",
@@ -107,5 +108,7 @@
   "preview_placeholder": "预览将在此处显示...",
   "preview_heading": "预览",
 
-  "confirm_new": "创建新文件？未保存的更改将丢失。"
+  "confirm_new": "创建新文件？未保存的更改将丢失。",
+  "yes": "是",
+  "no": "否"
 }

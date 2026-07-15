@@ -5,7 +5,7 @@
     One for Windows with net8.0-windows TFM, one for MacOS with net8.0-macos and one with net8.0 TFM for Linux.-->
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <BuiltInComInteropSupport Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
@@ -16,5 +16,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MarkdownToPdfConverter\MarkdownToPdfConverter.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\MarkdownToPdfConverter\Resources\Fonts\SimSun.ttf" Link="Resources\Fonts\SimSun.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

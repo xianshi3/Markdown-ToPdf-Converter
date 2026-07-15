@@ -90,5 +90,17 @@ namespace MarkdownToPdfConverter.Models
         public bool IsHorizontalRule => Type == PreviewBlockType.HorizontalRule;
         public bool IsEmpty => Type == PreviewBlockType.Empty;
         public bool IsCode => Type == PreviewBlockType.CodeBlock;
+
+        public bool IsHeading =>
+            Type >= PreviewBlockType.Heading1 && Type <= PreviewBlockType.Heading6;
+
+        public bool IsParagraph => Type == PreviewBlockType.Paragraph;
+        public bool IsBlockQuote => Type == PreviewBlockType.BlockQuote;
+        public bool IsListItem => Type == PreviewBlockType.ListItem;
+        public bool IsOrderedListItem => Type == PreviewBlockType.OrderedListItem;
+        public bool IsTable => Type == PreviewBlockType.Table;
+
+        public double HeadingLineOpacity => Type == PreviewBlockType.Heading1 ? 0.6 : 0.3;
+        public int ListNumber { get; set; }
     }
 }

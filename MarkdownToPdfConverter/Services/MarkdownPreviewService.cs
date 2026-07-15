@@ -87,6 +87,10 @@ namespace MarkdownToPdfConverter.Services
                     break;
 
                 case ListBlock listBlock:
+                    int startNum = 1;
+                    if (listBlock.IsOrdered && !string.IsNullOrEmpty(listBlock.OrderedStart))
+                        int.TryParse(listBlock.OrderedStart.TrimEnd('.'), out startNum);
+                    int listNum = startNum;
                     foreach (var item in listBlock)
                     {
                         if (item is ListItemBlock listItem)
@@ -97,9 +101,11 @@ namespace MarkdownToPdfConverter.Services
                                 blocks.Add(new PreviewBlock
                                 {
                                     Type = listBlock.IsOrdered ? PreviewBlockType.OrderedListItem : PreviewBlockType.ListItem,
-                                    Text = itemText
+                                    Text = itemText,
+                                    ListNumber = listBlock.IsOrdered ? listNum : 0
                                 });
                             }
+                            if (listBlock.IsOrdered) listNum++;
                         }
                     }
                     break;

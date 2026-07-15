@@ -73,7 +73,6 @@ namespace MarkdownToPdfConverter.ViewModels
 
         public string FileTabText => _localization.GetString("file_tab");
         public string EditTabText => _localization.GetString("edit_tab");
-        public string PreviewTabText => _localization.GetString("preview_tab");
         public string SelectedFileText => _localization.GetString("selected_file");
 
         public int LineCount
@@ -270,7 +269,7 @@ namespace MarkdownToPdfConverter.ViewModels
         }
 
         public ObservableCollection<string> PageSizeOptions { get; } = new() { "A4", "Letter", "Legal", "A3", "A5" };
-        public ObservableCollection<string> FontOptions { get; } = new() { "Segoe UI", "Arial", "Times New Roman", "Consolas", "Microsoft YaHei" };
+        public ObservableCollection<string> FontOptions { get; } = new() { "Inter", "Segoe UI", "Noto Sans", "DejaVu Sans", "Liberation Serif", "Consolas", "SimSun" };
 
         public ObservableCollection<PreviewBlock> PreviewBlocks
         {
@@ -391,7 +390,7 @@ namespace MarkdownToPdfConverter.ViewModels
             InsertHeadingCommand = ReactiveCommand.Create(() =>
             {
                 var text = MarkdownText;
-                MarkdownText = "# " + text.Insert(0, "# ");
+                MarkdownText = (string.IsNullOrEmpty(text) || text.StartsWith('\n') ? "" : "\n\n") + "# ";
             });
             InsertLinkCommand = ReactiveCommand.Create(() => InsertAroundSelection("[", "](url)"));
             InsertImageCommand = ReactiveCommand.Create(() => InsertAroundSelection("![", "](url)"));
@@ -399,12 +398,14 @@ namespace MarkdownToPdfConverter.ViewModels
             InsertListCommand = ReactiveCommand.Create(() =>
             {
                 var text = MarkdownText;
-                MarkdownText = text + (text.EndsWith("\n") || text.Length == 0 ? "" : "\n") + "- ";
+                var hasNewline = text.EndsWith("\n") || text.EndsWith("\r\n") || text.Length == 0;
+                MarkdownText = text + (hasNewline ? "" : "\n") + "- ";
             });
             InsertQuoteCommand = ReactiveCommand.Create(() =>
             {
                 var text = MarkdownText;
-                MarkdownText = text + (text.EndsWith("\n") || text.Length == 0 ? "" : "\n") + "> ";
+                var hasNewline = text.EndsWith("\n") || text.EndsWith("\r\n") || text.Length == 0;
+                MarkdownText = text + (hasNewline ? "" : "\n") + "> ";
             });
 
             ZoomInCommand = ReactiveCommand.Create(() => { ZoomLevel = Math.Min(200, ZoomLevel + 10); });
@@ -417,14 +418,21 @@ namespace MarkdownToPdfConverter.ViewModels
         private void InsertAroundSelection(string before, string after)
         {
             var text = MarkdownText;
-            MarkdownText = text + before + after;
+            if (string.IsNullOrEmpty(text))
+            {
+                MarkdownText = before + after;
+                return;
+            }
+            var trimmed = text.TrimEnd();
+            var ws = text.Length - trimmed.Length;
+            MarkdownText = trimmed + (trimmed.Length > 0 ? "" : "") + before + after + new string(' ', ws);
         }
 
-        private void NewFile()
+        private async void NewFile()
         {
             if (HasUnsavedChanges && !string.IsNullOrWhiteSpace(MarkdownText))
             {
-                var result = ShowConfirmDialog(_localization.GetString("confirm_new"));
+                var result = await ShowConfirmDialogAsync(_localization.GetString("confirm_new"));
                 if (!result) return;
             }
 
@@ -437,8 +445,11 @@ namespace MarkdownToPdfConverter.ViewModels
             UpdatePreview();
         }
 
-        private static bool ShowConfirmDialog(string message)
+        private static async Task<bool> ShowConfirmDialogAsync(string message)
         {
+            var dialog = new Views.ConfirmDialog { Message = message };
+            if (WindowService.MainWindow != null)
+                return await dialog.ShowDialog<bool>(WindowService.MainWindow);
             return true;
         }
 
@@ -446,7 +457,8 @@ namespace MarkdownToPdfConverter.ViewModels
         {
             if (HasUnsavedChanges && !string.IsNullOrWhiteSpace(MarkdownText))
             {
-                // Prompt would go here; for now just proceed
+                var proceed = await ShowConfirmDialogAsync(_localization.GetString("confirm_new"));
+                if (!proceed) return;
             }
 
             var files = await WindowService.OpenFilePickerAsync(new FilePickerOpenOptions
@@ -593,16 +605,26 @@ namespace MarkdownToPdfConverter.ViewModels
         {
             if (string.IsNullOrEmpty(FindText) || string.IsNullOrWhiteSpace(MarkdownText)) return;
             var comparison = MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
-            var index = MarkdownText.IndexOf(FindText, comparison);
-            if (index >= 0)
+            int start = 0;
+            for (int i = 0; i <= CurrentMatchIndex; i++)
             {
-                CurrentMatchIndex = 0;
+                int idx = MarkdownText.IndexOf(FindText, start, comparison);
+                if (idx < 0) { CurrentMatchIndex = 0; return; }
+                if (i == CurrentMatchIndex)
+                {
+                    CurrentMatchIndex = (CurrentMatchIndex + 1) % Math.Max(1, MatchCount);
+                    return;
+                }
+                start = idx + FindText.Length;
             }
+            CurrentMatchIndex = 0;
         }
 
         private void FindPrev()
         {
-            FindNext();
+            if (string.IsNullOrEmpty(FindText) || string.IsNullOrWhiteSpace(MarkdownText)) return;
+            if (MatchCount == 0) return;
+            CurrentMatchIndex = (CurrentMatchIndex - 1 + MatchCount) % MatchCount;
         }
 
         private void UpdateMatchCount()
@@ -631,7 +653,7 @@ namespace MarkdownToPdfConverter.ViewModels
 
         private void UpdateStatistics()
         {
-            LineCount = string.IsNullOrEmpty(MarkdownText) ? 1 : MarkdownText.Split('\n').Length;
+            LineCount = string.IsNullOrEmpty(MarkdownText) ? 1 : MarkdownText.Replace("\r\n", "\n").Split('\n').Length;
             WordCount = string.IsNullOrWhiteSpace(MarkdownText) ? 0 :
                 MarkdownText.Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
             CharCount = MarkdownText.Length;
@@ -653,7 +675,6 @@ namespace MarkdownToPdfConverter.ViewModels
                 this.RaisePropertyChanged(nameof(LoadFailedText));
                 this.RaisePropertyChanged(nameof(FileTabText));
                 this.RaisePropertyChanged(nameof(EditTabText));
-                this.RaisePropertyChanged(nameof(PreviewTabText));
                 this.RaisePropertyChanged(nameof(SelectedFileText));
                 this.RaisePropertyChanged(nameof(DropMdHintText));
                 this.RaisePropertyChanged(nameof(MatchStatusText));
@@ -703,11 +724,22 @@ namespace MarkdownToPdfConverter.ViewModels
             catch (Exception ex)
             {
                 StatusMessage = $"{_localization.GetString("conversion_failed")} {ex.Message}";
+                await ShowErrorDialogAsync(ex);
             }
             finally
             {
                 IsConverting = false;
             }
+        }
+
+        private async Task ShowErrorDialogAsync(Exception ex)
+        {
+            var dialog = new Views.ErrorDialog();
+            dialog.ErrorMessage = $"Exception: {ex.GetType().FullName}\nMessage: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
+            if (WindowService.MainWindow != null)
+                await dialog.ShowDialog(WindowService.MainWindow);
+            else
+                dialog.Show();
         }
 
         private async Task ConvertToHtmlAsync()
@@ -741,7 +773,7 @@ namespace MarkdownToPdfConverter.ViewModels
 <html lang=""en"">
 <head><meta charset=""utf-8""><title>Markdown Export</title>
 <style>
-body {{ font-family: 'Segoe UI', sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }}
+body {{ font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }}
 pre {{ background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }}
 code {{ background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }}
 table {{ border-collapse: collapse; width: 100%; }}
@@ -760,6 +792,7 @@ blockquote {{ border-left: 4px solid #ddd; margin: 0; padding: 0 16px; color: #6
             catch (Exception ex)
             {
                 StatusMessage = $"{_localization.GetString("conversion_failed")} {ex.Message}";
+                await ShowErrorDialogAsync(ex);
             }
             finally
             {
@@ -782,8 +815,9 @@ blockquote {{ border-left: 4px solid #ddd; margin: 0; padding: 0 16px; color: #6
 
         private void AddRecentFile(string path)
         {
-            if (_recentFiles.Contains(path))
-                _recentFiles.Remove(path);
+            var existing = _recentFiles.FirstOrDefault(f => string.Equals(f, path, StringComparison.OrdinalIgnoreCase));
+            if (existing != null)
+                _recentFiles.Remove(existing);
             _recentFiles.Insert(0, path);
             if (_recentFiles.Count > 10)
                 _recentFiles.RemoveAt(_recentFiles.Count - 1);

@@ -1,0 +1,228 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
+             xmlns:models="clr-namespace:MarkdownToPdfConverter.Models"
+             xmlns:cvt="clr-namespace:MarkdownToPdfConverter.Converters"
+             x:Class="MarkdownToPdfConverter.Views.Components.PreviewComponent"
+             x:DataType="vm:MainViewModel">
+    <UserControl.Resources>
+        <cvt:NotBoolConverter x:Key="NotBoolConverter"/>
+        <cvt:BoolToFontStyleConverter x:Key="BoolToFontStyle"/>
+        <cvt:BoolToFontFamilyConverter x:Key="BoolToFontFamily"/>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="Border.preview-root">
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
+        </Style>
+
+        <Style Selector="TextBlock.preview-heading">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="LetterSpacing" Value="1.5"/>
+            <Setter Property="Margin" Value="12,10,12,6"/>
+        </Style>
+
+        <Style Selector="Border.code-block">
+            <Setter Property="Background" Value="#F5F5F5"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="14,12"/>
+            <Setter Property="Margin" Value="12,4,12,8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#E0E0E0"/>
+        </Style>
+        <Style Selector="TextBlock.code-text">
+            <Setter Property="FontFamily" Value="JetBrains Mono, Cascadia Code, Consolas, monospace"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#2D2D2D"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="20"/>
+        </Style>
+
+        <Style Selector="Border.blockquote-block">
+            <Setter Property="Margin" Value="12,4,12,8"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="CornerRadius" Value="0,8,8,0"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+        </Style>
+        <Style Selector="TextBlock.blockquote-text">
+            <Setter Property="FontStyle" Value="Italic"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#666666"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="22"/>
+        </Style>
+
+        <Style Selector="Border.hr-block">
+            <Setter Property="Height" Value="1"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeBorderBrush}"/>
+            <Setter Property="Margin" Value="12,10"/>
+            <Setter Property="Opacity" Value="0.4"/>
+        </Style>
+
+        <Style Selector="Border.list-item">
+            <Setter Property="Margin" Value="12,1,12,1"/>
+            <Setter Property="Padding" Value="0,2"/>
+        </Style>
+        <Style Selector="TextBlock.list-text">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="22"/>
+        </Style>
+        <Style Selector="TextBlock.list-bullet">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Width" Value="20"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Border.empty-text">
+            <Setter Property="Padding" Value="12,20"/>
+        </Style>
+        <Style Selector="TextBlock.empty-hint">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeSecondaryForeground}"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+
+        <Style Selector="TextBlock.table-preview-text">
+            <Setter Property="FontFamily" Value="JetBrains Mono, Cascadia Code, Consolas, monospace"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="20"/>
+            <Setter Property="Margin" Value="12,4,12,8"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Border Classes="preview-root">
+        <Grid RowDefinitions="Auto,*">
+            <Grid ColumnDefinitions="*,Auto" Margin="12,10,12,0">
+                <TextBlock Classes="preview-heading" Text="Preview" />
+                <Button Grid.Column="1"
+                        Background="Transparent"
+                        BorderThickness="1"
+                        BorderBrush="{DynamicResource ThemeBorderBrush}"
+                        CornerRadius="4"
+                        Padding="4,2"
+                        Width="24" Height="24"
+                        Command="{Binding TogglePreviewCommand}"
+                        ToolTip.Tip="Close Preview">
+                    <Path Data="M 4,4 L 12,12 M 12,4 L 4,12"
+                          Stroke="{DynamicResource ThemeSecondaryForeground}"
+                          StrokeThickness="1.5"
+                          Stretch="Uniform"
+                          Width="10" Height="10"/>
+                </Button>
+            </Grid>
+
+            <ScrollViewer Grid.Row="1" Padding="4,0,4,4">
+                <ItemsControl ItemsSource="{Binding PreviewBlocks}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="0"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="models:PreviewBlock">
+                            <Panel>
+                                <!-- Heading with underline -->
+                                <Border IsVisible="{Binding IsHeading}"
+                                        Margin="12,8,12,2">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Text}"
+                                                   FontSize="{Binding DisplayFontSize}"
+                                                   FontWeight="Bold"
+                                                   Foreground="{DynamicResource ThemeForeground}"
+                                                   TextWrapping="Wrap"/>
+                                        <Border Height="2"
+                                                Background="{DynamicResource ThemeBorderBrush}"
+                                                Margin="0,4,40,0"
+                                                Opacity="{Binding HeadingLineOpacity}"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Paragraph -->
+                                <TextBlock IsVisible="{Binding IsParagraph}"
+                                           Text="{Binding Text}"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource ThemeForeground}"
+                                           TextWrapping="Wrap"
+                                           LineHeight="22"
+                                           Margin="12,2,12,6"/>
+
+                                <!-- Code Block -->
+                                <Border IsVisible="{Binding IsCode}"
+                                        Classes="code-block">
+                                    <ScrollViewer HorizontalScrollBarVisibility="Auto">
+                                        <TextBlock Classes="code-text" Text="{Binding Text}"/>
+                                    </ScrollViewer>
+                                </Border>
+
+                                <!-- BlockQuote -->
+                                <Border IsVisible="{Binding IsBlockQuote}"
+                                        Classes="blockquote-block">
+                                    <DockPanel>
+                                        <Border Width="4"
+                                                Background="#CCCCCC"
+                                                CornerRadius="2"
+                                                DockPanel.Dock="Left"
+                                                Margin="0,0,12,0"/>
+                                        <TextBlock Classes="blockquote-text"
+                                                   Text="{Binding Text}"/>
+                                    </DockPanel>
+                                </Border>
+
+                                <!-- Horizontal Rule -->
+                                <Border IsVisible="{Binding IsHorizontalRule}"
+                                        Classes="hr-block"/>
+
+                                <!-- List Item (bullet) -->
+                                <Border IsVisible="{Binding IsListItem}"
+                                        Classes="list-item">
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <TextBlock Classes="list-bullet" Text="&#x2022;"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Classes="list-text"
+                                                   Text="{Binding Text}"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Ordered List Item -->
+                                <Border IsVisible="{Binding IsOrderedListItem}"
+                                        Classes="list-item">
+                                    <Grid ColumnDefinitions="Auto,*">
+                                        <TextBlock Classes="list-bullet"
+                                                   Text="{Binding ListNumber, StringFormat={}{0}.}"/>
+                                        <TextBlock Grid.Column="1"
+                                                   Classes="list-text"
+                                                   Text="{Binding Text}"/>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Table (formatted text) -->
+                                <TextBlock IsVisible="{Binding IsTable}"
+                                           Classes="table-preview-text"
+                                           Text="{Binding Text}"/>
+
+                                <!-- Empty state -->
+                                <Border IsVisible="{Binding IsEmpty}"
+                                        Classes="empty-text">
+                                    <TextBlock Classes="empty-hint" Text="{Binding Text}"/>
+                                </Border>
+                            </Panel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</UserControl>
