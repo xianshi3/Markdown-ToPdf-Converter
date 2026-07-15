@@ -8,7 +8,7 @@ namespace MarkdownToPdfConverter
     class Program
     {
         // 初始化 Avalonia 应用
-        [STAThread]
+    // [STAThread] — not required by Avalonia; omitted for cross-platform compatibility
         public static void Main(string[] args) => BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
 

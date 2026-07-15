@@ -60,7 +60,7 @@ namespace MarkdownToPdfConverter.Converters
     {
         public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value is bool b && b) return new FontFamily("Consolas");
+            if (value is bool b && b) return new FontFamily("JetBrains Mono, Cascadia Code, Consolas, monospace");
             return FontFamily.Default;
         }
 

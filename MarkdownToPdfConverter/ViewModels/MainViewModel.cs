@@ -270,7 +270,7 @@ namespace MarkdownToPdfConverter.ViewModels
         }
 
         public ObservableCollection<string> PageSizeOptions { get; } = new() { "A4", "Letter", "Legal", "A3", "A5" };
-        public ObservableCollection<string> FontOptions { get; } = new() { "Segoe UI", "Arial", "Times New Roman", "Consolas", "Microsoft YaHei" };
+        public ObservableCollection<string> FontOptions { get; } = new() { "Inter", "Segoe UI", "Noto Sans", "DejaVu Sans", "Liberation Serif", "Consolas", "SimSun" };
 
         public ObservableCollection<PreviewBlock> PreviewBlocks
         {
@@ -399,12 +399,14 @@ namespace MarkdownToPdfConverter.ViewModels
             InsertListCommand = ReactiveCommand.Create(() =>
             {
                 var text = MarkdownText;
-                MarkdownText = text + (text.EndsWith("\n") || text.Length == 0 ? "" : "\n") + "- ";
+                var hasNewline = text.EndsWith("\n") || text.EndsWith("\r\n") || text.Length == 0;
+                MarkdownText = text + (hasNewline ? "" : "\n") + "- ";
             });
             InsertQuoteCommand = ReactiveCommand.Create(() =>
             {
                 var text = MarkdownText;
-                MarkdownText = text + (text.EndsWith("\n") || text.Length == 0 ? "" : "\n") + "> ";
+                var hasNewline = text.EndsWith("\n") || text.EndsWith("\r\n") || text.Length == 0;
+                MarkdownText = text + (hasNewline ? "" : "\n") + "> ";
             });
 
             ZoomInCommand = ReactiveCommand.Create(() => { ZoomLevel = Math.Min(200, ZoomLevel + 10); });
@@ -631,7 +633,7 @@ namespace MarkdownToPdfConverter.ViewModels
 
         private void UpdateStatistics()
         {
-            LineCount = string.IsNullOrEmpty(MarkdownText) ? 1 : MarkdownText.Split('\n').Length;
+            LineCount = string.IsNullOrEmpty(MarkdownText) ? 1 : MarkdownText.Replace("\r\n", "\n").Split('\n').Length;
             WordCount = string.IsNullOrWhiteSpace(MarkdownText) ? 0 :
                 MarkdownText.Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
             CharCount = MarkdownText.Length;
@@ -741,7 +743,7 @@ namespace MarkdownToPdfConverter.ViewModels
 <html lang=""en"">
 <head><meta charset=""utf-8""><title>Markdown Export</title>
 <style>
-body {{ font-family: 'Segoe UI', sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }}
+body {{ font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }}
 pre {{ background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }}
 code {{ background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }}
 table {{ border-collapse: collapse; width: 100%; }}
@@ -782,8 +784,9 @@ blockquote {{ border-left: 4px solid #ddd; margin: 0; padding: 0 16px; color: #6
 
         private void AddRecentFile(string path)
         {
-            if (_recentFiles.Contains(path))
-                _recentFiles.Remove(path);
+            var existing = _recentFiles.FirstOrDefault(f => string.Equals(f, path, StringComparison.OrdinalIgnoreCase));
+            if (existing != null)
+                _recentFiles.Remove(existing);
             _recentFiles.Insert(0, path);
             if (_recentFiles.Count > 10)
                 _recentFiles.RemoveAt(_recentFiles.Count - 1);

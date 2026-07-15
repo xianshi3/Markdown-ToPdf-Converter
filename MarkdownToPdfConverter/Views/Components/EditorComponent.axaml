@@ -116,7 +116,7 @@
             <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontSize" Value="{Binding FontSize}"/>
-            <Setter Property="FontFamily" Value="Cascadia Code, JetBrains Mono, Consolas, monospace"/>
+            <Setter Property="FontFamily" Value="JetBrains Mono, Cascadia Code, Consolas, monospace"/>
             <Setter Property="Padding" Value="16,12"/>
             <Setter Property="VerticalAlignment" Value="Stretch"/>
             <Setter Property="HorizontalAlignment" Value="Stretch"/>

@@ -306,7 +306,7 @@ namespace MarkdownToPdfConverter.Services
                     break;
                 case "code":
                     var code = para.AddFormattedText(node.InnerText.Trim());
-                    code.Font.Name = "Consolas";
+                    code.Font.Name = CustomFontResolver.DefaultCodeFont;
                     code.Font.Size = 9;
                     break;
                 case "a":
@@ -316,8 +316,7 @@ namespace MarkdownToPdfConverter.Services
                 case "br":
                     para.AddLineBreak();
                     break;
-case "del":
-                case "s":
+                case "del":
                     var strike = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
                     strike.Font.Color = Colors.DarkGray;
                     break;
@@ -349,18 +348,8 @@ case "del":
                     break;
                 case "kbd":
                     var kbd = para.AddFormattedText(node.InnerText.Trim());
-                    kbd.Font.Name = "Consolas";
+                    kbd.Font.Name = CustomFontResolver.DefaultCodeFont;
                     kbd.Font.Size = 9;
-                    break;
-                case "var":
-                    var variable = para.AddFormattedText(node.InnerText.Trim());
-                    variable.Font.Italic = true;
-                    variable.Font.Bold = true;
-                    break;
-                case "samp":
-                    var samp = para.AddFormattedText(node.InnerText.Trim());
-                    samp.Font.Name = "Consolas";
-                    samp.Font.Size = 9;
                     break;
                 case "mark":
                     var mark = para.AddFormattedText(node.InnerText.Trim());
@@ -401,7 +390,7 @@ case "del":
 
             string language = DetectLanguage(codeNode);
 
-            var lines = code.Split('\n');
+            var lines = code.Replace("\r\n", "\n").Split('\n');
             for (int i = 0; i < lines.Length; i++)
             {
                 var line = lines[i];
@@ -779,7 +768,7 @@ case "del":
         {
             var para = _section!.AddParagraph();
             var samp = para.AddFormattedText(node.InnerText.Trim());
-            samp.Font.Name = "Consolas";
+            samp.Font.Name = CustomFontResolver.DefaultCodeFont;
             samp.Font.Size = 9;
         }
 
@@ -787,7 +776,7 @@ case "del":
         {
             var para = _section!.AddParagraph();
             var kbd = para.AddFormattedText(node.InnerText.Trim());
-            kbd.Font.Name = "Consolas";
+            kbd.Font.Name = CustomFontResolver.DefaultCodeFont;
             kbd.Font.Size = 9;
         }
 
@@ -898,7 +887,8 @@ case "del":
 
     public class CustomFontResolver : IFontResolver
     {
-        public string DefaultFontName => "SimSun";
+        public const string DefaultCodeFont = "SimSun";
+        public string DefaultFontName => DefaultCodeFont;
 
         private static byte[]? _simSunCache;
         private static readonly object _lock = new();
@@ -921,6 +911,14 @@ case "del":
 
         public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
         {
+            // Map requested font names to the bundled SimSun
+            if (familyName.Equals("SimSun", StringComparison.OrdinalIgnoreCase)
+                || familyName.Equals(DefaultFontName, StringComparison.OrdinalIgnoreCase))
+            {
+                return new FontResolverInfo("SimSun");
+            }
+
+            // For other fonts, still use SimSun as fallback but preserve style info
             return new FontResolverInfo("SimSun");
         }
     }
