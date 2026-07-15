@@ -48,7 +48,6 @@
         <Style Selector="Slider.setting-slider">
             <Setter Property="IsSnapToTickEnabled" Value="True"/>
             <Setter Property="TickFrequency" Value="1"/>
-            <Setter Property="Height" Value="26"/>
         </Style>
 
         <Style Selector="TextBox.setting-input">
