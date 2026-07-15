@@ -1,15 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:MarkdownToPdfConverter.ViewModels"
-             xmlns:models="clr-namespace:MarkdownToPdfConverter.Models"
-             xmlns:cvt="clr-namespace:MarkdownToPdfConverter.Converters"
              x:Class="MarkdownToPdfConverter.Views.Components.EditorComponent"
              x:DataType="vm:MainViewModel">
-    <UserControl.Resources>
-        <cvt:NotBoolConverter x:Key="NotBoolConverter"/>
-        <cvt:BoolToFontStyleConverter x:Key="BoolToFontStyleConverter"/>
-        <cvt:BoolToFontFamilyConverter x:Key="BoolToFontFamilyConverter"/>
-    </UserControl.Resources>
 
     <UserControl.Styles>
         <Style Selector="Border.editor-container">
@@ -349,43 +342,7 @@
                 </Border>
             </TabItem>
 
-            <TabItem Header="{Binding PreviewTabText}">
-                <Border Classes="preview-container">
-                    <Grid RowDefinitions="Auto,*">
-                        <TextBlock Text="{DynamicResource str_preview_heading}" Classes="preview-heading"/>
-                        <ScrollViewer Grid.Row="1">
-                            <ItemsControl ItemsSource="{Binding PreviewBlocks}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Spacing="0"/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate DataType="models:PreviewBlock">
-                                        <StackPanel>
-                                            <Border Height="1"
-                                                    Background="{DynamicResource ThemeBorderBrush}"
-                                                    IsVisible="{Binding IsHorizontalRule}"
-                                                    Opacity="0.5"
-                                                    Margin="0,8"/>
-                                            <Border IsVisible="{Binding IsHorizontalRule, Converter={StaticResource NotBoolConverter}}"
-                                                    Margin="0,0,0,4">
-                                                <TextBlock Text="{Binding Text}"
-                                                           FontSize="{Binding DisplayFontSize}"
-                                                           FontWeight="{Binding DisplayFontWeight}"
-                                                           FontStyle="{Binding IsItalic, Converter={StaticResource BoolToFontStyleConverter}}"
-                                                           FontFamily="{Binding IsMonospace, Converter={StaticResource BoolToFontFamilyConverter}}"
-                                                           Foreground="{DynamicResource ThemeForeground}"
-                                                           TextWrapping="Wrap"/>
-                                            </Border>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </Grid>
-                </Border>
-            </TabItem>
+
         </TabControl>
     </Border>
 </UserControl>

@@ -30,8 +30,8 @@ Beyond conversion, it serves as a full-featured Markdown editor with live previe
       <td align="center"><strong>Light Theme</strong></td>
     </tr>
     <tr>
-      <td><img src="https://via.placeholder.com/320x200/0D1117/E6EDF3?text=Dark+Theme" width="320"/></td>
-      <td><img src="https://via.placeholder.com/320x200/FFFFFF/24292F?text=Light+Theme" width="320"/></td>
+      <td><img width="2560" height="1380" alt="20260709-234929" src="https://github.com/user-attachments/assets/041a015d-450c-45fc-84be-29069c59c075" /></td>
+      <td><img width="1600" height="1000" alt="20260709-234858" src="https://github.com/user-attachments/assets/7288f666-32d2-4b14-b781-a06e0e5ba20b" /></td>
     </tr>
   </table>
 </div>

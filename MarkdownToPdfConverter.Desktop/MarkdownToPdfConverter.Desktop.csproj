@@ -17,4 +17,10 @@
   <ItemGroup>
     <ProjectReference Include="..\MarkdownToPdfConverter\MarkdownToPdfConverter.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\MarkdownToPdfConverter\Resources\Fonts\SimSun.ttf" Link="Resources\Fonts\SimSun.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

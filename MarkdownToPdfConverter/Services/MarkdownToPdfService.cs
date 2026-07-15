@@ -1,11 +1,11 @@
-﻿using MigraDocCore.DocumentObjectModel;
-using MigraDocCore.Rendering;
+﻿using PdfSharpCore;
+using PdfSharpCore.Drawing;
 using PdfSharpCore.Fonts;
+using PdfSharpCore.Pdf;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using Markdig;
 using HtmlAgilityPack;
 using System.Net;
@@ -14,67 +14,9 @@ namespace MarkdownToPdfConverter.Services
 {
     public class MarkdownToPdfService
     {
-        private Document _document = null!;
-        private Section? _section;
         private MarkdownPipeline _pipeline;
 
-        private static readonly (string pattern, string color)[] _csharpKeywords = new[]
-        {
-            ("\\bpublic\\b", "Blue"), ("\\bprivate\\b", "Blue"), ("\\bprotected\\b", "Blue"), ("\\binternal\\b", "Blue"),
-            ("\\bclass\\b", "Blue"), ("\\bstruct\\b", "Blue"), ("\\binterface\\b", "Blue"), ("\\benum\\b", "Blue"),
-            ("\\bnamespace\\b", "Blue"), ("\\busing\\b", "Blue"), ("\\bvoid\\b", "Blue"), ("\\bvar\\b", "Blue"),
-            ("\\bstring\\b", "Blue"), ("\\bint\\b", "Blue"), ("\\bbool\\b", "Blue"), ("\\bdouble\\b", "Blue"),
-            ("\\bfloat\\b", "Blue"), ("\\bdecimal\\b", "Blue"), ("\\bchar\\b", "Blue"), ("\\bbyte\\b", "Blue"),
-            ("\\bnew\\b", "Blue"), ("\\bthis\\b", "Blue"), ("\\bbase\\b", "Blue"), ("\\bstatic\\b", "Blue"),
-            ("\\bconst\\b", "Blue"), ("\\breadonly\\b", "Blue"), ("\\bvirtual\\b", "Blue"), ("\\boverride\\b", "Blue"),
-            ("\\babstract\\b", "Blue"), ("\\bsealed\\b", "Blue"), ("\\bpartial\\b", "Blue"), ("\\basync\\b", "Blue"),
-            ("\\bawait\\b", "Blue"), ("\\breturn\\b", "Blue"), ("\\bthrow\\b", "Blue"), ("\\btry\\b", "Blue"),
-            ("\\bcatch\\b", "Blue"), ("\\bfinally\\b", "Blue"), ("\\bif\\b", "Blue"), ("\\belse\\b", "Blue"),
-            ("\\bfor\\b", "Blue"), ("\\bforeach\\b", "Blue"), ("\\bwhile\\b", "Blue"), ("\\bdo\\b", "Blue"),
-            ("\\bswitch\\b", "Blue"), ("\\bcase\\b", "Blue"), ("\\bbreak\\b", "Blue"), ("\\bcontinue\\b", "Blue"),
-            ("\\bnull\\b", "Blue"), ("\\btrue\\b", "Blue"), ("\\bfalse\\b", "Blue"), ("\\btypeof\\b", "Blue"),
-            ("\\bnameof\\b", "Blue"), ("\\bis\\b", "Blue"), ("\\bas\\b", "Blue"), ("\\bin\\b", "Blue"),
-            ("\\bout\\b", "Blue"), ("\\bref\\b", "Blue"), ("\\bparams\\b", "Blue"), ("\\bget\\b", "Blue"),
-            ("\\bset\\b", "Blue"), ("\\bvalue\\b", "Blue"), ("\\badd\\b", "Blue"), ("\\bremove\\b", "Blue"),
-        };
-
-        private static readonly (string pattern, string color)[] _pythonKeywords = new[]
-        {
-            ("\\bdef\\b", "Blue"), ("\\bclass\\b", "Blue"), ("\\bif\\b", "Blue"), ("\\belif\\b", "Blue"),
-            ("\\belse\\b", "Blue"), ("\\bfor\\b", "Blue"), ("\\bwhile\\b", "Blue"), ("\\breturn\\b", "Blue"),
-            ("\\bNone\\b", "Blue"), ("\\bTrue\\b", "Blue"), ("\\bFalse\\b", "Blue"), ("\\bimport\\b", "Blue"),
-            ("\\bfrom\\b", "Blue"), ("\\bas\\b", "Blue"), ("\\btry\\b", "Blue"), ("\\bexcept\\b", "Blue"),
-            ("\\bfinally\\b", "Blue"), ("\\braise\\b", "Blue"), ("\\bwith\\b", "Blue"), ("\\basync\\b", "Blue"),
-            ("\\bawait\\b", "Blue"), ("\\blambda\\b", "Blue"), ("\\bglobal\\b", "Blue"), ("\\bnonlocal\\b", "Blue"),
-            ("\\bassert\\b", "Blue"), ("\\byield\\b", "Blue"), ("\\bdel\\b", "Blue"), ("\\bpass\\b", "Blue"),
-            ("\\bbreak\\b", "Blue"), ("\\bcontinue\\b", "Blue"), ("\\breturn\\b", "Blue"),
-        };
-
-        private static readonly (string pattern, string color)[] _jsKeywords = new[]
-        {
-            ("\\bfunction\\b", "Blue"), ("\\bvar\\b", "Blue"), ("\\blet\\b", "Blue"), ("\\bconst\\b", "Blue"),
-            ("\\bif\\b", "Blue"), ("\\belse\\b", "Blue"), ("\\bfor\\b", "Blue"), ("\\bwhile\\b", "Blue"),
-            ("\\breturn\\b", "Blue"), ("\\bbreak\\b", "Blue"), ("\\bcontinue\\b", "Blue"), ("\\bswitch\\b", "Blue"),
-            ("\\bcase\\b", "Blue"), ("\\bdefault\\b", "Blue"), ("\\btry\\b", "Blue"), ("\\bcatch\\b", "Blue"),
-            ("\\bfinally\\b", "Blue"), ("\\bthrow\\b", "Blue"), ("\\bnew\\b", "Blue"), ("\\bthis\\b", "Blue"),
-            ("\\bclass\\b", "Blue"), ("\\bextends\\b", "Blue"), ("\\bsuper\\b", "Blue"), ("\\bimport\\b", "Blue"),
-            ("\\bexport\\b", "Blue"), ("\\basync\\b", "Blue"), ("\\bawait\\b", "Blue"), ("\\byield\\b", "Blue"),
-            ("\\bnull\\b", "Blue"), ("\\bundefined\\b", "Blue"), ("\\btrue\\b", "Blue"), ("\\bfalse\\b", "Blue"),
-            ("\\btypeof\\b", "Blue"), ("\\binstanceof\\b", "Blue"), ("\\bdelete\\b", "Blue"), ("\\bvoid\\b", "Blue"),
-        };
-
-        private static readonly Dictionary<string, Regex> _syntaxRegexCache = new()
-        {
-            ["csharp"] = BuildSyntaxRegex(_csharpKeywords),
-            ["python"] = BuildSyntaxRegex(_pythonKeywords),
-            ["javascript"] = BuildSyntaxRegex(_jsKeywords),
-        };
-
-        private static Regex BuildSyntaxRegex((string pattern, string color)[] keywords)
-        {
-            var p = string.Join("|", keywords.Select(k => k.Item1));
-            return new Regex("(" + p + ")|((//|#).*)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        }
+        private const double PtPerMm = 2.83465;
 
         static MarkdownToPdfService()
         {
@@ -96,59 +38,31 @@ namespace MarkdownToPdfConverter.Services
                 .Build();
         }
 
+        private string _currentPageSize = "A4";
+
         public void ConvertMarkdownToPdf(string markdownContent, Stream outputStream,
             string pageSize = "A4", double pageMargin = 20, string exportFont = "SimSun")
         {
             try
             {
-                _document = new Document();
-                SetupDocumentStyles(exportFont);
+                _currentPageSize = pageSize;
 
                 string html = Markdown.ToHtml(markdownContent, _pipeline);
-
-                _section = _document.AddSection();
-                var margin = Unit.FromMillimeter(pageMargin);
-                _section.PageSetup.TopMargin = margin;
-                _section.PageSetup.BottomMargin = margin;
-                _section.PageSetup.LeftMargin = Unit.FromMillimeter(pageMargin + 5);
-                _section.PageSetup.RightMargin = Unit.FromMillimeter(pageMargin + 5);
-
-                switch (pageSize.ToLower())
-                {
-                    case "a3":
-                        _section.PageSetup.PageFormat = PageFormat.A3;
-                        break;
-                    case "a4":
-                        _section.PageSetup.PageFormat = PageFormat.A4;
-                        break;
-                    case "a5":
-                        _section.PageSetup.PageFormat = PageFormat.A5;
-                        break;
-                    case "letter":
-                        _section.PageSetup.PageFormat = PageFormat.Letter;
-                        break;
-                    case "legal":
-                        _section.PageSetup.PageFormat = PageFormat.Legal;
-                        break;
-                }
 
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
 
-                htmlDoc.DocumentNode.SelectSingleNode("//meta[@name='generator']")?.Remove();
+                var pdf = new PdfDocument();
+                var page = pdf.AddPage();
+                SetPageSize(page, pageSize);
 
-                htmlDoc.DocumentNode.Descendants()
-                    .Where(n => n.NodeType == HtmlNodeType.Text && n.InnerText.Length == 0)
-                    .ToList()
-                    .ForEach(n => n.Remove());
+                double marginPt = pageMargin * PtPerMm;
+                var gfx = XGraphics.FromPdfPage(page);
+                var layout = new LayoutState(gfx, pdf, page, exportFont, marginPt);
 
-                ProcessDocument(htmlDoc.DocumentNode);
+                RenderContent(layout, htmlDoc.DocumentNode);
 
-                var renderer = new PdfDocumentRenderer(true);
-                renderer.Document = _document;
-                renderer.RenderDocument();
-
-                renderer.PdfDocument.Save(outputStream);
+                pdf.Save(outputStream);
             }
             catch (Exception ex)
             {
@@ -156,750 +70,577 @@ namespace MarkdownToPdfConverter.Services
             }
         }
 
-        private void SetupDocumentStyles(string fontName = "SimSun")
+        private void SetPageSize(PdfPage page, string pageSize)
         {
-            var normalStyle = _document.Styles["Normal"];
-            normalStyle.Font.Name = fontName;
-            normalStyle.Font.Size = 10;
-            normalStyle.ParagraphFormat.SpaceAfter = 5;
-
-            var heading1 = _document.Styles["Heading1"];
-            heading1.Font.Size = 20;
-            heading1.Font.Bold = true;
-            heading1.ParagraphFormat.SpaceBefore = 15;
-            heading1.ParagraphFormat.SpaceAfter = 10;
-
-            var heading2 = _document.Styles["Heading2"];
-            heading2.Font.Size = 16;
-            heading2.Font.Bold = true;
-            heading2.ParagraphFormat.SpaceBefore = 12;
-            heading2.ParagraphFormat.SpaceAfter = 8;
-
-            var heading3 = _document.Styles["Heading3"];
-            heading3.Font.Size = 14;
-            heading3.Font.Bold = true;
-            heading3.ParagraphFormat.SpaceBefore = 10;
-            heading3.ParagraphFormat.SpaceAfter = 6;
-
-            var heading4 = _document.Styles["Heading4"];
-            heading4.Font.Size = 12;
-            heading4.Font.Bold = true;
-            heading4.ParagraphFormat.SpaceBefore = 8;
-            heading4.ParagraphFormat.SpaceAfter = 4;
-
-            var heading5 = _document.Styles["Heading5"];
-            heading5.Font.Size = 11;
-            heading5.Font.Bold = true;
-            heading5.ParagraphFormat.SpaceBefore = 6;
-            heading5.ParagraphFormat.SpaceAfter = 3;
-
-            var heading6 = _document.Styles["Heading6"];
-            heading6.Font.Size = 10;
-            heading6.Font.Bold = true;
-            heading6.ParagraphFormat.SpaceBefore = 5;
-            heading6.ParagraphFormat.SpaceAfter = 2;
+            switch (pageSize.ToLower())
+            {
+                case "a3": page.Size = PageSize.A3; break;
+                case "a4": page.Size = PageSize.A4; break;
+                case "a5": page.Size = PageSize.A5; break;
+                case "letter": page.Size = PageSize.Letter; break;
+                case "legal": page.Size = PageSize.Legal; break;
+            }
         }
 
-        private void ProcessDocument(HtmlNode node)
+        private static double MeasureLineHeight(XGraphics gfx, XFont font)
+        {
+            return gfx.MeasureString("A\u4e00g", font).Height;
+        }
+
+        private static double LineSpacing(double lineH)
+        {
+            return lineH * 1.35;
+        }
+
+        private void RenderContent(LayoutState layout, HtmlNode node)
         {
             foreach (var child in node.ChildNodes)
             {
                 if (child.NodeType == HtmlNodeType.Element)
-                {
-                    ProcessElement(child);
-                }
+                    RenderElement(layout, child);
             }
         }
 
-        private void ProcessElement(HtmlNode node)
+        private void RenderElement(LayoutState layout, HtmlNode node)
         {
-            string tag = node.Name.ToLower();
-
-            switch (tag)
+            switch (node.Name.ToLower())
             {
-                case "h1": AddHeading(node, 1); break;
-                case "h2": AddHeading(node, 2); break;
-                case "h3": AddHeading(node, 3); break;
-                case "h4": AddHeading(node, 4); break;
-                case "h5": AddHeading(node, 5); break;
-                case "h6": AddHeading(node, 6); break;
-                case "p": AddParagraph(node); break;
-                case "pre": AddCodeBlock(node); break;
-                case "blockquote": AddBlockQuote(node); break;
-                case "ul":
-                case "ol": AddList(node, tag == "ol"); break;
-                case "hr": AddHorizontalLine(); break;
-                case "table": AddTable(node); break;
-                case "dl": AddDefinitionList(node); break;
-                case "figure": AddFigure(node); break;
-                case "figcaption": break;
-                case "details": AddDetails(node); break;
-                case "summary": break;
-                case "abbr": AddAbbreviation(node); break;
-                case "address": AddAddress(node); break;
-                case "cite": AddCitation(node); break;
-                case "samp": AddSample(node); break;
-                case "kbd": AddKeyboard(node); break;
-                case "var": AddVariable(node); break;
-                case "time": AddTime(node); break;
-                case "mark": AddMarked(node); break;
-                case "ruby": AddRuby(node); break;
-                case "rt": break;
-                case "rp": break;
-                case "wbr": AddWordBreak(node); break;
-                case "input": AddInput(node); break;
-                case "progress": AddProgress(node); break;
-                case "meter": AddMeter(node); break;
-                case "audio":
-                case "video": AddMedia(node); break;
-                case "iframe": AddIframe(node); break;
-                default: ProcessChildNodes(node); break;
+                case "h1": RenderHeading(layout, node, 20); break;
+                case "h2": RenderHeading(layout, node, 16); break;
+                case "h3": RenderHeading(layout, node, 14); break;
+                case "h4": RenderHeading(layout, node, 12); break;
+                case "h5": RenderHeading(layout, node, 11); break;
+                case "h6": RenderHeading(layout, node, 10); break;
+                case "p": RenderParagraph(layout, node); break;
+                case "pre": RenderCodeBlock(layout, node); break;
+                case "blockquote": RenderBlockQuote(layout, node); break;
+                case "ul": RenderList(layout, node, false); break;
+                case "ol": RenderList(layout, node, true); break;
+                case "hr": RenderHorizontalRule(layout); break;
+                case "table": RenderTable(layout, node); break;
+                case "dl": RenderDefinitionList(layout, node); break;
+                default: RenderContent(layout, node); break;
             }
         }
 
-        private void AddHeading(HtmlNode node, int level)
+        private void EnsurePage(LayoutState layout, double needed)
         {
-            var para = _section!.AddParagraph();
-            para.Style = $"Heading{level}";
-            ProcessInlineElements(para, node);
+            if (layout.Y + needed > layout.PageHeight - layout.Margin)
+            {
+                var page = layout.Pdf.AddPage();
+                SetPageSize(page, _currentPageSize);
+                layout.Gfx = XGraphics.FromPdfPage(page);
+                layout.Y = layout.Margin;
+            }
         }
 
-        private void AddParagraph(HtmlNode node)
+        private double ContentWidth(LayoutState layout) =>
+            layout.PageWidth - layout.Margin * 2;
+
+        private void RenderHeading(LayoutState layout, HtmlNode node, double size)
         {
-            var para = _section!.AddParagraph();
-            para.Format.SpaceAfter = 6;
-            ProcessInlineElements(para, node);
+            var text = WebUtility.HtmlDecode(node.InnerText.Trim());
+            if (string.IsNullOrEmpty(text)) return;
+
+            var font = new XFont(layout.FontName, size, XFontStyle.Bold);
+            double lineH = MeasureLineHeight(layout.Gfx, font);
+
+            layout.Y += LineSpacing(lineH) * 1.2;
+            EnsurePage(layout, lineH + 6);
+
+            layout.Gfx.DrawString(text, font, XBrushes.Black,
+                new XRect(layout.Margin, layout.Y, ContentWidth(layout), lineH),
+                XStringFormats.TopLeft);
+            layout.Y += lineH + 4;
         }
 
-        private void ProcessInlineElements(Paragraph para, HtmlNode node)
+        private void RenderParagraph(LayoutState layout, HtmlNode node)
         {
+            var font = new XFont(layout.FontName, 10, XFontStyle.Regular);
+            double lineH = MeasureLineHeight(layout.Gfx, font);
+            double lineSpacing = LineSpacing(lineH);
+
+            EnsurePage(layout, lineSpacing);
+            layout.Y += 4;
+
+            RenderInlineContent(layout, node, 10, lineH, lineSpacing);
+
+            layout.Y += lineSpacing * 0.4;
+        }
+
+        private void RenderInlineContent(LayoutState layout, HtmlNode node,
+            double fontSize, double lineH, double lineSpacing)
+        {
+            double x = layout.Margin;
+            double maxX = layout.PageWidth - layout.Margin;
+            double startY = layout.Y;
+
             foreach (var child in node.ChildNodes)
             {
                 if (child.NodeType == HtmlNodeType.Text)
                 {
-                    var text = WebUtility.HtmlDecode(child.InnerText);
-                    if (!string.IsNullOrEmpty(text))
-                        para.AddText(text);
+                    var raw = WebUtility.HtmlDecode(child.InnerText);
+                    if (string.IsNullOrEmpty(raw)) continue;
+
+                    var lines = raw.Split('\n');
+                    for (int li = 0; li < lines.Length; li++)
+                    {
+                        if (li > 0)
+                        {
+                            layout.Y += lineSpacing;
+                            x = layout.Margin;
+                            EnsurePage(layout, lineSpacing);
+                        }
+
+                        var text = lines[li];
+                        if (string.IsNullOrEmpty(text)) continue;
+
+                        var font = new XFont(layout.FontName, fontSize, XFontStyle.Regular);
+                        var words = text.Split(' ');
+                        for (int wi = 0; wi < words.Length; wi++)
+                        {
+                            var word = words[wi];
+                            if (wi > 0) word = " " + word;
+
+                            var sz = layout.Gfx.MeasureString(word, font);
+                            if (x + sz.Width > maxX)
+                            {
+                                layout.Y += lineSpacing;
+                                x = layout.Margin;
+                                EnsurePage(layout, lineSpacing);
+                            }
+                            layout.Gfx.DrawString(word, font, XBrushes.Black,
+                                new XRect(x, layout.Y, sz.Width, sz.Height),
+                                XStringFormats.TopLeft);
+                            x += sz.Width;
+                        }
+                    }
                 }
                 else if (child.NodeType == HtmlNodeType.Element)
                 {
-                    ProcessInlineElement(para, child);
+                    RenderInlineElement(layout, child, ref x, fontSize, maxX, lineH, lineSpacing);
                 }
             }
         }
 
-        private void ProcessInlineElement(Paragraph para, HtmlNode node)
+        private void RenderInlineElement(LayoutState layout, HtmlNode node,
+            ref double x, double fontSize, double maxX, double lineH, double lineSpacing)
         {
-            string tag = node.Name.ToLower();
+            var text = WebUtility.HtmlDecode(node.InnerText);
+            if (string.IsNullOrEmpty(text)) return;
 
-            switch (tag)
+            XFontStyle style = XFontStyle.Regular;
+            XBrush brush = XBrushes.Black;
+            string fontName = layout.FontName;
+            double size = fontSize;
+
+            switch (node.Name.ToLower())
             {
                 case "strong":
                 case "b":
-                    var bold = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
-                    bold.Font.Bold = true;
+                    style = XFontStyle.Bold;
                     break;
                 case "em":
                 case "i":
-                    var italic = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
-                    italic.Font.Italic = true;
+                    style = XFontStyle.Italic;
                     break;
                 case "code":
-                    var code = para.AddFormattedText(node.InnerText.Trim());
-                    code.Font.Name = CustomFontResolver.DefaultCodeFont;
-                    code.Font.Size = 9;
+                    fontName = CustomFontResolver.DefaultCodeFont;
+                    size = fontSize - 1;
                     break;
                 case "a":
-                    var link = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
-                    link.Font.Underline = Underline.Single;
-                    break;
-                case "br":
-                    para.AddLineBreak();
+                    brush = XBrushes.Blue;
                     break;
                 case "del":
-                    var strike = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
-                    strike.Font.Color = Colors.DarkGray;
-                    break;
-                case "u":
-                    var underline = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
-                    underline.Font.Underline = Underline.Single;
-                    break;
-                case "sup":
-                    var sup = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
-                    sup.Font.Size = 7;
-                    sup.Font.Superscript = true;
-                    break;
-                case "sub":
-                    var sub = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
-                    sub.Font.Size = 7;
-                    sub.Font.Subscript = true;
-                    break;
-                case "small":
-                    var small = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
-                    small.Font.Size = 8;
-                    break;
-                case "ins":
-                    var ins = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
-                    ins.Font.Underline = Underline.Single;
-                    break;
-                case "q":
-                    var quote = para.AddFormattedText("\"" + WebUtility.HtmlDecode(node.InnerText.Trim()) + "\"");
-                    quote.Font.Italic = true;
-                    break;
-                case "kbd":
-                    var kbd = para.AddFormattedText(node.InnerText.Trim());
-                    kbd.Font.Name = CustomFontResolver.DefaultCodeFont;
-                    kbd.Font.Size = 9;
+                    brush = XBrushes.Gray;
                     break;
                 case "mark":
-                    var mark = para.AddFormattedText(node.InnerText.Trim());
-                    mark.Font.Color = Colors.Yellow;
+                    brush = XBrushes.Yellow;
                     break;
-                case "span":
-                    if (node.Attributes["class"]?.Value.Contains("strikethrough") == true)
-                    {
-                        var ss = para.AddFormattedText(WebUtility.HtmlDecode(node.InnerText.Trim()));
-                        ss.Font.Underline = Underline.Single;
-                    }
-                    else
-                    {
-                        ProcessInlineElements(para, node);
-                    }
+                case "small":
+                    size = fontSize - 2;
                     break;
-                case "input":
-                    if (node.Attributes["type"]?.Value == "checkbox")
-                    {
-                        var isChecked = node.Attributes["checked"] != null;
-                        para.AddText(isChecked ? "[x] " : "[ ] ");
-                    }
+                case "sup":
+                case "sub":
+                    size = fontSize - 3;
                     break;
                 default:
-                    if (node.HasChildNodes)
-                        ProcessInlineElements(para, node);
-                    else
-                        para.AddText(node.InnerText);
-                    break;
+                    RenderInlineContent(layout, node, fontSize, lineH, lineSpacing);
+                    return;
             }
+
+            var font = new XFont(fontName, size, style);
+            var measure = layout.Gfx.MeasureString(text, font);
+            double textH = measure.Height;
+
+            if (x + measure.Width > maxX)
+            {
+                layout.Y += lineSpacing;
+                x = layout.Margin;
+                EnsurePage(layout, lineSpacing);
+            }
+
+            if (node.Name.ToLower() == "code")
+            {
+                layout.Gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(235, 235, 235)),
+                    x - 1, layout.Y + 1, measure.Width + 2, textH);
+            }
+
+            layout.Gfx.DrawString(text, font, brush,
+                new XRect(x, layout.Y, measure.Width, textH),
+                XStringFormats.TopLeft);
+            x += measure.Width;
         }
 
-        private void AddCodeBlock(HtmlNode node)
+        private void RenderCodeBlock(LayoutState layout, HtmlNode node)
         {
             var codeNode = node.SelectSingleNode("code");
             var code = codeNode?.InnerText ?? node.InnerText;
-            code = code.Trim();
+            code = code.TrimEnd('\r', '\n', ' ');
+            if (string.IsNullOrEmpty(code)) return;
 
             string language = DetectLanguage(codeNode);
-
             var lines = code.Replace("\r\n", "\n").Split('\n');
-            for (int i = 0; i < lines.Length; i++)
+
+            var codeFont = new XFont(CustomFontResolver.DefaultCodeFont, 8, XFontStyle.Regular);
+            double lineH = MeasureLineHeight(layout.Gfx, codeFont);
+            double lineSpacing = LineSpacing(lineH);
+            double padding = 8;
+
+            double totalH = lines.Length * lineSpacing + padding * 2;
+            EnsurePage(layout, totalH + 6);
+
+            layout.Y += 4;
+
+            double bgX = layout.Margin;
+            double bgY = layout.Y;
+            double bgW = ContentWidth(layout);
+            double bgH = lines.Length * lineSpacing + padding * 2;
+
+            var bgBrush = new XSolidBrush(XColor.FromArgb(245, 245, 245));
+            var borderPen = new XPen(XColor.FromArgb(220, 220, 220), 0.5);
+
+            double codeX = layout.Margin + padding;
+            double codeY = layout.Y + padding;
+            double maxTextW = ContentWidth(layout) - padding * 2;
+
+            layout.Gfx.DrawRectangle(bgBrush, bgX, bgY, bgW, bgH);
+            layout.Gfx.DrawRectangle(borderPen, bgX, bgY, bgW, bgH);
+
+            foreach (var line in lines)
             {
-                var line = lines[i];
-                var para = _section!.AddParagraph();
-                para.Format.LeftIndent = 20;
-                para.Format.RightIndent = 20;
-                
-                if (i == 0)
-                {
-                    para.Format.SpaceBefore = 8;
-                }
-                if (i == lines.Length - 1)
-                {
-                    para.Format.SpaceAfter = 8;
-                }
-
-                para.Format.Font.Name = "Consolas";
-                para.Format.Font.Size = 9;
-                para.Format.Font.Color = Colors.DarkBlue;
-
-                AddSyntaxHighlight(para, line, language);
+                var displayLine = line;
+                layout.Gfx.DrawString(displayLine, codeFont, XBrushes.Black,
+                    new XRect(codeX, codeY, maxTextW, lineH),
+                    XStringFormats.TopLeft);
+                codeY += lineSpacing;
             }
+
+            layout.Y = bgY + bgH + 4;
+
+            if (!string.IsNullOrEmpty(language) && language != "plaintext")
+            {
+                var langFont = new XFont(layout.FontName, 7, XFontStyle.Italic);
+                layout.Gfx.DrawString(language, langFont, XBrushes.Gray,
+                    new XRect(layout.Margin + padding + 2, layout.Y, 100, 10),
+                    XStringFormats.TopLeft);
+                layout.Y += 12;
+            }
+
+            layout.Y += 4;
         }
 
-        private string DetectLanguage(HtmlNode? codeNode)
+        private void RenderBlockQuote(LayoutState layout, HtmlNode node)
         {
-            if (codeNode?.Attributes["class"] == null) return "plaintext";
+            var font = new XFont(layout.FontName, 10, XFontStyle.Italic);
+            double lineH = MeasureLineHeight(layout.Gfx, font);
+            double lineSpacing = LineSpacing(lineH);
 
-            var classAttr = codeNode.Attributes["class"].Value;
-            if (classAttr.Contains("csharp") || classAttr.Contains("language-cs") || classAttr.Contains("cs"))
-                return "csharp";
-            if (classAttr.Contains("python") || classAttr.Contains("py"))
-                return "python";
-            if (classAttr.Contains("javascript") || classAttr.Contains("js"))
-                return "javascript";
-            if (classAttr.Contains("java"))
-                return "java";
-            if (classAttr.Contains("cpp") || classAttr.Contains("c++"))
-                return "cpp";
-            if (classAttr.Contains("go"))
-                return "go";
-            if (classAttr.Contains("rust"))
-                return "rust";
-            if (classAttr.Contains("php"))
-                return "php";
-            if (classAttr.Contains("ruby"))
-                return "ruby";
-            if (classAttr.Contains("swift"))
-                return "swift";
-            if (classAttr.Contains("kotlin"))
-                return "kotlin";
-            if (classAttr.Contains("sql"))
-                return "sql";
-            if (classAttr.Contains("bash") || classAttr.Contains("sh") || classAttr.Contains("shell"))
-                return "bash";
-            if (classAttr.Contains("json"))
-                return "json";
-            if (classAttr.Contains("xml") || classAttr.Contains("html"))
-                return "xml";
-            if (classAttr.Contains("css"))
-                return "css";
-            if (classAttr.Contains("yaml"))
-                return "yaml";
-            if (classAttr.Contains("markdown") || classAttr.Contains("md"))
-                return "markdown";
+            EnsurePage(layout, lineSpacing);
+            layout.Y += 4;
 
-            return "plaintext";
-        }
+            double barX = layout.Margin;
+            double barW = 3;
+            double textX = layout.Margin + 14;
+            double maxTextW = ContentWidth(layout) - 14;
 
-        private void AddSyntaxHighlight(Paragraph para, string line, string language)
-        {
-            if (string.IsNullOrEmpty(line))
+            double startY = layout.Y;
+            double contentY = layout.Y;
+
+            foreach (var child in node.ChildNodes)
             {
-                para.AddText(" ");
-                return;
-            }
-
-            var keywords = language switch
-            {
-                "csharp" => _csharpKeywords,
-                "python" => _pythonKeywords,
-                "javascript" => _jsKeywords,
-                _ => Array.Empty<(string, string)>()
-            };
-
-            if (keywords.Length == 0 || language == "plaintext")
-            {
-                para.AddText(line);
-                return;
-            }
-
-            try
-            {
-                _syntaxRegexCache.TryGetValue(language, out var regex);
-                if (regex == null)
+                if (child.NodeType == HtmlNodeType.Text)
                 {
-                    para.AddText(line);
-                    return;
-                }
-                var lastEnd = 0;
+                    var raw = WebUtility.HtmlDecode(child.InnerText);
+                    if (string.IsNullOrEmpty(raw)) continue;
 
-                foreach (Match match in regex.Matches(line))
-                {
-                    if (match.Index > lastEnd)
+                    var paragraphs = raw.Split('\n');
+                    foreach (var para in paragraphs)
                     {
-                        var beforeText = line.Substring(lastEnd, match.Index - lastEnd);
-                        if (!string.IsNullOrWhiteSpace(beforeText))
+                        if (string.IsNullOrEmpty(para.Trim()))
                         {
-                            para.AddText(beforeText);
+                            contentY += lineSpacing;
+                            continue;
                         }
-                    }
 
-                    var isComment = match.Value.StartsWith("//") || match.Value.StartsWith("#");
-                    var formatted = para.AddFormattedText(match.Value);
-
-                    if (isComment)
-                    {
-                        formatted.Font.Color = Colors.ForestGreen;
-                        formatted.Font.Italic = true;
+                        var words = para.Split(' ');
+                        double xp = textX;
+                        for (int wi = 0; wi < words.Length; wi++)
+                        {
+                            var word = wi > 0 ? " " + words[wi] : words[wi];
+                            var sz = layout.Gfx.MeasureString(word, font);
+                            if (xp + sz.Width > maxTextW && xp > textX)
+                            {
+                                contentY += lineSpacing;
+                                xp = textX;
+                                EnsurePage(layout, lineSpacing);
+                            }
+                            layout.Gfx.DrawString(word, font, XBrushes.DarkSlateGray,
+                                new XRect(xp, contentY, sz.Width, sz.Height),
+                                XStringFormats.TopLeft);
+                            xp += sz.Width;
+                        }
+                        contentY += lineSpacing;
                     }
-                    else if (IsKeyword(match.Value, keywords))
-                    {
-                        formatted.Font.Color = Colors.Blue;
-                        formatted.Font.Bold = true;
-                    }
-                    else
-                    {
-                        formatted.Font.Color = Colors.Black;
-                    }
-
-                    lastEnd = match.Index + match.Length;
                 }
-
-                if (lastEnd < line.Length)
+                else if (child.NodeType == HtmlNodeType.Element)
                 {
-                    para.AddText(line.Substring(lastEnd));
+                    RenderInlineElement(layout, child, ref textX, 10, maxTextW, lineH, lineSpacing);
                 }
             }
-            catch
-            {
-                para.AddText(line);
-            }
+
+            double barHeight = contentY - startY;
+            if (barHeight < lineSpacing) barHeight = lineSpacing;
+
+            layout.Gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(210, 210, 210)),
+                barX, startY, barW, barHeight);
+
+            layout.Y = contentY + 4;
         }
 
-        private bool IsKeyword(string word, (string pattern, string color)[] keywords)
+        private void RenderList(LayoutState layout, HtmlNode node, bool ordered)
         {
-            foreach (var (pattern, _) in keywords)
-            {
-                if (Regex.IsMatch(word, pattern, RegexOptions.IgnoreCase))
-                    return true;
-            }
-            return false;
-        }
-
-        private void AddBlockQuote(HtmlNode node)
-        {
-            var text = node.InnerText.Trim();
-            var para = _section!.AddParagraph();
-            para.Format.LeftIndent = 25;
-            para.Format.RightIndent = 25;
-            para.Format.SpaceBefore = 8;
-            para.Format.SpaceAfter = 8;
-            para.Format.Font.Italic = true;
-            para.Format.Font.Size = 10;
-            para.Format.Font.Color = Colors.DarkSlateGray;
-            para.Format.Borders.Left.Width = 3;
-            para.Format.Borders.Left.Color = Colors.Gray;
-            para.AddText(text);
-        }
-
-        private void AddList(HtmlNode node, bool ordered)
-        {
-            var items = node.SelectNodes(".//li");
+            var items = node.SelectNodes("./li");
             if (items == null) return;
+
+            var font = new XFont(layout.FontName, 10, XFontStyle.Regular);
+            double lineH = MeasureLineHeight(layout.Gfx, font);
+            double lineSpacing = LineSpacing(lineH);
 
             int num = 1;
             foreach (var item in items)
             {
-                var para = _section!.AddParagraph();
-                para.Format.LeftIndent = 20;
-                para.Format.FirstLineIndent = -15;
-                para.Format.SpaceBefore = 3;
-                para.Format.SpaceAfter = 2;
+                var text = WebUtility.HtmlDecode(item.InnerText.Trim());
+                if (string.IsNullOrEmpty(text)) continue;
 
-                var inputCheck = item.SelectSingleNode(".//input[@type='checkbox']");
-                if (inputCheck != null)
+                var prefix = ordered ? $"{num}. " : "\u2022 ";
+                EnsurePage(layout, lineSpacing + 4);
+
+                double px = layout.Margin + 10;
+                layout.Gfx.DrawString(prefix, font, XBrushes.Black,
+                    new XRect(px, layout.Y + 2, 25, lineH),
+                    XStringFormats.TopLeft);
+
+                double textX = layout.Margin + 30;
+                double maxTextW = ContentWidth(layout) - 30;
+                double xp = textX;
+                double yp = layout.Y + 2;
+
+                var words = text.Split(' ');
+                for (int wi = 0; wi < words.Length; wi++)
                 {
-                    var isChecked = inputCheck.Attributes["checked"] != null;
-                    para.AddText(isChecked ? "[x] " : "[ ] ");
-                }
-                else if (ordered)
-                {
-                    para.AddText($"{num}. ");
-                    num++;
-                }
-                else
-                {
-                    para.AddText("• ");
+                    var word = wi > 0 ? " " + words[wi] : words[wi];
+                    var sz = layout.Gfx.MeasureString(word, font);
+                    if (xp + sz.Width > maxTextW && xp > textX)
+                    {
+                        yp += lineSpacing;
+                        xp = textX;
+                        EnsurePage(layout, lineSpacing);
+                    }
+                    layout.Gfx.DrawString(word, font, XBrushes.Black,
+                        new XRect(xp, yp, sz.Width, sz.Height),
+                        XStringFormats.TopLeft);
+                    xp += sz.Width;
                 }
 
-                ProcessInlineElements(para, item);
+                layout.Y = yp + lineSpacing + 2;
+                if (ordered) num++;
             }
         }
 
-        private void AddTable(HtmlNode tableNode)
+        private void RenderHorizontalRule(LayoutState layout)
         {
-            var headerRow = tableNode.SelectSingleNode(".//thead/tr");
-            if (headerRow != null)
-                AddTableHeader(headerRow);
+            EnsurePage(layout, 4);
+            layout.Y += 10;
+            layout.Gfx.DrawLine(new XPen(XColor.FromArgb(200, 200, 200), 1),
+                layout.Margin, layout.Y,
+                layout.PageWidth - layout.Margin, layout.Y);
+            layout.Y += 10;
+        }
 
-            var bodyRows = tableNode.SelectNodes(".//tbody/tr");
-            if (bodyRows == null)
-                bodyRows = tableNode.SelectNodes(".//tr");
+        private static readonly string[] _languages = new[]
+        {
+            "csharp", "cs", "python", "py", "javascript", "js", "java",
+            "cpp", "c++", "go", "rust", "php", "ruby", "swift", "kotlin",
+            "sql", "bash", "sh", "shell", "json", "xml", "html", "css", "yaml"
+        };
 
-            if (bodyRows != null)
+        private string DetectLanguage(HtmlNode? codeNode)
+        {
+            if (codeNode?.Attributes["class"] == null)
+                return "plaintext";
+            var cls = codeNode.Attributes["class"].Value;
+            foreach (var lang in _languages)
             {
-                int rowIndex = 0;
-                foreach (var row in bodyRows)
+                if (cls.Contains(lang)) return lang;
+            }
+            if (cls.Contains("language-"))
+            {
+                var idx = cls.IndexOf("language-") + 9;
+                var end = cls.IndexOf(' ', idx);
+                return end > idx ? cls[idx..end] : cls[idx..];
+            }
+            return "plaintext";
+        }
+
+        private void RenderTable(LayoutState layout, HtmlNode tableNode)
+        {
+            var rows = tableNode.SelectNodes(".//tr");
+            if (rows == null || rows.Count == 0) return;
+
+            int cols = rows.Max(r => r.SelectNodes("./th|./td")?.Count ?? 0);
+            if (cols == 0) return;
+
+            var font = new XFont(layout.FontName, 9, XFontStyle.Regular);
+            double lineH = MeasureLineHeight(layout.Gfx, font);
+            double rowHeight = lineH + 8;
+            double cellPad = 4;
+
+            double totalH = rows.Count * rowHeight + 8;
+            EnsurePage(layout, totalH);
+
+            double tableY = layout.Y + 4;
+            double cellW = ContentWidth(layout) / cols;
+
+            for (int ri = 0; ri < rows.Count; ri++)
+            {
+                var cells = rows[ri].SelectNodes("./th|./td");
+                if (cells == null) continue;
+
+                bool isHeader = ri == 0;
+                var rowFont = new XFont(layout.FontName, 9, isHeader ? XFontStyle.Bold : XFontStyle.Regular);
+                double xp = layout.Margin;
+
+                for (int ci = 0; ci < cells.Count && ci < cols; ci++)
                 {
-                    if (headerRow != null && row == headerRow) continue;
-                    AddTableRow(row, rowIndex % 2 == 1);
-                    rowIndex++;
+                    var text = WebUtility.HtmlDecode(cells[ci].InnerText.Trim());
+                    var bg = isHeader
+                        ? new XSolidBrush(XColor.FromArgb(230, 230, 230))
+                        : (ri % 2 == 0
+                            ? XBrushes.White
+                            : new XSolidBrush(XColor.FromArgb(248, 248, 248)));
+
+                    layout.Gfx.DrawRectangle(bg, xp, tableY, cellW, rowHeight);
+                    layout.Gfx.DrawRectangle(XPens.LightGray, xp, tableY, cellW, rowHeight);
+                    layout.Gfx.DrawString(text, rowFont, XBrushes.Black,
+                        new XRect(xp + cellPad, tableY + 3, cellW - cellPad * 2, rowHeight - 6),
+                        XStringFormats.TopLeft);
+                    xp += cellW;
                 }
+                tableY += rowHeight;
             }
+
+            layout.Y = tableY + 6;
         }
 
-        private void AddTableHeader(HtmlNode row)
-        {
-            var cells = row.SelectNodes("./th|./td");
-            if (cells == null) return;
-
-            var para = _section!.AddParagraph();
-            para.Format.SpaceBefore = 5;
-            para.Format.SpaceAfter = 2;
-            para.Format.Font.Bold = true;
-            para.Format.Font.Size = 9;
-
-            for (int i = 0; i < cells.Count; i++)
-            {
-                var cellText = WebUtility.HtmlDecode(cells[i].InnerText.Trim());
-                para.AddText(cellText);
-                if (i < cells.Count - 1)
-                    para.AddText(" | ");
-            }
-        }
-
-        private void AddTableRow(HtmlNode row, bool alternate)
-        {
-            var cells = row.SelectNodes("./td|./th");
-            if (cells == null) return;
-
-            var para = _section!.AddParagraph();
-            para.Format.SpaceBefore = 1;
-            para.Format.SpaceAfter = 1;
-            para.Format.Font.Size = 9;
-
-            for (int i = 0; i < cells.Count; i++)
-            {
-                var cellText = WebUtility.HtmlDecode(cells[i].InnerText.Trim());
-                para.AddText(cellText);
-                if (i < cells.Count - 1)
-                    para.AddText(" | ");
-            }
-        }
-
-        private void AddDefinitionList(HtmlNode node)
+        private void RenderDefinitionList(LayoutState layout, HtmlNode node)
         {
             var terms = node.SelectNodes("./dt");
-            var definitions = node.SelectNodes("./dd");
-
+            var defs = node.SelectNodes("./dd");
             if (terms == null) return;
+
+            var font = new XFont(layout.FontName, 10, XFontStyle.Regular);
+            double lineH = MeasureLineHeight(layout.Gfx, font);
+            double lineSpacing = LineSpacing(lineH);
 
             for (int i = 0; i < terms.Count; i++)
             {
-                var termPara = _section!.AddParagraph();
-                termPara.Format.Font.Bold = true;
-                termPara.Format.SpaceBefore = 5;
-                termPara.Format.SpaceAfter = 2;
-                termPara.AddText(WebUtility.HtmlDecode(terms[i].InnerText.Trim()));
+                var termText = WebUtility.HtmlDecode(terms[i].InnerText.Trim());
+                if (string.IsNullOrEmpty(termText)) continue;
 
-                if (definitions != null && i < definitions.Count)
+                var boldFont = new XFont(layout.FontName, 10, XFontStyle.Bold);
+                EnsurePage(layout, lineSpacing);
+                layout.Gfx.DrawString(termText, boldFont, XBrushes.Black,
+                    new XRect(layout.Margin, layout.Y, ContentWidth(layout), lineH),
+                    XStringFormats.TopLeft);
+                layout.Y += lineSpacing;
+
+                if (defs != null && i < defs.Count)
                 {
-                    var defPara = _section!.AddParagraph();
-                    defPara.Format.LeftIndent = 15;
-                    defPara.Format.SpaceAfter = 5;
-                    ProcessInlineElements(defPara, definitions[i]);
+                    var defText = WebUtility.HtmlDecode(defs[i].InnerText.Trim());
+                    if (string.IsNullOrEmpty(defText)) continue;
+
+                    EnsurePage(layout, lineSpacing);
+                    layout.Gfx.DrawString(defText, font, XBrushes.DimGray,
+                        new XRect(layout.Margin + 15, layout.Y, ContentWidth(layout) - 15, lineH),
+                        XStringFormats.TopLeft);
+                    layout.Y += lineSpacing;
                 }
             }
         }
 
-        private void AddHorizontalLine()
+        private class LayoutState
         {
-            var para = _section!.AddParagraph();
-            para.Format.SpaceBefore = 10;
-            para.Format.SpaceAfter = 10;
-            para.Format.Borders.Top.Width = 0.5;
-            para.Format.Borders.Top.Color = Colors.LightGray;
-        }
+            public XGraphics Gfx { get; set; }
+            public PdfDocument Pdf { get; }
+            public PdfPage Page { get; set; }
+            public double Y { get; set; }
+            public string FontName { get; }
+            public double Margin { get; }
 
-        private void AddFigure(HtmlNode node)
-        {
-            var img = node.SelectSingleNode(".//img");
-            if (img != null)
+            public double PageWidth => Page.Width.Point;
+            public double PageHeight => Page.Height.Point;
+
+            public LayoutState(XGraphics gfx, PdfDocument pdf, PdfPage page,
+                string fontName, double marginPt)
             {
-                var para = _section!.AddParagraph();
-                para.Format.Alignment = ParagraphAlignment.Center;
-                para.Format.SpaceBefore = 10;
-                para.Format.SpaceAfter = 10;
-                para.AddText($"[图片: {img.Attributes["alt"]?.Value ?? "Image"}]");
-            }
-            var caption = node.SelectSingleNode(".//figcaption");
-            if (caption != null)
-            {
-                var para = _section!.AddParagraph();
-                para.Format.Alignment = ParagraphAlignment.Center;
-                para.Format.Font.Italic = true;
-                para.Format.Font.Size = 9;
-                para.AddText(caption.InnerText.Trim());
+                Gfx = gfx;
+                Pdf = pdf;
+                Page = page;
+                FontName = fontName;
+                Margin = marginPt;
+                Y = marginPt;
             }
         }
-
-        private void AddDetails(HtmlNode node)
-        {
-            var summary = node.SelectSingleNode(".//summary");
-            var content = node.SelectSingleNode(".//p");
-
-            if (summary != null)
-            {
-                var para = _section!.AddParagraph();
-                para.Format.Font.Bold = true;
-                para.Format.SpaceBefore = 5;
-                para.AddText("▸ " + summary.InnerText.Trim());
-            }
-
-            if (content != null)
-            {
-                var para = _section!.AddParagraph();
-                para.Format.LeftIndent = 15;
-                ProcessInlineElements(para, content);
-            }
-        }
-
-        private void AddAbbreviation(HtmlNode node)
-        {
-            var title = node.Attributes["title"]?.Value;
-            var text = node.InnerText.Trim();
-            var para = _section!.AddParagraph();
-            
-            var formatted = para.AddFormattedText(text);
-            formatted.Font.Bold = true;
-            
-            if (!string.IsNullOrEmpty(title))
-            {
-                para.AddText($" ({title})");
-            }
-        }
-
-        private void AddAddress(HtmlNode node)
-        {
-            var para = _section!.AddParagraph();
-            para.Format.Font.Italic = true;
-            para.Format.SpaceBefore = 5;
-            para.Format.SpaceAfter = 5;
-            ProcessInlineElements(para, node);
-        }
-
-        private void AddCitation(HtmlNode node)
-        {
-            var para = _section!.AddParagraph();
-            para.Format.Font.Italic = true;
-            var cite = para.AddFormattedText(node.InnerText.Trim());
-        }
-
-        private void AddSample(HtmlNode node)
-        {
-            var para = _section!.AddParagraph();
-            var samp = para.AddFormattedText(node.InnerText.Trim());
-            samp.Font.Name = CustomFontResolver.DefaultCodeFont;
-            samp.Font.Size = 9;
-        }
-
-        private void AddKeyboard(HtmlNode node)
-        {
-            var para = _section!.AddParagraph();
-            var kbd = para.AddFormattedText(node.InnerText.Trim());
-            kbd.Font.Name = CustomFontResolver.DefaultCodeFont;
-            kbd.Font.Size = 9;
-        }
-
-        private void AddVariable(HtmlNode node)
-        {
-            var para = _section!.AddParagraph();
-            var variable = para.AddFormattedText(node.InnerText.Trim());
-            variable.Font.Italic = true;
-            variable.Font.Bold = true;
-        }
-
-        private void AddTime(HtmlNode node)
-        {
-            var datetime = node.Attributes["datetime"]?.Value;
-            var para = _section!.AddParagraph();
-            
-            if (!string.IsNullOrEmpty(datetime))
-            {
-                para.AddText($"[{datetime}] ");
-            }
-            para.AddText(node.InnerText.Trim());
-        }
-
-        private void AddMarked(HtmlNode node)
-        {
-            var para = _section!.AddParagraph();
-            var marked = para.AddFormattedText(node.InnerText.Trim());
-            marked.Font.Color = Colors.Yellow;
-        }
-
-        private void AddRuby(HtmlNode node)
-        {
-            var text = node.SelectSingleNode("./rb")?.InnerText ?? node.InnerText;
-            var rt = node.SelectSingleNode("./rt")?.InnerText;
-
-            var para = _section!.AddParagraph();
-            para.AddText(text);
-
-            if (!string.IsNullOrEmpty(rt))
-            {
-                para.AddText($" ({rt})");
-            }
-        }
-
-        private void AddWordBreak(HtmlNode node)
-        {
-            var para = _section!.AddParagraph();
-            para.AddText("");
-        }
-
-        private void AddInput(HtmlNode node)
-        {
-            if (node.Attributes["type"]?.Value == "checkbox")
-            {
-                var isChecked = node.Attributes["checked"] != null;
-                var para = _section!.AddParagraph();
-                para.AddText(isChecked ? "[x]" : "[ ]");
-            }
-        }
-
-        private void AddProgress(HtmlNode node)
-        {
-            var value = node.Attributes["value"]?.Value ?? "0";
-            var max = node.Attributes["max"]?.Value ?? "100";
-            var para = _section!.AddParagraph();
-            para.AddText($"[{value}/{max}]");
-        }
-
-        private void AddMeter(HtmlNode node)
-        {
-            var value = node.Attributes["value"]?.Value ?? "0";
-            var para = _section!.AddParagraph();
-            para.AddText($"[{value}]");
-        }
-
-        private void AddMedia(HtmlNode node)
-        {
-            var para = _section!.AddParagraph();
-            para.Format.Alignment = ParagraphAlignment.Center;
-            var src = node.Attributes["src"]?.Value;
-            if (!string.IsNullOrEmpty(src))
-            {
-                para.AddText($"[{node.Name.ToUpper()}: {Path.GetFileName(src)}]");
-            }
-        }
-
-        private void AddIframe(HtmlNode node)
-        {
-            var src = node.Attributes["src"]?.Value;
-            var para = _section!.AddParagraph();
-            para.Format.Alignment = ParagraphAlignment.Center;
-            if (!string.IsNullOrEmpty(src))
-            {
-                para.AddText($"[嵌入内容: {src}]");
-            }
-        }
-
-        private void ProcessChildNodes(HtmlNode node)
-        {
-            foreach (var child in node.ChildNodes)
-            {
-                if (child.NodeType == HtmlNodeType.Element)
-                    ProcessElement(child);
-            }
-        }
-
     }
 
     public class CustomFontResolver : IFontResolver
     {
         public const string DefaultCodeFont = "SimSun";
-        public string DefaultFontName => DefaultCodeFont;
 
         private static byte[]? _simSunCache;
         private static readonly object _lock = new();
+
+        private static string FontPath =>
+            Path.Combine(AppContext.BaseDirectory, "Resources", "Fonts", "SimSun.ttf");
+
+        public string DefaultFontName => DefaultCodeFont;
+
+        public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
+        {
+            return new FontResolverInfo("SimSun", isBold, isItalic);
+        }
 
         public byte[] GetFont(string faceName)
         {
             if (_simSunCache != null) return _simSunCache;
 
-            var fontPath = Path.Combine(AppContext.BaseDirectory, "Resources", "Fonts", "SimSun.ttf");
+            var fontPath = FontPath;
             if (!File.Exists(fontPath))
-                throw new FileNotFoundException($"Font file not found: {fontPath}");
+                throw new FileNotFoundException(
+                    $"SimSun font not found at: {fontPath}. " +
+                    $"Base directory: {AppContext.BaseDirectory}. " +
+                    "Ensure the font is copied to the output directory (Resources/Fonts/SimSun.ttf).");
 
             lock (_lock)
             {
@@ -909,17 +650,5 @@ namespace MarkdownToPdfConverter.Services
             return _simSunCache;
         }
 
-        public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
-        {
-            // Map requested font names to the bundled SimSun
-            if (familyName.Equals("SimSun", StringComparison.OrdinalIgnoreCase)
-                || familyName.Equals(DefaultFontName, StringComparison.OrdinalIgnoreCase))
-            {
-                return new FontResolverInfo("SimSun");
-            }
-
-            // For other fonts, still use SimSun as fallback but preserve style info
-            return new FontResolverInfo("SimSun");
-        }
     }
 }

@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="MarkdownToPdfConverter.Views.ConfirmDialog"
+        Title="Confirm"
+        Width="400" Height="180"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="{DynamicResource ThemeBackground}">
+    <Window.Styles>
+        <Style Selector="Border.dialog-card">
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Padding" Value="20"/>
+        </Style>
+        <Style Selector="TextBlock.dialog-text">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource ThemeForeground}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="Margin" Value="0,0,0,20"/>
+        </Style>
+    </Window.Styles>
+    <Border Classes="dialog-card" VerticalAlignment="Center">
+        <StackPanel>
+            <TextBlock Classes="dialog-text" x:Name="MessageText"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                    <Button Content="Yes" x:Name="YesButton" Click="OnYesClick" Padding="20,8" IsDefault="True"/>
+                    <Button Content="No" x:Name="NoButton" Click="OnNoClick" Padding="20,8" IsCancel="True"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>

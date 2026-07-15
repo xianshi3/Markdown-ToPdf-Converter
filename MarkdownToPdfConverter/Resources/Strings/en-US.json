@@ -5,7 +5,6 @@
   "help": "Help",
   "file_tab": "File Upload",
   "edit_tab": "Edit Markdown",
-  "preview_tab": "Preview",
   "selected_file": "Selected File:",
   "edit_content": "Edit Content:",
   "preview": "Preview",
@@ -100,6 +99,8 @@
   "find_match_case": "Aa",
   "find_no_matches": "No matches",
 
+  "copy": "Copy",
+  "close": "Close",
   "about_version": "v1.2.0",
   "about_desc": "A cross-platform Markdown to PDF converter built with Avalonia UI and .NET.\nSupports syntax highlighting, custom themes, and multiple export formats.",
   "about_close": "Close",
@@ -107,5 +108,7 @@
   "preview_placeholder": "Preview will appear here...",
   "preview_heading": "PREVIEW",
 
-  "confirm_new": "Create new file? Unsaved changes will be lost."
+  "confirm_new": "Create new file? Unsaved changes will be lost.",
+  "yes": "Yes",
+  "no": "No"
 }
