@@ -13,8 +13,8 @@
 
     <UserControl.Styles>
         <Style Selector="Border.preview-root">
-            <Setter Property="Background" Value="{DynamicResource ThemeBackground}"/>
-            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Background" Value="{DynamicResource ThemeSurfaceBackground}"/>
+            <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="Padding" Value="4"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="BorderBrush" Value="{DynamicResource ThemeBorderBrush}"/>
