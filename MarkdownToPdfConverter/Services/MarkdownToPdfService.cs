@@ -12,17 +12,29 @@ using System.Net;
 
 namespace MarkdownToPdfConverter.Services
 {
+    /// <summary>
+    /// Converts Markdown content to PDF using PdfSharpCore and Markdig.
+    /// </summary>
     public class MarkdownToPdfService
     {
         private MarkdownPipeline _pipeline;
 
+        /// <summary>
+        /// Points-per-millimeter conversion factor (1 mm = 2.83465 pt).
+        /// </summary>
         private const double PtPerMm = 2.83465;
 
+        /// <summary>
+        /// Static constructor: registers the custom font resolver once.
+        /// </summary>
         static MarkdownToPdfService()
         {
             GlobalFontSettings.FontResolver = new CustomFontResolver();
         }
 
+        /// <summary>
+        /// Initializes the Markdig pipeline with all advanced extensions enabled.
+        /// </summary>
         public MarkdownToPdfService()
         {
             _pipeline = new MarkdownPipelineBuilder()
@@ -40,6 +52,14 @@ namespace MarkdownToPdfConverter.Services
 
         private string _currentPageSize = "A4";
 
+        /// <summary>
+        /// Converts the given Markdown content to PDF and writes it to the output stream.
+        /// </summary>
+        /// <param name="markdownContent">Raw Markdown text.</param>
+        /// <param name="outputStream">Stream to write the resulting PDF into.</param>
+        /// <param name="pageSize">Page size name (e.g. "A4", "Letter").</param>
+        /// <param name="pageMargin">Page margin in millimeters.</param>
+        /// <param name="exportFont">Font family name to use for text rendering.</param>
         public void ConvertMarkdownToPdf(string markdownContent, Stream outputStream,
             string pageSize = "A4", double pageMargin = 20, string exportFont = "SimSun")
         {
@@ -70,6 +90,9 @@ namespace MarkdownToPdfConverter.Services
             }
         }
 
+        /// <summary>
+        /// Sets the PdfPage size based on the given page size name.
+        /// </summary>
         private void SetPageSize(PdfPage page, string pageSize)
         {
             switch (pageSize.ToLower())
@@ -82,16 +105,25 @@ namespace MarkdownToPdfConverter.Services
             }
         }
 
+        /// <summary>
+        /// Measures the line height for a font using a mixed Latin/CJK sample string.
+        /// </summary>
         private static double MeasureLineHeight(XGraphics gfx, XFont font)
         {
             return gfx.MeasureString("A\u4e00g", font).Height;
         }
 
+        /// <summary>
+        /// Returns recommended line spacing (line height * 1.35).
+        /// </summary>
         private static double LineSpacing(double lineH)
         {
             return lineH * 1.35;
         }
 
+        /// <summary>
+        /// Iterates child HTML nodes and renders each element.
+        /// </summary>
         private void RenderContent(LayoutState layout, HtmlNode node)
         {
             foreach (var child in node.ChildNodes)
@@ -101,6 +133,9 @@ namespace MarkdownToPdfConverter.Services
             }
         }
 
+        /// <summary>
+        /// Dispatches an HTML element to the appropriate render method by tag name.
+        /// </summary>
         private void RenderElement(LayoutState layout, HtmlNode node)
         {
             switch (node.Name.ToLower())
@@ -123,6 +158,9 @@ namespace MarkdownToPdfConverter.Services
             }
         }
 
+        /// <summary>
+        /// Adds a new page if the remaining vertical space is insufficient for the needed height.
+        /// </summary>
         private void EnsurePage(LayoutState layout, double needed)
         {
             if (layout.Y + needed > layout.PageHeight - layout.Margin)
@@ -134,9 +172,15 @@ namespace MarkdownToPdfConverter.Services
             }
         }
 
+        /// <summary>
+        /// Available content width between left and right margins.
+        /// </summary>
         private double ContentWidth(LayoutState layout) =>
             layout.PageWidth - layout.Margin * 2;
 
+        /// <summary>
+        /// Renders a heading (h1-h6) with bold font at the specified size.
+        /// </summary>
         private void RenderHeading(LayoutState layout, HtmlNode node, double size)
         {
             var text = WebUtility.HtmlDecode(node.InnerText.Trim());
@@ -154,6 +198,9 @@ namespace MarkdownToPdfConverter.Services
             layout.Y += lineH + 4;
         }
 
+        /// <summary>
+        /// Renders a paragraph with word-wrapping and automatic page breaks.
+        /// </summary>
         private void RenderParagraph(LayoutState layout, HtmlNode node)
         {
             var font = new XFont(layout.FontName, 10, XFontStyle.Regular);
@@ -168,6 +215,9 @@ namespace MarkdownToPdfConverter.Services
             layout.Y += lineSpacing * 0.4;
         }
 
+        /// <summary>
+        /// Renders inline text and elements (bold, italic, code, links, etc.) with word-wrapping.
+        /// </summary>
         private void RenderInlineContent(LayoutState layout, HtmlNode node,
             double fontSize, double lineH, double lineSpacing)
         {
@@ -223,6 +273,9 @@ namespace MarkdownToPdfConverter.Services
             }
         }
 
+        /// <summary>
+        /// Renders a single inline element (strong, em, code, a, del, etc.) at the current cursor position.
+        /// </summary>
         private void RenderInlineElement(LayoutState layout, HtmlNode node,
             ref double x, double fontSize, double maxX, double lineH, double lineSpacing)
         {
@@ -292,6 +345,9 @@ namespace MarkdownToPdfConverter.Services
             x += measure.Width;
         }
 
+        /// <summary>
+        /// Renders a code block with a gray background, border, and optional language label.
+        /// </summary>
         private void RenderCodeBlock(LayoutState layout, HtmlNode node)
         {
             var codeNode = node.SelectSingleNode("code");
@@ -350,6 +406,9 @@ namespace MarkdownToPdfConverter.Services
             layout.Y += 4;
         }
 
+        /// <summary>
+        /// Renders a blockquote with an italic font and a vertical bar on the left.
+        /// </summary>
         private void RenderBlockQuote(LayoutState layout, HtmlNode node)
         {
             var font = new XFont(layout.FontName, 10, XFontStyle.Italic);
@@ -418,6 +477,9 @@ namespace MarkdownToPdfConverter.Services
             layout.Y = contentY + 4;
         }
 
+        /// <summary>
+        /// Renders an ordered or unordered list with appropriate bullet or numbering.
+        /// </summary>
         private void RenderList(LayoutState layout, HtmlNode node, bool ordered)
         {
             var items = node.SelectNodes("./li");
@@ -468,6 +530,9 @@ namespace MarkdownToPdfConverter.Services
             }
         }
 
+        /// <summary>
+        /// Renders a horizontal rule as a thin line across the content width.
+        /// </summary>
         private void RenderHorizontalRule(LayoutState layout)
         {
             EnsurePage(layout, 4);
@@ -485,6 +550,9 @@ namespace MarkdownToPdfConverter.Services
             "sql", "bash", "sh", "shell", "json", "xml", "html", "css", "yaml"
         };
 
+        /// <summary>
+        /// Detects the programming language from the code node's CSS class attribute.
+        /// </summary>
         private string DetectLanguage(HtmlNode? codeNode)
         {
             if (codeNode?.Attributes["class"] == null)
@@ -503,6 +571,9 @@ namespace MarkdownToPdfConverter.Services
             return "plaintext";
         }
 
+        /// <summary>
+        /// Renders an HTML table with alternating row colors and a header row.
+        /// </summary>
         private void RenderTable(LayoutState layout, HtmlNode tableNode)
         {
             var rows = tableNode.SelectNodes(".//tr");
@@ -553,6 +624,9 @@ namespace MarkdownToPdfConverter.Services
             layout.Y = tableY + 6;
         }
 
+        /// <summary>
+        /// Renders a definition list with bold terms and indented definitions.
+        /// </summary>
         private void RenderDefinitionList(LayoutState layout, HtmlNode node)
         {
             var terms = node.SelectNodes("./dt");
@@ -589,6 +663,9 @@ namespace MarkdownToPdfConverter.Services
             }
         }
 
+        /// <summary>
+        /// Tracks the current rendering position, graphics context, font, and page dimensions.
+        /// </summary>
         private class LayoutState
         {
             public XGraphics Gfx { get; set; }
@@ -614,6 +691,9 @@ namespace MarkdownToPdfConverter.Services
         }
     }
 
+    /// <summary>
+    /// Provides font resolution for PdfSharpCore, using a bundled SimSun font file.
+    /// </summary>
     public class CustomFontResolver : IFontResolver
     {
         public const string DefaultCodeFont = "SimSun";
@@ -626,13 +706,20 @@ namespace MarkdownToPdfConverter.Services
 
         public string DefaultFontName => DefaultCodeFont;
 
+        /// <summary>
+        /// Always resolves to "SimSun" regardless of the requested family.
+        /// </summary>
         public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
         {
             return new FontResolverInfo("SimSun", isBold, isItalic);
         }
 
+        /// <summary>
+        /// Reads and caches the SimSun font bytes from the Resources/Fonts directory.
+        /// </summary>
         public byte[] GetFont(string faceName)
         {
+            // Return cached bytes if already loaded.
             if (_simSunCache != null) return _simSunCache;
 
             var fontPath = FontPath;
@@ -642,6 +729,7 @@ namespace MarkdownToPdfConverter.Services
                     $"Base directory: {AppContext.BaseDirectory}. " +
                     "Ensure the font is copied to the output directory (Resources/Fonts/SimSun.ttf).");
 
+            // Thread-safe lazy loading of the font file.
             lock (_lock)
             {
                 _simSunCache ??= File.ReadAllBytes(fontPath);

@@ -6,6 +6,7 @@ using MarkdownToPdfConverter.Views;
 
 namespace MarkdownToPdfConverter
 {
+    /// <summary>The main application class that configures theme, localization, and the main window.</summary>
     public partial class App : Application
     {
         public override void Initialize()
@@ -13,8 +14,10 @@ namespace MarkdownToPdfConverter
             AvaloniaXamlLoader.Load(this);
         }
 
+        /// <summary>Applies theme and localization, then creates and shows the main window.</summary>
         public override void OnFrameworkInitializationCompleted()
         {
+            // Apply saved theme and language settings
             ThemeService.Instance.ApplyToApplication();
             LocalizationService.Instance.ApplyToApplication();
 

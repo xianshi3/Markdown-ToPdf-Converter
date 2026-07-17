@@ -14,6 +14,9 @@ using MarkdownToPdfConverter.Services;
 
 namespace MarkdownToPdfConverter.ViewModels
 {
+    /// <summary>
+    /// Main ViewModel for the Markdown editor application. Handles file operations, text editing, find/replace, preview, and conversion.
+    /// </summary>
     public class MainViewModel : ViewModelBase
     {
         private readonly ILocalizationService _localization;
@@ -58,6 +61,9 @@ namespace MarkdownToPdfConverter.ViewModels
 
         private bool _isPreviewVisible;
 
+        /// <summary>
+        /// Dynamic window title showing filename and unsaved indicator.
+        /// </summary>
         public string WindowTitle
         {
             get
@@ -71,40 +77,49 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Localized tab header for the File section.</summary>
         public string FileTabText => _localization.GetString("file_tab");
+        /// <summary>Localized tab header for the Edit section.</summary>
         public string EditTabText => _localization.GetString("edit_tab");
+        /// <summary>Localized label for the selected file path display.</summary>
         public string SelectedFileText => _localization.GetString("selected_file");
 
+        /// <summary>Number of lines in the markdown text.</summary>
         public int LineCount
         {
             get => _lineCount;
             set => this.RaiseAndSetIfChanged(ref _lineCount, value);
         }
 
+        /// <summary>Number of words in the markdown text.</summary>
         public int WordCount
         {
             get => _wordCount;
             set => this.RaiseAndSetIfChanged(ref _wordCount, value);
         }
 
+        /// <summary>Total character count of the markdown text.</summary>
         public int CharCount
         {
             get => _charCount;
             set => this.RaiseAndSetIfChanged(ref _charCount, value);
         }
 
+        /// <summary>Current UI theme name (Dark/Light/Gray).</summary>
         public string CurrentTheme
         {
             get => _currentTheme;
             set => this.RaiseAndSetIfChanged(ref _currentTheme, value);
         }
 
+        /// <summary>Indicates whether the document has unsaved changes.</summary>
         public bool HasUnsavedChanges
         {
             get => _hasUnsavedChanges;
             set => this.RaiseAndSetIfChanged(ref _hasUnsavedChanges, value);
         }
 
+        /// <summary>Whether the file sidebar panel is expanded.</summary>
         public bool IsSidebarExpanded
         {
             get => _isSidebarExpanded;
@@ -115,8 +130,10 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Computed sidebar width based on expansion state.</summary>
         public double SidebarWidth => IsSidebarExpanded ? 200 : 0;
 
+        /// <summary>Whether the markdown preview panel is visible.</summary>
         public bool IsPreviewVisible
         {
             get => _isPreviewVisible;
@@ -127,17 +144,23 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Text for the language toggle button.</summary>
         public string LanguageButtonText => _localization.CurrentLanguage == "zh-CN" ? "English" : "中文";
+        /// <summary>Localized status text shown after a file is loaded.</summary>
         public string LoadFileStatusText => _localization.GetString("file_loaded_status");
+        /// <summary>Localized text for load failure messages.</summary>
         public string LoadFailedText => _localization.GetString("load_failed");
+        /// <summary>Localized hint text shown when no file is loaded.</summary>
         public string DropMdHintText => _localization.GetString("drop_md_hint");
 
+        /// <summary>Font size for the editor text display.</summary>
         public double FontSize
         {
             get => _fontSize;
             set => this.RaiseAndSetIfChanged(ref _fontSize, value);
         }
 
+        /// <summary>Zoom level percentage (50-200). Scales font size proportionally.</summary>
         public double ZoomLevel
         {
             get => _zoomLevel;
@@ -148,6 +171,7 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Full path of the currently opened markdown file.</summary>
         public string SelectedFilePath
         {
             get => _selectedFilePath;
@@ -159,6 +183,7 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>The current markdown text content with undo/redo tracking.</summary>
         public string MarkdownText
         {
             get => _markdownText;
@@ -166,6 +191,7 @@ namespace MarkdownToPdfConverter.ViewModels
             {
                 if (_markdownText != value)
                 {
+                    // Push current state to undo stack (skip during undo/redo operations)
                     if (!_isUndoingRedoing)
                     {
                         _undoStack.Push(_markdownText);
@@ -177,6 +203,7 @@ namespace MarkdownToPdfConverter.ViewModels
                     this.RaisePropertyChanged(nameof(CanUndo));
                     this.RaisePropertyChanged(nameof(CanRedo));
                     HasUnsavedChanges = value != _lastSavedText;
+                    // Schedule debounced stats update via timer
                     _statsPending = true;
                     _statsTimer.Stop();
                     _statsTimer.Start();
@@ -185,23 +212,29 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Status bar message displayed to the user.</summary>
         public string StatusMessage
         {
             get => _statusMessage;
             set => this.RaiseAndSetIfChanged(ref _statusMessage, value);
         }
 
+        /// <summary>Whether a conversion operation is in progress.</summary>
         public bool IsConverting
         {
             get => _isConverting;
             set => this.RaiseAndSetIfChanged(ref _isConverting, value);
         }
 
+        /// <summary>True when conversion is not busy and markdown text is non-empty.</summary>
         public bool CanConvert => !IsConverting && !string.IsNullOrWhiteSpace(MarkdownText);
 
+        /// <summary>True when the undo stack has entries.</summary>
         public bool CanUndo => _undoStack.Count > 0;
+        /// <summary>True when the redo stack has entries.</summary>
         public bool CanRedo => _redoStack.Count > 0;
 
+        /// <summary>Text to search for in the find/replace panel.</summary>
         public string FindText
         {
             get => _findText;
@@ -212,18 +245,21 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Replacement text for find/replace operations.</summary>
         public string ReplaceText
         {
             get => _replaceText;
             set => this.RaiseAndSetIfChanged(ref _replaceText, value);
         }
 
+        /// <summary>Whether the find/replace panel is visible.</summary>
         public bool IsFindVisible
         {
             get => _isFindVisible;
             set => this.RaiseAndSetIfChanged(ref _isFindVisible, value);
         }
 
+        /// <summary>Whether find/replace should match case sensitivity.</summary>
         public bool MatchCase
         {
             get => _matchCase;
@@ -234,85 +270,127 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Total number of matches found in the current text.</summary>
         public int MatchCount
         {
             get => _matchCount;
             set => this.RaiseAndSetIfChanged(ref _matchCount, value);
         }
 
+        /// <summary>Index (0-based) of the currently highlighted match.</summary>
         public int CurrentMatchIndex
         {
             get => _currentMatchIndex;
             set => this.RaiseAndSetIfChanged(ref _currentMatchIndex, value);
         }
 
+        /// <summary>Formatted match status text (e.g. "2/5") or localized "no matches" message.</summary>
         public string MatchStatusText => MatchCount > 0
             ? $"{CurrentMatchIndex + 1}/{MatchCount}"
             : _localization.GetString("find_no_matches");
 
+        /// <summary>Selected page size for PDF export (e.g. "A4", "Letter").</summary>
         public string PageSize
         {
             get => _pageSize;
             set => this.RaiseAndSetIfChanged(ref _pageSize, value);
         }
 
+        /// <summary>Page margin in mm for PDF export.</summary>
         public double PageMargin
         {
             get => _pageMargin;
             set => this.RaiseAndSetIfChanged(ref _pageMargin, value);
         }
 
+        /// <summary>Font name used in the exported PDF.</summary>
         public string ExportFont
         {
             get => _exportFont;
             set => this.RaiseAndSetIfChanged(ref _exportFont, value);
         }
 
+        /// <summary>Available page size options for PDF export.</summary>
         public ObservableCollection<string> PageSizeOptions { get; } = new() { "A4", "Letter", "Legal", "A3", "A5" };
+        /// <summary>Available font options for PDF export.</summary>
         public ObservableCollection<string> FontOptions { get; } = new() { "Inter", "Segoe UI", "Noto Sans", "DejaVu Sans", "Liberation Serif", "Consolas", "SimSun" };
 
+        /// <summary>Parsed preview blocks for the markdown preview panel.</summary>
         public ObservableCollection<PreviewBlock> PreviewBlocks
         {
             get => _previewBlocks;
             set => this.RaiseAndSetIfChanged(ref _previewBlocks, value);
         }
 
+        /// <summary>Recently opened files list (persisted to disk).</summary>
         public ObservableCollection<string> RecentFiles
         {
             get => _recentFiles;
             set => this.RaiseAndSetIfChanged(ref _recentFiles, value);
         }
 
+        /// <summary>Creates a new empty markdown document.</summary>
         public ReactiveCommand<Unit, Unit> NewFileCommand { get; }
+        /// <summary>Opens a markdown file via system file picker.</summary>
         public ReactiveCommand<Unit, Unit> OpenFileCommand { get; }
+        /// <summary>Saves the current document to its file path.</summary>
         public ReactiveCommand<Unit, Unit> SaveFileCommand { get; }
+        /// <summary>Saves the current document with a new file name/path.</summary>
         public ReactiveCommand<Unit, Unit> SaveAsCommand { get; }
+        /// <summary>Exports the markdown content to a PDF file.</summary>
         public ReactiveCommand<Unit, Unit> ConvertToPdfCommand { get; }
+        /// <summary>Exports the markdown content to an HTML file.</summary>
         public ReactiveCommand<Unit, Unit> ConvertToHtmlCommand { get; }
+        /// <summary>Switches between Chinese and English UI localization.</summary>
         public ReactiveCommand<Unit, Unit> SwitchLanguageCommand { get; }
+        /// <summary>Cycles through available UI themes (Dark/Light/Gray).</summary>
         public ReactiveCommand<Unit, Unit> SwitchThemeCommand { get; }
+        /// <summary>Undoes the last text edit.</summary>
         public ReactiveCommand<Unit, Unit> UndoCommand { get; }
+        /// <summary>Redoes the last undone text edit.</summary>
         public ReactiveCommand<Unit, Unit> RedoCommand { get; }
+        /// <summary>Toggles the find/replace panel visibility.</summary>
         public ReactiveCommand<Unit, Unit> FindCommand { get; }
+        /// <summary>Replaces all occurrences of find text with replace text.</summary>
         public ReactiveCommand<Unit, Unit> ReplaceCommand { get; }
+        /// <summary>Jumps to the next find match.</summary>
         public ReactiveCommand<Unit, Unit> FindNextCommand { get; }
+        /// <summary>Jumps to the previous find match.</summary>
         public ReactiveCommand<Unit, Unit> FindPrevCommand { get; }
+        /// <summary>Hides the find/replace panel.</summary>
         public ReactiveCommand<Unit, Unit> CloseFindCommand { get; }
+        /// <summary>Toggles the markdown preview panel.</summary>
         public ReactiveCommand<Unit, Unit> TogglePreviewCommand { get; }
+        /// <summary>Toggles the file sidebar panel.</summary>
         public ReactiveCommand<Unit, Unit> ToggleSidebarCommand { get; }
+        /// <summary>Shows the About dialog.</summary>
         public ReactiveCommand<Unit, Unit> ShowAboutCommand { get; }
+        /// <summary>Inserts bold markdown formatting (**text**).</summary>
         public ReactiveCommand<Unit, Unit> InsertBoldCommand { get; }
+        /// <summary>Inserts italic markdown formatting (*text*).</summary>
         public ReactiveCommand<Unit, Unit> InsertItalicCommand { get; }
+        /// <summary>Inserts a heading marker (# ) at the start of the document.</summary>
         public ReactiveCommand<Unit, Unit> InsertHeadingCommand { get; }
+        /// <summary>Inserts a markdown link [text](url).</summary>
         public ReactiveCommand<Unit, Unit> InsertLinkCommand { get; }
+        /// <summary>Inserts a markdown image ![alt](url).</summary>
         public ReactiveCommand<Unit, Unit> InsertImageCommand { get; }
+        /// <summary>Wraps selection in inline code backticks.</summary>
         public ReactiveCommand<Unit, Unit> InsertCodeCommand { get; }
+        /// <summary>Inserts an unordered list item marker (- ).</summary>
         public ReactiveCommand<Unit, Unit> InsertListCommand { get; }
+        /// <summary>Inserts a blockquote marker (> ).</summary>
         public ReactiveCommand<Unit, Unit> InsertQuoteCommand { get; }
+        /// <summary>Increases the zoom level by 10%.</summary>
         public ReactiveCommand<Unit, Unit> ZoomInCommand { get; }
+        /// <summary>Decreases the zoom level by 10%.</summary>
         public ReactiveCommand<Unit, Unit> ZoomOutCommand { get; }
+        /// <summary>Resets zoom level to 100%.</summary>
         public ReactiveCommand<Unit, Unit> ZoomResetCommand { get; }
 
+        /// <summary>
+        /// Initializes the MainViewModel with services, timers, commands, and recent files.
+        /// </summary>
         public MainViewModel()
         {
             _localization = LocalizationService.Instance;
@@ -320,6 +398,7 @@ namespace MarkdownToPdfConverter.ViewModels
             _converterService = new MarkdownToPdfService();
             _previewService = new MarkdownPreviewService();
 
+            // Debounced timer for updating line/word/char statistics
             _statsTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
             _statsTimer.Tick += (_, _) =>
             {
@@ -331,6 +410,7 @@ namespace MarkdownToPdfConverter.ViewModels
                 }
             };
 
+            // Auto-save every 60 seconds if there are unsaved changes
             _autoSaveTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(60) };
             _autoSaveTimer.Tick += async (_, _) => await AutoSaveAsync();
             _autoSaveTimer.Start();
@@ -346,11 +426,13 @@ namespace MarkdownToPdfConverter.ViewModels
             SaveFileCommand = ReactiveCommand.CreateFromTask(SaveFileAsync);
             SaveAsCommand = ReactiveCommand.CreateFromTask(SaveAsAsync);
 
+            // Convert-to-PDF is allowed when not already converting and there's content to convert
             ConvertToPdfCommand = ReactiveCommand.CreateFromTask(ConvertToPdfAsync,
                 this.WhenAnyValue(x => x.IsConverting, x => x.SelectedFilePath, x => x.MarkdownText,
                     (converting, filePath, markdown) =>
                         !converting && (!string.IsNullOrEmpty(filePath) || !string.IsNullOrWhiteSpace(markdown))));
 
+            // Convert-to-HTML requires content and no active conversion
             ConvertToHtmlCommand = ReactiveCommand.CreateFromTask(ConvertToHtmlAsync,
                 this.WhenAnyValue(x => x.IsConverting, x => x.MarkdownText,
                     (converting, markdown) => !converting && !string.IsNullOrWhiteSpace(markdown)));
@@ -361,6 +443,7 @@ namespace MarkdownToPdfConverter.ViewModels
                 _localization.SetLanguage(newLang);
             });
 
+            // Cycle theme: Dark -> Light -> Gray -> Dark
             SwitchThemeCommand = ReactiveCommand.Create(() =>
             {
                 var newTheme = _themeService.CurrentTheme switch
@@ -415,6 +498,7 @@ namespace MarkdownToPdfConverter.ViewModels
             LoadRecentFiles();
         }
 
+        /// <summary>Wraps the current text with given before/after strings (e.g. **text**).</summary>
         private void InsertAroundSelection(string before, string after)
         {
             var text = MarkdownText;
@@ -423,11 +507,13 @@ namespace MarkdownToPdfConverter.ViewModels
                 MarkdownText = before + after;
                 return;
             }
+            // Preserve trailing whitespace when appending formatting
             var trimmed = text.TrimEnd();
             var ws = text.Length - trimmed.Length;
             MarkdownText = trimmed + (trimmed.Length > 0 ? "" : "") + before + after + new string(' ', ws);
         }
 
+        /// <summary>Clears the current document after confirming unsaved changes.</summary>
         private async void NewFile()
         {
             if (HasUnsavedChanges && !string.IsNullOrWhiteSpace(MarkdownText))
@@ -445,6 +531,7 @@ namespace MarkdownToPdfConverter.ViewModels
             UpdatePreview();
         }
 
+        /// <summary>Shows a confirmation dialog with the given message and returns the result.</summary>
         private static async Task<bool> ShowConfirmDialogAsync(string message)
         {
             var dialog = new Views.ConfirmDialog { Message = message };
@@ -453,6 +540,7 @@ namespace MarkdownToPdfConverter.ViewModels
             return true;
         }
 
+        /// <summary>Opens a system file picker for markdown files and loads the selected file.</summary>
         private async Task OpenFileAsync()
         {
             if (HasUnsavedChanges && !string.IsNullOrWhiteSpace(MarkdownText))
@@ -479,6 +567,7 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Reads markdown text from the given file path and updates the editor state.</summary>
         private async Task LoadFileAsync(string path)
         {
             try
@@ -497,6 +586,7 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Saves to the current file path, or prompts for a new path if none is set.</summary>
         private async Task SaveFileAsync()
         {
             if (string.IsNullOrEmpty(SelectedFilePath))
@@ -519,6 +609,7 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Opens a save file picker to save the document to a new location.</summary>
         private async Task SaveAsAsync()
         {
             var file = await WindowService.SaveFilePickerAsync(new FilePickerSaveOptions
@@ -554,6 +645,7 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Automatically saves unsaved changes every 60 seconds if a file path is known.</summary>
         private async Task AutoSaveAsync()
         {
             if (!HasUnsavedChanges || string.IsNullOrWhiteSpace(MarkdownText) || string.IsNullOrEmpty(SelectedFilePath))
@@ -571,6 +663,7 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Restores the previous text state from the undo stack.</summary>
         private void Undo()
         {
             if (_undoStack.Count > 0)
@@ -582,6 +675,7 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Restores the last undone text state from the redo stack.</summary>
         private void Redo()
         {
             if (_redoStack.Count > 0)
@@ -593,6 +687,7 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Replaces all occurrences of FindText with ReplaceText in the markdown content.</summary>
         private void Replace()
         {
             if (string.IsNullOrEmpty(FindText)) return;
@@ -601,10 +696,12 @@ namespace MarkdownToPdfConverter.ViewModels
             UpdateMatchCount();
         }
 
+        /// <summary>Advances to the next match, wrapping around to the first match.</summary>
         private void FindNext()
         {
             if (string.IsNullOrEmpty(FindText) || string.IsNullOrWhiteSpace(MarkdownText)) return;
             var comparison = MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+            // Walk through each match sequentially until we reach the current index, then advance
             int start = 0;
             for (int i = 0; i <= CurrentMatchIndex; i++)
             {
@@ -620,13 +717,16 @@ namespace MarkdownToPdfConverter.ViewModels
             CurrentMatchIndex = 0;
         }
 
+        /// <summary>Moves to the previous match, wrapping around to the last match.</summary>
         private void FindPrev()
         {
             if (string.IsNullOrEmpty(FindText) || string.IsNullOrWhiteSpace(MarkdownText)) return;
             if (MatchCount == 0) return;
+            // Decrement with wrap-around using modular arithmetic
             CurrentMatchIndex = (CurrentMatchIndex - 1 + MatchCount) % MatchCount;
         }
 
+        /// <summary>Recalculates the total number of matches and resets the current match index.</summary>
         private void UpdateMatchCount()
         {
             if (string.IsNullOrEmpty(FindText) || string.IsNullOrWhiteSpace(MarkdownText))
@@ -640,6 +740,7 @@ namespace MarkdownToPdfConverter.ViewModels
             var comparison = MatchCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
             int count = 0;
             int index = 0;
+            // Count all non-overlapping occurrences of the search text
             while ((index = MarkdownText.IndexOf(FindText, index, comparison)) >= 0)
             {
                 count++;
@@ -651,6 +752,7 @@ namespace MarkdownToPdfConverter.ViewModels
             this.RaisePropertyChanged(nameof(MatchStatusText));
         }
 
+        /// <summary>Recalculates line count, word count, and character count from the markdown text.</summary>
         private void UpdateStatistics()
         {
             LineCount = string.IsNullOrEmpty(MarkdownText) ? 1 : MarkdownText.Replace("\r\n", "\n").Split('\n').Length;
@@ -659,12 +761,14 @@ namespace MarkdownToPdfConverter.ViewModels
             CharCount = MarkdownText.Length;
         }
 
+        /// <summary>Reparses the markdown text into preview blocks for the preview panel.</summary>
         private void UpdatePreview()
         {
             var blocks = _previewService.Parse(MarkdownText);
             PreviewBlocks = new ObservableCollection<PreviewBlock>(blocks);
         }
 
+        /// <summary>Refreshes all localized UI strings when the display language changes.</summary>
         private void OnLanguageChanged()
         {
             Dispatcher.UIThread.Post(() =>
@@ -682,6 +786,7 @@ namespace MarkdownToPdfConverter.ViewModels
             });
         }
 
+        /// <summary>Updates the CurrentTheme property when the theme service fires a change.</summary>
         private void OnThemeChanged()
         {
             Dispatcher.UIThread.Post(() =>
@@ -690,6 +795,7 @@ namespace MarkdownToPdfConverter.ViewModels
             });
         }
 
+        /// <summary>Prompts for a save location and converts markdown to PDF using the selected service.</summary>
         private async Task ConvertToPdfAsync()
         {
             if (string.IsNullOrWhiteSpace(MarkdownText))
@@ -716,6 +822,7 @@ namespace MarkdownToPdfConverter.ViewModels
                 IsConverting = true;
                 StatusMessage = _localization.GetString("converting");
 
+                // Write PDF directly to the selected file stream
                 await using var stream = await file.OpenWriteAsync();
                 _converterService.ConvertMarkdownToPdf(MarkdownText, stream, PageSize, PageMargin, ExportFont);
 
@@ -732,6 +839,7 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
+        /// <summary>Displays an error dialog with exception details.</summary>
         private async Task ShowErrorDialogAsync(Exception ex)
         {
             var dialog = new Views.ErrorDialog();
@@ -742,6 +850,7 @@ namespace MarkdownToPdfConverter.ViewModels
                 dialog.Show();
         }
 
+        /// <summary>Converts markdown to HTML with an embedded stylesheet and saves to a file.</summary>
         private async Task ConvertToHtmlAsync()
         {
             if (string.IsNullOrWhiteSpace(MarkdownText))
@@ -768,6 +877,7 @@ namespace MarkdownToPdfConverter.ViewModels
                 IsConverting = true;
                 StatusMessage = _localization.GetString("converting");
 
+                // Convert markdown to HTML body using Markdig, then wrap with a styled HTML document
                 var html = Markdig.Markdown.ToHtml(MarkdownText);
                 var fullHtml = $@"<!DOCTYPE html>
 <html lang=""en"">
@@ -800,6 +910,7 @@ blockquote {{ border-left: 4px solid #ddd; margin: 0; padding: 0 16px; color: #6
             }
         }
 
+        /// <summary>Opens the About dialog showing application information.</summary>
         private async Task ShowAboutAsync()
         {
             var dialog = new Views.AboutWindow();
@@ -813,8 +924,10 @@ blockquote {{ border-left: 4px solid #ddd; margin: 0; padding: 0 16px; color: #6
             }
         }
 
+        /// <summary>Adds a file path to the top of the recent files list, limited to 10 entries.</summary>
         private void AddRecentFile(string path)
         {
+            // Remove duplicate if exists, then insert at top
             var existing = _recentFiles.FirstOrDefault(f => string.Equals(f, path, StringComparison.OrdinalIgnoreCase));
             if (existing != null)
                 _recentFiles.Remove(existing);
@@ -824,6 +937,7 @@ blockquote {{ border-left: 4px solid #ddd; margin: 0; padding: 0 16px; color: #6
             SaveRecentFiles();
         }
 
+        /// <summary>Loads the recent files list from a local app data text file.</summary>
         private void LoadRecentFiles()
         {
             try
@@ -835,6 +949,7 @@ blockquote {{ border-left: 4px solid #ddd; margin: 0; padding: 0 16px; color: #6
                 if (File.Exists(recentPath))
                 {
                     var files = File.ReadAllLines(recentPath);
+                    // Only add files that still exist on disk
                     foreach (var f in files)
                     {
                         if (File.Exists(f))
@@ -845,6 +960,7 @@ blockquote {{ border-left: 4px solid #ddd; margin: 0; padding: 0 16px; color: #6
             catch { }
         }
 
+        /// <summary>Persists the current recent files list to a local app data text file.</summary>
         private void SaveRecentFiles()
         {
             try

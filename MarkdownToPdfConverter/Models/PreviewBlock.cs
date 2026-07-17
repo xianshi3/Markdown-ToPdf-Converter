@@ -2,6 +2,7 @@ using Avalonia.Media;
 
 namespace MarkdownToPdfConverter.Models
 {
+    /// <summary>Represents the type of a parsed Markdown block element.</summary>
     public enum PreviewBlockType
     {
         Heading1, Heading2, Heading3, Heading4, Heading5, Heading6,
@@ -9,12 +10,17 @@ namespace MarkdownToPdfConverter.Models
         HorizontalRule, Table, Empty
     }
 
+    /// <summary>Represents a single block element parsed from Markdown for preview rendering.</summary>
     public class PreviewBlock
     {
+        /// <summary>The block type (heading, paragraph, code, etc.).</summary>
         public PreviewBlockType Type { get; set; }
+        /// <summary>The raw text content of the block.</summary>
         public string Text { get; set; } = string.Empty;
+        /// <summary>The heading level (1-6), zero for non-heading blocks.</summary>
         public int Level { get; set; }
 
+        /// <summary>Gets the font size based on the block type.</summary>
         public double DisplayFontSize => Type switch
         {
             PreviewBlockType.Heading1 => 22,
@@ -29,11 +35,13 @@ namespace MarkdownToPdfConverter.Models
             _ => 12
         };
 
+        /// <summary>Gets the font weight — bold for headings, normal otherwise.</summary>
         public FontWeight DisplayFontWeight =>
             Type >= PreviewBlockType.Heading1 && Type <= PreviewBlockType.Heading6
                 ? FontWeight.Bold
                 : FontWeight.Normal;
 
+        /// <summary>Gets the line height in pixels for the block type.</summary>
         public double LineHeight => Type switch
         {
             PreviewBlockType.Heading1 => 32,
@@ -49,6 +57,7 @@ namespace MarkdownToPdfConverter.Models
             _ => 20
         };
 
+        /// <summary>Gets the spacing before the block in pixels.</summary>
         public double SpacingBefore => Type switch
         {
             PreviewBlockType.Heading1 => 12,
@@ -62,6 +71,7 @@ namespace MarkdownToPdfConverter.Models
             _ => 0
         };
 
+        /// <summary>Gets the spacing after the block in pixels.</summary>
         public double SpacingAfter => Type switch
         {
             PreviewBlockType.Heading1 => 8,
@@ -76,6 +86,7 @@ namespace MarkdownToPdfConverter.Models
             _ => 2
         };
 
+        /// <summary>Gets the left indent for list items, code blocks, and block quotes.</summary>
         public double LeftIndent => Type switch
         {
             PreviewBlockType.ListItem => 16,
@@ -85,22 +96,35 @@ namespace MarkdownToPdfConverter.Models
             _ => 0
         };
 
+        /// <summary>True if the block is a block quote (rendered in italic).</summary>
         public bool IsItalic => Type == PreviewBlockType.BlockQuote;
+        /// <summary>True if the block is a code block (rendered in monospace).</summary>
         public bool IsMonospace => Type == PreviewBlockType.CodeBlock;
+        /// <summary>True if the block is a horizontal rule.</summary>
         public bool IsHorizontalRule => Type == PreviewBlockType.HorizontalRule;
+        /// <summary>True if the block is empty.</summary>
         public bool IsEmpty => Type == PreviewBlockType.Empty;
+        /// <summary>True if the block is a code block.</summary>
         public bool IsCode => Type == PreviewBlockType.CodeBlock;
 
+        /// <summary>True if the block is a heading (levels 1-6).</summary>
         public bool IsHeading =>
             Type >= PreviewBlockType.Heading1 && Type <= PreviewBlockType.Heading6;
 
+        /// <summary>True if the block is a paragraph.</summary>
         public bool IsParagraph => Type == PreviewBlockType.Paragraph;
+        /// <summary>True if the block is a block quote.</summary>
         public bool IsBlockQuote => Type == PreviewBlockType.BlockQuote;
+        /// <summary>True if the block is an unordered list item.</summary>
         public bool IsListItem => Type == PreviewBlockType.ListItem;
+        /// <summary>True if the block is an ordered list item.</summary>
         public bool IsOrderedListItem => Type == PreviewBlockType.OrderedListItem;
+        /// <summary>True if the block is a table.</summary>
         public bool IsTable => Type == PreviewBlockType.Table;
 
+        /// <summary>Opacity of the decorative line under headings (H1 brighter).</summary>
         public double HeadingLineOpacity => Type == PreviewBlockType.Heading1 ? 0.6 : 0.3;
+        /// <summary>The ordinal number for ordered list items.</summary>
         public int ListNumber { get; set; }
     }
 }

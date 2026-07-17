@@ -9,10 +9,16 @@ using MarkdownToPdfConverter.Models;
 
 namespace MarkdownToPdfConverter.Services
 {
+    /// <summary>
+    /// Parses Markdown text into a list of PreviewBlock items for UI rendering.
+    /// </summary>
     public class MarkdownPreviewService
     {
         private readonly MarkdownPipeline _pipeline;
 
+        /// <summary>
+        /// Initializes the Markdig pipeline with preview-relevant extensions.
+        /// </summary>
         public MarkdownPreviewService()
         {
             _pipeline = new MarkdownPipelineBuilder()
@@ -25,6 +31,9 @@ namespace MarkdownToPdfConverter.Services
                 .Build();
         }
 
+        /// <summary>
+        /// Parses the given Markdown string and returns a structured list of preview blocks.
+        /// </summary>
         public List<PreviewBlock> Parse(string markdown)
         {
             var blocks = new List<PreviewBlock>();
@@ -50,6 +59,9 @@ namespace MarkdownToPdfConverter.Services
             return blocks;
         }
 
+        /// <summary>
+        /// Converts a single Markdig Block into one or more PreviewBlocks.
+        /// </summary>
         private void ProcessBlock(Block block, List<PreviewBlock> blocks)
         {
             switch (block)
@@ -121,6 +133,9 @@ namespace MarkdownToPdfConverter.Services
             }
         }
 
+        /// <summary>
+        /// Recursively extracts plain text from a Markdig inline container.
+        /// </summary>
         private static string ExtractInlineText(Inline? inline)
         {
             if (inline == null) return string.Empty;
@@ -149,6 +164,9 @@ namespace MarkdownToPdfConverter.Services
             return sb.ToString().Trim();
         }
 
+        /// <summary>
+        /// Extracts plain text from a block by traversing its descendant paragraphs.
+        /// </summary>
         private static string ExtractBlockText(Block block)
         {
             var sb = new StringBuilder();
@@ -163,6 +181,9 @@ namespace MarkdownToPdfConverter.Services
             return sb.ToString().Trim();
         }
 
+        /// <summary>
+        /// Renders a Markdig Table as a pipe-separated string representation.
+        /// </summary>
         private static string RenderTable(Table table)
         {
             var sb = new StringBuilder();
