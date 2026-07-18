@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace MarkdownToPdfConverter.Services
 {
+    /// <summary>
+    /// Provides theming functionality (Dark, Light, Gray) with resource lookup and application-wide updates.
+    /// </summary>
     public interface IThemeService
     {
         string CurrentTheme { get; }
@@ -15,6 +18,9 @@ namespace MarkdownToPdfConverter.Services
         ThemeResources GetResources(string themeName);
     }
 
+    /// <summary>
+    /// Manages application theme resources and applies them to Avalonia's resource dictionary.
+    /// </summary>
     public class ThemeService : IThemeService
     {
         public static ThemeService Instance { get; } = new();
@@ -113,6 +119,9 @@ namespace MarkdownToPdfConverter.Services
         public string CurrentTheme => _currentTheme;
         public ThemeResources CurrentResources => _themes[_currentTheme];
 
+        /// <summary>
+        /// Switches to the specified theme if it exists and differs from the current one.
+        /// </summary>
         public void SetTheme(string themeName)
         {
             if (_themes.ContainsKey(themeName) && _currentTheme != themeName)
@@ -123,6 +132,9 @@ namespace MarkdownToPdfConverter.Services
             }
         }
 
+        /// <summary>
+        /// Applies all theme resource brushes to the application's resource dictionary.
+        /// </summary>
         public void ApplyToApplication()
         {
             var app = Application.Current;
@@ -156,10 +168,16 @@ namespace MarkdownToPdfConverter.Services
             app.Resources["ThemeWindowButtonCloseHoverBackground"] = r.WindowButtonCloseHoverBackground;
         }
 
+        /// <summary>
+        /// Returns the theme resources for the given name, falling back to Dark if not found.
+        /// </summary>
         public ThemeResources GetResources(string themeName) =>
             _themes.TryGetValue(themeName, out var resources) ? resources : _themes["Dark"];
     }
 
+    /// <summary>
+    /// Holds all named brush resources used by the application's theme.
+    /// </summary>
     public class ThemeResources
     {
         public IBrush Background { get; set; } = Brushes.Transparent;

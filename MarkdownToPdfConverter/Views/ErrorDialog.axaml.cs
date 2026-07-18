@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 
 namespace MarkdownToPdfConverter.Views
 {
+    /// <summary>Dialog window that displays an error message with copy and close options.</summary>
     public partial class ErrorDialog : Window
     {
         public ErrorDialog()
@@ -11,6 +12,7 @@ namespace MarkdownToPdfConverter.Views
             InitializeComponent();
         }
 
+        /// <summary>Gets or sets the error text displayed in the dialog.</summary>
         public string ErrorMessage
         {
             get => ErrorTextBox?.Text ?? string.Empty;
@@ -21,6 +23,7 @@ namespace MarkdownToPdfConverter.Views
             }
         }
 
+        /// <summary>Copies the error message text to the system clipboard.</summary>
         private async void OnCopyClick(object? sender, RoutedEventArgs e)
         {
             var topLevel = TopLevel.GetTopLevel(this);
@@ -28,6 +31,7 @@ namespace MarkdownToPdfConverter.Views
                 await topLevel.Clipboard.SetTextAsync(ErrorMessage);
         }
 
+        /// <summary>Closes the dialog window.</summary>
         private void OnCloseClick(object? sender, RoutedEventArgs e)
         {
             Close();
