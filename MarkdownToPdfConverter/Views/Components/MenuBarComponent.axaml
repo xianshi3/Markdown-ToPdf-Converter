@@ -14,7 +14,15 @@
             <MenuItem Header="{DynamicResource str_menu_export_pdf}" Command="{Binding ConvertToPdfCommand}"/>
             <MenuItem Header="{DynamicResource str_menu_export_html}" Command="{Binding ConvertToHtmlCommand}"/>
             <Separator/>
-            <MenuItem Header="{DynamicResource str_menu_recent}" ItemsSource="{Binding RecentFiles}"/>
+            <MenuItem Header="{DynamicResource str_menu_recent}" ItemsSource="{Binding RecentFiles}">
+                <MenuItem.ItemTemplate>
+                    <DataTemplate DataType="x:String">
+                        <MenuItem Header="{Binding}"
+                                  Command="{Binding $parent[UserControl].DataContext.OpenRecentFileCommand}"
+                                  CommandParameter="{Binding}"/>
+                    </DataTemplate>
+                </MenuItem.ItemTemplate>
+            </MenuItem>
             <Separator/>
             <MenuItem Header="{DynamicResource str_menu_about}" Command="{Binding ShowAboutCommand}"/>
         </MenuItem>

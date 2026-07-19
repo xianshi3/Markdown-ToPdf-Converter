@@ -24,8 +24,9 @@ namespace MarkdownToPdfConverter.Services
                 if (file != null && IsValidMarkdownFile(file.Path.LocalPath))
                     return file.Path.LocalPath;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"FileDropHelper (IStorageProvider): {ex.Message}");
             }
 
             try
@@ -37,8 +38,9 @@ namespace MarkdownToPdfConverter.Services
                 if (!string.IsNullOrEmpty(name) && IsValidMarkdownFile(name))
                     return name;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"FileDropHelper (legacy): {ex.Message}");
             }
 
             return null;

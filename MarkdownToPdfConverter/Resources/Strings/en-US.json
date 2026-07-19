@@ -107,8 +107,10 @@
 
   "preview_placeholder": "Preview will appear here...",
   "preview_heading": "PREVIEW",
+  "close_preview": "Close Preview",
 
   "confirm_new": "Create new file? Unsaved changes will be lost.",
+  "confirm_close": "Exit? Unsaved changes will be lost.",
   "yes": "Yes",
   "no": "No"
 }

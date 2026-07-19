@@ -336,6 +336,8 @@
                         <Border Grid.Row="2" Classes="editor-body">
                             <TextBox Classes="editor-textbox"
                                      Text="{Binding MarkdownText}"
+                                     SelectionStart="{Binding SelectionStart}"
+                                     SelectionEnd="{Binding SelectionEnd}"
                                      Watermark="{DynamicResource str_editor_watermark}"/>
                         </Border>
                     </Grid>

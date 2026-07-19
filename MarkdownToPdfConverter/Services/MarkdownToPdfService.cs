@@ -86,7 +86,7 @@ namespace MarkdownToPdfConverter.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"PDF conversion failed: {ex.Message}", ex);
+                throw new InvalidOperationException($"PDF conversion failed: {ex.Message}", ex);
             }
         }
 
