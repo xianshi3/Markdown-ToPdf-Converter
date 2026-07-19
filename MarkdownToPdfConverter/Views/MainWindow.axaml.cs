@@ -11,6 +11,8 @@ namespace MarkdownToPdfConverter.Views
     /// <summary>The main application window hosting all components and handling global input.</summary>
     public partial class MainWindow : Window
     {
+        private bool _forceClose;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -40,6 +42,8 @@ namespace MarkdownToPdfConverter.Views
 
         private async void OnClosing(object? sender, WindowClosingEventArgs e)
         {
+            if (_forceClose) return;
+
             if (DataContext is MainViewModel vm && vm.HasUnsavedChanges)
             {
                 e.Cancel = true;
@@ -48,7 +52,10 @@ namespace MarkdownToPdfConverter.Views
                     var message = LocalizationService.Instance.GetString("confirm_close");
                     var result = await MainViewModel.ShowConfirmDialogAsync(message);
                     if (result)
+                    {
+                        _forceClose = true;
                         Close();
+                    }
                 });
             }
         }
