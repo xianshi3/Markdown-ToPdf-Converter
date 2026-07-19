@@ -109,6 +109,7 @@
   "preview_heading": "PREVIEW",
 
   "confirm_new": "Create new file? Unsaved changes will be lost.",
+  "confirm_close": "Exit? Unsaved changes will be lost.",
   "yes": "Yes",
   "no": "No"
 }

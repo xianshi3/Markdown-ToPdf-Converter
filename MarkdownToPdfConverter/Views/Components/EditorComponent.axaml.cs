@@ -36,7 +36,14 @@ public partial class EditorComponent : UserControl
     {
         DropFileTab.Classes.Remove("dragover");
 
-        if (DataContext is MainViewModel vm)
-            await FileDropHelper.HandleFileDrop(e, vm);
+        try
+        {
+            if (DataContext is MainViewModel vm)
+                await FileDropHelper.HandleFileDrop(e, vm);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"EditorComponent drop failed: {ex.Message}");
+        }
     }
 }

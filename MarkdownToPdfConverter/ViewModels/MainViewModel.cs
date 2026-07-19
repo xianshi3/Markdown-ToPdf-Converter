@@ -140,7 +140,7 @@ namespace MarkdownToPdfConverter.ViewModels
             set
             {
                 this.RaiseAndSetIfChanged(ref _isPreviewVisible, value);
-                UpdatePreview();
+                if (value) UpdatePreview();
             }
         }
 
@@ -421,7 +421,7 @@ namespace MarkdownToPdfConverter.ViewModels
             _localization.LanguageChanged += OnLanguageChanged;
             _themeService.ThemeChanged += OnThemeChanged;
 
-            NewFileCommand = ReactiveCommand.Create(NewFile);
+            NewFileCommand = ReactiveCommand.CreateFromTask(NewFile);
             OpenFileCommand = ReactiveCommand.CreateFromTask(OpenFileAsync);
             SaveFileCommand = ReactiveCommand.CreateFromTask(SaveFileAsync);
             SaveAsCommand = ReactiveCommand.CreateFromTask(SaveAsAsync);
@@ -514,7 +514,7 @@ namespace MarkdownToPdfConverter.ViewModels
         }
 
         /// <summary>Clears the current document after confirming unsaved changes.</summary>
-        private async void NewFile()
+        private async Task NewFile()
         {
             if (HasUnsavedChanges && !string.IsNullOrWhiteSpace(MarkdownText))
             {
@@ -531,13 +531,15 @@ namespace MarkdownToPdfConverter.ViewModels
             UpdatePreview();
         }
 
-        /// <summary>Shows a confirmation dialog with the given message and returns the result.</summary>
-        private static async Task<bool> ShowConfirmDialogAsync(string message)
+        /// <summary>Displays an error dialog with exception details.</summary>
+        private async Task ShowErrorDialogAsync(Exception ex)
         {
-            var dialog = new Views.ConfirmDialog { Message = message };
+            var dialog = new Views.ErrorDialog();
+            dialog.ErrorMessage = $"Exception: {ex.GetType().FullName}\nMessage: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
             if (WindowService.MainWindow != null)
-                return await dialog.ShowDialog<bool>(WindowService.MainWindow);
-            return true;
+                await dialog.ShowDialog(WindowService.MainWindow);
+            else
+                dialog.Show();
         }
 
         /// <summary>Opens a system file picker for markdown files and loads the selected file.</summary>
@@ -657,9 +659,9 @@ namespace MarkdownToPdfConverter.ViewModels
                 _lastSavedText = MarkdownText;
                 HasUnsavedChanges = false;
             }
-            catch
+            catch (Exception ex)
             {
-                // Silently handle auto-save failures
+                System.Diagnostics.Debug.WriteLine($"AutoSave failed: {ex.Message}");
             }
         }
 
@@ -839,15 +841,13 @@ namespace MarkdownToPdfConverter.ViewModels
             }
         }
 
-        /// <summary>Displays an error dialog with exception details.</summary>
-        private async Task ShowErrorDialogAsync(Exception ex)
+        /// <summary>Shows a confirmation dialog with the given message and returns the result.</summary>
+        internal static async Task<bool> ShowConfirmDialogAsync(string message)
         {
-            var dialog = new Views.ErrorDialog();
-            dialog.ErrorMessage = $"Exception: {ex.GetType().FullName}\nMessage: {ex.Message}\n\nStack Trace:\n{ex.StackTrace}";
+            var dialog = new Views.ConfirmDialog { Message = message };
             if (WindowService.MainWindow != null)
-                await dialog.ShowDialog(WindowService.MainWindow);
-            else
-                dialog.Show();
+                return await dialog.ShowDialog<bool>(WindowService.MainWindow);
+            return true;
         }
 
         /// <summary>Converts markdown to HTML with an embedded stylesheet and saves to a file.</summary>
@@ -957,7 +957,10 @@ blockquote {{ border-left: 4px solid #ddd; margin: 0; padding: 0 16px; color: #6
                     }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LoadRecentFiles failed: {ex.Message}");
+            }
         }
 
         /// <summary>Persists the current recent files list to a local app data text file.</summary>
@@ -972,7 +975,10 @@ blockquote {{ border-left: 4px solid #ddd; margin: 0; padding: 0 16px; color: #6
                 var recentPath = Path.Combine(appData, "recent.txt");
                 File.WriteAllLines(recentPath, _recentFiles);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"SaveRecentFiles failed: {ex.Message}");
+            }
         }
     }
 }

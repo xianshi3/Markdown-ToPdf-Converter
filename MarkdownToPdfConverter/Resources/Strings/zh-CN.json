@@ -109,6 +109,7 @@
   "preview_heading": "预览",
 
   "confirm_new": "创建新文件？未保存的更改将丢失。",
+  "confirm_close": "退出？未保存的更改将丢失。",
   "yes": "是",
   "no": "否"
 }

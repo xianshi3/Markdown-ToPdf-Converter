@@ -26,9 +26,16 @@ namespace MarkdownToPdfConverter.Views
         /// <summary>Copies the error message text to the system clipboard.</summary>
         private async void OnCopyClick(object? sender, RoutedEventArgs e)
         {
-            var topLevel = TopLevel.GetTopLevel(this);
-            if (topLevel?.Clipboard != null)
-                await topLevel.Clipboard.SetTextAsync(ErrorMessage);
+            try
+            {
+                var topLevel = TopLevel.GetTopLevel(this);
+                if (topLevel?.Clipboard != null)
+                    await topLevel.Clipboard.SetTextAsync(ErrorMessage);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ErrorDialog copy failed: {ex.Message}");
+            }
         }
 
         /// <summary>Closes the dialog window.</summary>
