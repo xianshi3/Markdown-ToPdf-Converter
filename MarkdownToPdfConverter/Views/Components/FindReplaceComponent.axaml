@@ -76,8 +76,7 @@
     </UserControl.Styles>
 
     <Border Name="FindReplaceBorder">
-        <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto"
-              VerticalAlignment="Center">
+        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto,Auto,Auto,Auto,Auto,Auto">
             <TextBox Grid.Column="0"
                      Text="{Binding FindText}"
                      Watermark="{DynamicResource str_find_placeholder}"
@@ -128,6 +127,10 @@
                       Stretch="Uniform"
                       Width="12" Height="12"/>
             </Button>
+            <TextBlock Grid.Row="1" Grid.ColumnSpan="7"
+                       Text="{Binding MatchStatusText}"
+                       Classes="match-status"
+                       Margin="8,2,0,4"/>
         </Grid>
     </Border>
 </UserControl>

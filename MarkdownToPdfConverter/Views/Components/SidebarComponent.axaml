@@ -215,7 +215,9 @@
                         <ItemsControl ItemsSource="{Binding RecentFiles}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="x:String">
-                                    <Button Classes="recent-file-btn">
+                                    <Button Classes="recent-file-btn"
+                                            Command="{Binding $parent[UserControl].DataContext.OpenRecentFileCommand}"
+                                            CommandParameter="{Binding}">
                                         <StackPanel Orientation="Horizontal" Spacing="5">
                                             <Path Data="M 2,1 L 8,1 L 12,5 L 12,15 C 12,16 11,17 10,17 L 4,17 C 3,17 2,16 2,15 Z M 8,1 L 8,5 L 12,5"
                                                   Stroke="{DynamicResource ThemeSecondaryForeground}"

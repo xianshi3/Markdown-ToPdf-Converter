@@ -56,6 +56,9 @@ namespace MarkdownToPdfConverter.ViewModels
         private bool _statsPending;
         private readonly DispatcherTimer _autoSaveTimer;
 
+        private int _selectionStart;
+        private int _selectionEnd;
+
         private ObservableCollection<string> _recentFiles = new();
         private ObservableCollection<PreviewBlock> _previewBlocks = new();
 
@@ -322,6 +325,20 @@ namespace MarkdownToPdfConverter.ViewModels
             set => this.RaiseAndSetIfChanged(ref _previewBlocks, value);
         }
 
+        /// <summary>Current selection start index in the editor.</summary>
+        public int SelectionStart
+        {
+            get => _selectionStart;
+            set => this.RaiseAndSetIfChanged(ref _selectionStart, value);
+        }
+
+        /// <summary>Current selection end index in the editor.</summary>
+        public int SelectionEnd
+        {
+            get => _selectionEnd;
+            set => this.RaiseAndSetIfChanged(ref _selectionEnd, value);
+        }
+
         /// <summary>Recently opened files list (persisted to disk).</summary>
         public ObservableCollection<string> RecentFiles
         {
@@ -371,6 +388,8 @@ namespace MarkdownToPdfConverter.ViewModels
         public ReactiveCommand<Unit, Unit> InsertItalicCommand { get; }
         /// <summary>Inserts a heading marker (# ) at the start of the document.</summary>
         public ReactiveCommand<Unit, Unit> InsertHeadingCommand { get; }
+        /// <summary>Opens a file from the recent files list.</summary>
+        public ReactiveCommand<string, Unit> OpenRecentFileCommand { get; }
         /// <summary>Inserts a markdown link [text](url).</summary>
         public ReactiveCommand<Unit, Unit> InsertLinkCommand { get; }
         /// <summary>Inserts a markdown image ![alt](url).</summary>
@@ -468,28 +487,16 @@ namespace MarkdownToPdfConverter.ViewModels
             ToggleSidebarCommand = ReactiveCommand.Create(() => { IsSidebarExpanded = !IsSidebarExpanded; });
             ShowAboutCommand = ReactiveCommand.CreateFromTask(ShowAboutAsync);
 
+            OpenRecentFileCommand = ReactiveCommand.CreateFromTask<string>(OpenRecentFile);
+
             InsertBoldCommand = ReactiveCommand.Create(() => InsertAroundSelection("**", "**"));
             InsertItalicCommand = ReactiveCommand.Create(() => InsertAroundSelection("*", "*"));
-            InsertHeadingCommand = ReactiveCommand.Create(() =>
-            {
-                var text = MarkdownText;
-                MarkdownText = (string.IsNullOrEmpty(text) || text.StartsWith('\n') ? "" : "\n\n") + "# ";
-            });
+            InsertHeadingCommand = ReactiveCommand.Create(InsertHeading);
             InsertLinkCommand = ReactiveCommand.Create(() => InsertAroundSelection("[", "](url)"));
             InsertImageCommand = ReactiveCommand.Create(() => InsertAroundSelection("![", "](url)"));
             InsertCodeCommand = ReactiveCommand.Create(() => InsertAroundSelection("`", "`"));
-            InsertListCommand = ReactiveCommand.Create(() =>
-            {
-                var text = MarkdownText;
-                var hasNewline = text.EndsWith("\n") || text.EndsWith("\r\n") || text.Length == 0;
-                MarkdownText = text + (hasNewline ? "" : "\n") + "- ";
-            });
-            InsertQuoteCommand = ReactiveCommand.Create(() =>
-            {
-                var text = MarkdownText;
-                var hasNewline = text.EndsWith("\n") || text.EndsWith("\r\n") || text.Length == 0;
-                MarkdownText = text + (hasNewline ? "" : "\n") + "> ";
-            });
+            InsertListCommand = ReactiveCommand.Create(InsertList);
+            InsertQuoteCommand = ReactiveCommand.Create(InsertQuote);
 
             ZoomInCommand = ReactiveCommand.Create(() => { ZoomLevel = Math.Min(200, ZoomLevel + 10); });
             ZoomOutCommand = ReactiveCommand.Create(() => { ZoomLevel = Math.Max(50, ZoomLevel - 10); });
@@ -498,19 +505,62 @@ namespace MarkdownToPdfConverter.ViewModels
             LoadRecentFiles();
         }
 
-        /// <summary>Wraps the current text with given before/after strings (e.g. **text**).</summary>
+        /// <summary>Opens a file from the recent files list, prompting if there are unsaved changes.</summary>
+        private async Task OpenRecentFile(string path)
+        {
+            if (HasUnsavedChanges && !string.IsNullOrWhiteSpace(MarkdownText))
+            {
+                var result = await ShowConfirmDialogAsync(_localization.GetString("confirm_new"));
+                if (!result) return;
+            }
+            await LoadFileAsync(path);
+        }
+
+        /// <summary>Wraps selected text with given before/after strings (e.g. **text**),
+        /// or inserts them at cursor if nothing is selected.</summary>
         private void InsertAroundSelection(string before, string after)
         {
             var text = MarkdownText;
-            if (string.IsNullOrEmpty(text))
+            var selStart = Math.Min(SelectionStart, text.Length);
+            var selEnd = Math.Min(SelectionEnd, text.Length);
+            if (selStart > selEnd) (selStart, selEnd) = (selEnd, selStart);
+
+            if (selStart >= selEnd)
             {
-                MarkdownText = before + after;
-                return;
+                MarkdownText = text[..selStart] + before + after + text[selStart..];
+                SelectionStart = selStart + before.Length;
+                SelectionEnd = SelectionStart;
             }
-            // Preserve trailing whitespace when appending formatting
-            var trimmed = text.TrimEnd();
-            var ws = text.Length - trimmed.Length;
-            MarkdownText = trimmed + (trimmed.Length > 0 ? "" : "") + before + after + new string(' ', ws);
+            else
+            {
+                var selected = text[selStart..selEnd];
+                MarkdownText = text[..selStart] + before + selected + after + text[selEnd..];
+                SelectionStart = selStart + before.Length;
+                SelectionEnd = SelectionStart + selected.Length;
+            }
+        }
+
+        /// <summary>Inserts a heading marker (# ) before the current line or selection.</summary>
+        private void InsertHeading()
+        {
+            var text = MarkdownText;
+            MarkdownText = (string.IsNullOrEmpty(text) || text.StartsWith('\n') ? "" : "\n\n") + "# ";
+        }
+
+        /// <summary>Inserts an unordered list marker (- ) at the end or before selected text.</summary>
+        private void InsertList()
+        {
+            var text = MarkdownText;
+            var hasNewline = text.EndsWith("\n") || text.EndsWith("\r\n") || text.Length == 0;
+            MarkdownText = text + (hasNewline ? "" : "\n") + "- ";
+        }
+
+        /// <summary>Inserts a blockquote marker (> ) at the end or before selected text.</summary>
+        private void InsertQuote()
+        {
+            var text = MarkdownText;
+            var hasNewline = text.EndsWith("\n") || text.EndsWith("\r\n") || text.Length == 0;
+            MarkdownText = text + (hasNewline ? "" : "\n") + "> ";
         }
 
         /// <summary>Clears the current document after confirming unsaved changes.</summary>
@@ -883,7 +933,7 @@ namespace MarkdownToPdfConverter.ViewModels
 <html lang=""en"">
 <head><meta charset=""utf-8""><title>Markdown Export</title>
 <style>
-body {{ font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }}
+body {{ font-family: '{ExportFont}', system-ui, -apple-system, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; }}
 pre {{ background: #f4f4f4; padding: 12px; border-radius: 6px; overflow-x: auto; }}
 code {{ background: #f4f4f4; padding: 2px 6px; border-radius: 3px; }}
 table {{ border-collapse: collapse; width: 100%; }}

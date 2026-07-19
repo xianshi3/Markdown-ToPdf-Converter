@@ -107,6 +107,7 @@
 
   "preview_placeholder": "预览将在此处显示...",
   "preview_heading": "预览",
+  "close_preview": "关闭预览",
 
   "confirm_new": "创建新文件？未保存的更改将丢失。",
   "confirm_close": "退出？未保存的更改将丢失。",

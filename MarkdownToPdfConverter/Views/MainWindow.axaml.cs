@@ -62,39 +62,9 @@ namespace MarkdownToPdfConverter.Views
 
                 var shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
 
+                // Only handle shortcuts NOT already covered by MenuBar InputGesture
                 switch (e.Key)
                 {
-                    case Key.N:
-                        _ = vm.NewFileCommand.Execute().Subscribe();
-                        e.Handled = true;
-                        break;
-                    case Key.O:
-                        _ = vm.OpenFileCommand.Execute().Subscribe();
-                        e.Handled = true;
-                        break;
-                    case Key.S:
-                        if (shift)
-                            _ = vm.SaveAsCommand.Execute().Subscribe();
-                        else
-                            _ = vm.SaveFileCommand.Execute().Subscribe();
-                        e.Handled = true;
-                        break;
-                    case Key.Z:
-                        _ = vm.UndoCommand.Execute().Subscribe();
-                        e.Handled = true;
-                        break;
-                    case Key.Y:
-                        _ = vm.RedoCommand.Execute().Subscribe();
-                        e.Handled = true;
-                        break;
-                    case Key.F:
-                        _ = vm.FindCommand.Execute().Subscribe();
-                        e.Handled = true;
-                        break;
-                    case Key.H:
-                        _ = vm.ReplaceCommand.Execute().Subscribe();
-                        e.Handled = true;
-                        break;
                     case Key.L:
                         _ = vm.SwitchLanguageCommand.Execute().Subscribe();
                         e.Handled = true;
@@ -111,14 +81,12 @@ namespace MarkdownToPdfConverter.Views
                         _ = vm.InsertItalicCommand.Execute().Subscribe();
                         e.Handled = true;
                         break;
-                    case Key.P:
-                        _ = vm.TogglePreviewCommand.Execute().Subscribe();
-                        e.Handled = true;
-                        break;
                     case Key.OemPlus:
                         if (shift)
+                        {
                             _ = vm.ZoomInCommand.Execute().Subscribe();
-                        e.Handled = true;
+                            e.Handled = true;
+                        }
                         break;
                     case Key.OemMinus:
                         _ = vm.ZoomOutCommand.Execute().Subscribe();
